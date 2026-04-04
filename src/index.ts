@@ -4,8 +4,6 @@ import { createContext } from './context';
 import { buildCorsHeaders, withCors } from './utils/cors';
 import appRouter from './routers/router';
 
-let x = 1;
-
 serve({
   port: 3000,
   async fetch(req) {
