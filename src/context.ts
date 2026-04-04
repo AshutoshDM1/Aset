@@ -1,5 +1,5 @@
-import type { inferAsyncReturnType } from "@trpc/server";
-import { db } from "./utils/drizzle";
+import type { inferAsyncReturnType } from '@trpc/server';
+import { db } from './utils/drizzle';
 
 export function createContext() {
   return { db };

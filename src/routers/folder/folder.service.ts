@@ -1,13 +1,13 @@
-import { TRPCError } from "@trpc/server";
-import { and, eq, isNull } from "drizzle-orm";
-import { folders } from "../../db/schema";
-import { type Db } from "../../utils/drizzle";
+import { TRPCError } from '@trpc/server';
+import { and, eq, isNull } from 'drizzle-orm';
+import { folders } from '../../db/schema';
+import { type Db } from '../../utils/drizzle';
 import type {
   FolderCreateInput,
   FolderGetInput,
   FolderListInput,
   FolderRow,
-} from "./folder.types";
+} from './folder.types';
 
 export async function createFolder(
   database: Db,
@@ -18,16 +18,13 @@ export async function createFolder(
       .select({ id: folders.id })
       .from(folders)
       .where(
-        and(
-          eq(folders.id, input.parentId),
-          eq(folders.ownerId, input.ownerId),
-        ),
+        and(eq(folders.id, input.parentId), eq(folders.ownerId, input.ownerId)),
       )
       .limit(1);
     if (!parent) {
       throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "Parent folder not found",
+        code: 'BAD_REQUEST',
+        message: 'Parent folder not found',
       });
     }
   }
@@ -43,8 +40,8 @@ export async function createFolder(
 
   if (!row) {
     throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Failed to create folder",
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'Failed to create folder',
     });
   }
 
@@ -76,8 +73,8 @@ export async function getFolder(
 
   if (!row) {
     throw new TRPCError({
-      code: "NOT_FOUND",
-      message: "Folder not found",
+      code: 'NOT_FOUND',
+      message: 'Folder not found',
     });
   }
 

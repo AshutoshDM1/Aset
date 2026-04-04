@@ -9,14 +9,25 @@
     "db:push": "drizzle-kit push",
     "db:pull": "drizzle-kit pull",
     "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "prepare": "husky",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix"
   },
   "private": true,
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/bun": "latest",
     "@types/node": "^25.3.1",
     "drizzle-kit": "^0.31.10",
-    "tsx": "^4.21.0"
+    "eslint": "^10.2.0",
+    "globals": "^17.4.0",
+    "husky": "^9.1.7",
+    "jiti": "^2.6.1",
+    "prettier": "3.8.1",
+    "tsx": "^4.21.0",
+    "typescript-eslint": "^8.58.0"
   },
   "peerDependencies": {
     "typescript": "^5.9.3"

@@ -1,10 +1,10 @@
-import { publicProcedure, router } from "../../trpc";
-import { createFolder, getFolder, listFolders } from "./folder.service";
+import { publicProcedure, router } from '../../trpc';
+import { createFolder, getFolder, listFolders } from './folder.service';
 import {
   folderCreateInputSchema,
   folderGetInputSchema,
   folderListInputSchema,
-} from "./folder.validation";
+} from './folder.validation';
 
 export const folderRouter = router({
   create: publicProcedure
