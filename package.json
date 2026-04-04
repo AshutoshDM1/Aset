@@ -1,21 +1,33 @@
 {
-  "name": "elitedrive",
+  "name": "aset-backend",
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun --watch src/index.ts"
+    "dev": "bun --watch src/index.ts",
+    "build": "bun build src/index.ts --outdir dist",
+    "start": "bun run dist/index.js",
+    "db:push": "drizzle-kit push",
+    "db:pull": "drizzle-kit pull",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio"
   },
   "private": true,
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/node": "^25.3.1"
+    "@types/node": "^25.3.1",
+    "drizzle-kit": "^0.31.10",
+    "tsx": "^4.21.0"
   },
   "peerDependencies": {
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
     "@trpc/server": "^11.10.0",
+    "@types/cors": "^2.8.19",
     "cors": "^2.8.6",
+    "dotenv": "^17.4.0",
+    "drizzle-orm": "^0.45.2",
     "zod": "^4.3.6"
   }
 }
