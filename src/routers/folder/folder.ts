@@ -1,4 +1,4 @@
-import { publicProcedure, router } from '../../trpc';
+import { onboardedProcedure, router } from '../../trpc';
 import { createFolder, getFolder, listFolders } from './folder.service';
 import {
   folderCreateInputSchema,
@@ -7,15 +7,21 @@ import {
 } from './folder.validation';
 
 export const folderRouter = router({
-  create: publicProcedure
+  create: onboardedProcedure
     .input(folderCreateInputSchema)
-    .mutation(({ ctx, input }) => createFolder(ctx.db, input)),
+    .mutation(({ ctx, input }) =>
+      createFolder(ctx.db, { ...input, ownerId: ctx.auth.userId }),
+    ),
 
-  list: publicProcedure
+  list: onboardedProcedure
     .input(folderListInputSchema)
-    .query(({ ctx, input }) => listFolders(ctx.db, input)),
+    .query(({ ctx, input }) =>
+      listFolders(ctx.db, { ...input, ownerId: ctx.auth.userId }),
+    ),
 
-  get: publicProcedure
+  get: onboardedProcedure
     .input(folderGetInputSchema)
-    .query(({ ctx, input }) => getFolder(ctx.db, input)),
+    .query(({ ctx, input }) =>
+      getFolder(ctx.db, { ...input, ownerId: ctx.auth.userId }),
+    ),
 });

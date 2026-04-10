@@ -5,17 +5,16 @@ import { buildCorsHeaders, withCors } from './utils/cors';
 import appRouter from './routers/router';
 
 serve({
-  port: 3000,
+  port: parseInt(process.env.PORT || '5000'),
   async fetch(req) {
     const url = new URL(req.url);
-    const corsHeaders = buildCorsHeaders(req);
+    const corsHeaders = buildCorsHeaders();
     if (req.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: corsHeaders });
     }
 
     if (req.method === 'GET' && url.pathname === '/') {
       return withCors(
-        req,
         new Response(
           JSON.stringify({
             message: 'Welcome to the ASET Backend built on Trpc',
@@ -32,11 +31,11 @@ serve({
       endpoint: '/trpc',
       req,
       router: appRouter,
-      createContext,
+      createContext: () => createContext({ req }),
     });
 
-    return withCors(req, res);
+    return withCors(res);
   },
 });
 
-console.log('Server running on http://localhost:3000');
+console.log(`Server running on http://localhost:${process.env.PORT}`);

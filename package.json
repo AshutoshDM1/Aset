@@ -6,8 +6,8 @@
     "dev": "bun --watch src/index.ts",
     "build": "bun build src/index.ts --outdir dist --target=bun",
     "start": "bun run dist/index.js",
-    "db:push": "drizzle-kit push",
-    "db:pull": "drizzle-kit pull",
+    "push": "drizzle-kit push",
+    "pull": "drizzle-kit pull",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
@@ -33,10 +33,9 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@clerk/backend": "^3.2.8",
     "@neondatabase/serverless": "^1.0.2",
     "@trpc/server": "^11.10.0",
-    "@types/cors": "^2.8.19",
-    "cors": "^2.8.6",
     "dotenv": "^17.4.0",
     "drizzle-orm": "^0.45.2",
     "zod": "^4.3.6"
