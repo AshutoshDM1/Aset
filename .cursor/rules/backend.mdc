@@ -1,0 +1,80 @@
+---
+description: Rules for all backend TypeScript code in this repo
+globs: src/**/*.ts
+alwaysApply: false
+---
+
+# Aset Backend — Coding Rules
+
+## Stack
+
+- Runtime: **Bun**
+- Language: **TypeScript** (strict)
+- API layer: **tRPC v11** (fetch adapter)
+- Database: **Prisma 7** (PostgreSQL via `@prisma/adapter-pg`)
+- Auth: **Clerk** (JWT verification via `@clerk/backend`)
+- Validation: **Zod**
+
+## Project Structure
+
+```
+src/
+  index.ts            — Bun server entry point
+  context.ts          — tRPC context (db + auth)
+  trpc.ts             — tRPC init, procedure exports
+  middleware/          — Request-level middleware (auth)
+  routers/            — tRPC routers, one folder per domain
+    router.ts         — Root appRouter (merges all sub-routers)
+    health/           — Health check
+    user/             — User CRUD
+  utils/              — Shared utilities (db client, cors)
+prisma/
+  schema.prisma       — Single source of truth for DB models
+```
+
+## Code Style
+
+- Write the **least code** that solves the problem. Delete before adding.
+- No wrapper functions that just forward args. No "service layer" unless there are 3+ consumers.
+- One export per file is preferred. Keep files under 80 lines; split when they grow.
+- Use `const` over `let`. Never use `any` — use `unknown` and narrow.
+- No barrel files (`index.ts` re-exports). Import from the actual file.
+
+## Comments
+
+- No narration comments ("// get user", "// return result").
+- Only comment **why**, not **what** — non-obvious constraints, trade-offs, workarounds.
+
+## tRPC Conventions
+
+- Two procedure types: `publicProcedure` and `protectedProcedure`. Do not add more middleware layers unless strictly necessary.
+- Each router lives in `src/routers/<domain>/<domain>.ts`.
+- Validate all inputs with Zod. Keep schemas inline unless reused across 2+ procedures.
+- Return plain objects. No response wrappers like `{ success: true, data: ... }` — tRPC handles this.
+
+## Prisma Conventions
+
+- The Prisma client is at `ctx.db` (not `ctx.prisma`).
+- Use `select` to limit fields only when you need to exclude something specific. Default to returning the full model.
+- Never call raw SQL unless Prisma's query API genuinely cannot express it.
+- Schema changes require a migration (`bun run migrate`) or push (`bun run push`).
+
+## Auth Conventions
+
+- `clerk-auth.ts` only does JWT verification — no Clerk API calls there.
+- Clerk API calls (e.g. `users.getUser`) happen only in specific routes that need profile data (like initial user sync).
+- Protected routes access `ctx.auth.userId` (a Clerk user ID string).
+
+## Error Handling
+
+- Use `TRPCError` with the correct code (`UNAUTHORIZED`, `NOT_FOUND`, `BAD_REQUEST`, etc.).
+- Let unexpected errors propagate — tRPC returns 500 automatically.
+- No try/catch around Prisma calls unless you need to handle a specific case (like unique constraint violations).
+
+## What NOT To Do
+
+- Do not create README or documentation files unless asked.
+- Do not add packages without being asked. Especially no ORMs, loggers, or utility libs.
+- Do not create abstractions "for future use" — no base classes, no generic CRUD factories.
+- Do not nest logic deeper than 2 levels. Early-return instead.
+- Do not duplicate Clerk profile data in the DB beyond what's needed for queries/joins (currently: `clerkId`, `email`, `name`).

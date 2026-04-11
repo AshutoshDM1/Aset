@@ -1,12 +1,10 @@
 import { router } from '../trpc';
-import { fileRouter } from './files/file';
-import { folderRouter } from './folder/folder';
 import { healthRouter } from './health/health';
+import { userRouter } from './user/user';
 
 const appRouter = router({
-  file: fileRouter,
-  folder: folderRouter,
   health: healthRouter,
+  user: userRouter,
 });
 
 export default appRouter;

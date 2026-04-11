@@ -1,10 +1,9 @@
-import type { inferAsyncReturnType } from '@trpc/server';
-import { db } from './utils/drizzle';
-import { getClerkAuth } from './middleware/clerk-auth';
+import { verifyAuth } from './middleware/clerk-auth';
+import { db } from './utils/db';
 
 export async function createContext({ req }: { req: Request }) {
-  const auth = await getClerkAuth(req);
+  const auth = await verifyAuth(req);
   return { db, auth };
 }
 
-export type Context = inferAsyncReturnType<typeof createContext>;
+export type Context = Awaited<ReturnType<typeof createContext>>;
