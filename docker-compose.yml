@@ -1,0 +1,12 @@
+# Place `.env` next to this file (Neon DATABASE_URL, Clerk, R2, PORT, etc.).
+# Run: docker compose up --build -d
+# Same idea as: docker run -p $PORT:$PORT --env-file .env <image>
+
+services:
+  api:
+    build: .
+    container_name: aset-backend
+    env_file: .env
+    ports:
+      - "${PORT:-5000}:${PORT:-5000}"
+    restart: unless-stopped

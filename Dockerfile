@@ -4,7 +4,8 @@ FROM oven/bun:1 AS build
 WORKDIR /app
 
 COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile
+# Skip prepare (husky); Git hooks are not used inside the image
+RUN bun install --frozen-lockfile --ignore-scripts
 
 COPY prisma ./prisma
 COPY prisma.config.ts ./
@@ -23,7 +24,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile --production
+RUN bun install --frozen-lockfile --production --ignore-scripts
 
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/prisma ./prisma
