@@ -5,17 +5,13 @@ import {
   buildObjectKey,
   objectKeyPrefix,
   presignPut,
+  resolvePublicFileUrl,
   storageUrlForKey,
-  urlForStoredFile,
 } from '../../utils/r2';
 
 export const fileRouter = router({
   listByFolder: protectedProcedure
-    .input(
-      z.object({
-        folderId: z.number().int().positive(),
-      }),
-    )
+    .input(z.object({ folderId: z.number().int().positive() }))
     .query(async ({ ctx, input }) => {
       const folder = await ctx.db.folder.findFirst({
         where: { id: input.folderId, ownerId: ctx.auth.userId },
@@ -31,45 +27,12 @@ export const fileRouter = router({
         orderBy: { name: 'asc' },
         select: { id: true, name: true, createdAt: true, s3Url: true },
       });
-      return Promise.all(
-        rows.map(async (f) => ({
-          id: f.id,
-          name: f.name,
-          createdAt: f.createdAt,
-          url: await urlForStoredFile(f.s3Url),
-        })),
-      );
-    }),
-
-  presignRead: protectedProcedure
-    .input(z.object({ fileId: z.number().int().positive() }))
-    .query(async ({ ctx, input }) => {
-      const file = await ctx.db.file.findFirst({
-        where: { id: input.fileId, ownerId: ctx.auth.userId },
-        select: { s3Url: true },
-      });
-      if (!file) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'File not found',
-        });
-      }
-      try {
-        const url = await urlForStoredFile(file.s3Url);
-        if (!url) {
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: 'Could not build file URL',
-          });
-        }
-        return { url };
-      } catch (e) {
-        if (e instanceof TRPCError) throw e;
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Could not sign download URL',
-        });
-      }
+      return rows.map((f) => ({
+        id: f.id,
+        name: f.name,
+        createdAt: f.createdAt,
+        url: resolvePublicFileUrl(f.s3Url),
+      }));
     }),
 
   presignUpload: protectedProcedure
@@ -104,7 +67,7 @@ export const fileRouter = router({
           uploadUrl,
           objectKey,
           contentType,
-          url: await urlForStoredFile(stored),
+          url: resolvePublicFileUrl(stored),
         };
       } catch {
         throw new TRPCError({
@@ -152,7 +115,7 @@ export const fileRouter = router({
       return {
         id: file.id,
         name: file.name,
-        url: await urlForStoredFile(file.s3Url),
+        url: resolvePublicFileUrl(file.s3Url),
       };
     }),
 });

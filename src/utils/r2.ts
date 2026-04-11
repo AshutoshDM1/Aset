@@ -1,8 +1,4 @@
-import {
-  GetObjectCommand,
-  PutObjectCommand,
-  S3Client,
-} from '@aws-sdk/client-s3';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'node:crypto';
 
@@ -21,6 +17,14 @@ function r2Client(): S3Client {
     credentials: { accessKeyId, secretAccessKey },
     forcePathStyle: true,
   });
+}
+
+function publicBase(): string {
+  return (
+    process.env.R2_PUBLIC_BASE_URL?.trim().replace(/\/$/, '') ||
+    process.env.R2_PUBLIC_URL?.trim().replace(/\/$/, '') ||
+    ''
+  );
 }
 
 export function sanitizeFileName(name: string): string {
@@ -53,66 +57,20 @@ export async function presignPut(
   return getSignedUrl(client, command, { expiresIn: 300 });
 }
 
-/** Public URL if R2_PUBLIC_BASE_URL is set; otherwise stores the object key only. */
+/** Value stored in DB: public URL when `R2_PUBLIC_BASE_URL` is set, else object key. */
 export function storageUrlForKey(objectKey: string): string {
-  const base = process.env.R2_PUBLIC_BASE_URL?.trim().replace(/\/$/, '');
+  const base = publicBase();
   if (base) return `${base}/${objectKey}`;
   return objectKey;
 }
 
-function publicBase(): string {
-  return (
-    process.env.R2_PUBLIC_BASE_URL?.trim().replace(/\/$/, '') ||
-    process.env.R2_PUBLIC_URL?.trim().replace(/\/$/, '') ||
-    ''
-  );
-}
-
-/** DB value may be a full URL or an object key; returns a browser URL or "" if not public. */
+/** Browser URL for a DB value (full URL or key + public base). */
 export function resolvePublicFileUrl(stored: string): string {
   const s = stored.trim();
   if (/^https?:\/\//i.test(s)) return s;
   const base = publicBase();
   if (base) return `${base}/${s}`;
   return '';
-}
-
-/** S3 object key from DB (raw key or path of a public URL we stored). */
-export function objectKeyFromStored(stored: string): string {
-  const s = stored.trim();
-  if (!s) return s;
-  if (/^https?:\/\//i.test(s)) {
-    try {
-      return new URL(s).pathname.replace(/^\//, '');
-    } catch {
-      return s;
-    }
-  }
-  return s;
-}
-
-export async function presignGetObject(objectKey: string): Promise<string> {
-  const bucket = process.env.R2_BUCKET?.trim();
-  if (!bucket) throw new Error('R2_BUCKET is required');
-  const client = r2Client();
-  const command = new GetObjectCommand({
-    Bucket: bucket,
-    Key: objectKey,
-  });
-  return getSignedUrl(client, command, { expiresIn: 3600 });
-}
-
-/** Public URL when R2_PUBLIC_BASE_URL is set; otherwise a time-limited presigned GET URL. */
-export async function urlForStoredFile(stored: string): Promise<string> {
-  const direct = resolvePublicFileUrl(stored);
-  if (direct) return direct;
-  const key = objectKeyFromStored(stored);
-  if (!key) return '';
-  try {
-    return await presignGetObject(key);
-  } catch {
-    return '';
-  }
 }
 
 export function objectKeyPrefix(userId: string, folderId: number): string {
