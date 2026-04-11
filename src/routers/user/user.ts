@@ -26,9 +26,8 @@ export const userRouter = router({
         id: ctx.auth.userId,
         email: email!,
         name:
-          [clerkUser.firstName, clerkUser.lastName]
-            .filter(Boolean)
-            .join(' ') || null,
+          [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ') ||
+          null,
       },
       update: {},
     });
