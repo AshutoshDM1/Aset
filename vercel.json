@@ -1,0 +1,6 @@
+{
+  "buildCommand": "pnpm --filter elitedrive build",
+  "outputDirectory": "Aset-Frontend/dist",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "framework": null
+}

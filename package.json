@@ -1,0 +1,14 @@
+{
+  "name": "aset-monorepo",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "pnpm --filter elitedrive dev",
+    "dev:backend": "pnpm --filter aset-backend dev",
+    "build:frontend": "pnpm --filter elitedrive build",
+    "lint": "pnpm -r lint"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  }
+}

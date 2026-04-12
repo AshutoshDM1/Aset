@@ -44,6 +44,7 @@
     "vaul": "^1.1.2"
   },
   "devDependencies": {
+    "@aset/api": "workspace:*",
     "@cloudflare/vite-plugin": "^1.29.1",
     "@eslint/js": "^9.39.4",
     "@types/node": "^24.12.0",

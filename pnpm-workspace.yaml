@@ -1,8 +1,12 @@
 packages:
-  - '.'
+  - 'Aset-Frontend'
+  - 'Aset-Backend'
+  - 'packages/*'
 allowBuilds:
   '@clerk/shared': true
+  '@prisma/engines': true
   esbuild: true
   msw: false
+  prisma: true
   sharp: true
   workerd: true
