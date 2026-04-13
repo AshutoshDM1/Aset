@@ -5,6 +5,7 @@
     "dev:frontend": "pnpm --filter aset-frontend dev",
     "dev:backend": "pnpm --filter aset-backend dev",
     "build:frontend": "pnpm --filter aset-frontend build",
+    "build:vercel": "pnpm --filter aset-backend exec prisma generate && pnpm --filter aset-frontend build && node ./scripts/sync-frontend-dist.mjs",
     "lint": "pnpm -r lint"
   },
   "engines": {

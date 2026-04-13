@@ -1,6 +1,7 @@
 {
-  "buildCommand": "pnpm --filter aset-backend exec prisma generate && pnpm --filter aset-frontend build",
-  "outputDirectory": "apps/frontend/dist",
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "pnpm run build:vercel",
+  "outputDirectory": "dist",
   "installCommand": "pnpm install --frozen-lockfile",
   "framework": null
 }
