@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id    String  @id
+  email String  @unique
+  name  String?
+  folders Folder[]
+  files   File[]
+}
+
+model Folder {
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+
+  ownerId String
+  owner   User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  parentId Int?
+  parent   Folder?  @relation("FolderTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children Folder[] @relation("FolderTree")
+
+  files File[]
+
+  @@index([ownerId])
+  @@index([parentId])
+}
+
+model File {
+  id        Int      @id @default(autoincrement())
+  name      String
+  s3Url     String
+  createdAt DateTime @default(now())
+
+  ownerId String
+  owner   User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  folderId Int?
+  folder   Folder? @relation(fields: [folderId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId])
+  @@index([folderId])
+}

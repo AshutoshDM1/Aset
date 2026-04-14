@@ -1,0 +1,9 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+allowBuilds:
+  '@clerk/shared': true
+  '@prisma/engines': true
+  esbuild: true
+  msw: true
+  prisma: true

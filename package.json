@@ -1,0 +1,34 @@
+{
+  "name": "Aset",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "pnpm -r dev",
+    "dev:frontend": "pnpm --filter aset-frontend dev",
+    "dev:backend": "pnpm --filter aset-backend dev",
+    "build": "pnpm -r build",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "format": "prettier --write .",
+    "prepare": "husky"
+  },
+  "keywords": [
+    "Aset"
+  ],
+  "author": "Ashutosh Tiwari",
+  "license": "ISC",
+  "packageManager": "pnpm@10.33.0",
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.5.0",
+    "husky": "^9.1.7",
+    "prettier": "^3.5.3",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.58.2"
+  }
+}

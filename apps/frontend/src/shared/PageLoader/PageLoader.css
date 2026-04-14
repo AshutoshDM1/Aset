@@ -1,0 +1,66 @@
+.page-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  background: var(--background);
+}
+
+.page-loader__mark {
+  position: relative;
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.page-loader__mark::before,
+.page-loader__mark::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+}
+
+/* Trailing arc — rotates */
+.page-loader__mark::before {
+  border-top-color: color-mix(in oklch, var(--primary) 88%, transparent);
+  border-right-color: color-mix(in oklch, var(--primary) 35%, transparent);
+  animation: page-loader-spin 0.85s linear infinite;
+}
+
+/* Subtle pulse ring */
+.page-loader__mark::after {
+  border-color: color-mix(in oklch, var(--muted-foreground) 18%, transparent);
+  animation: page-loader-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes page-loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes page-loader-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 0.2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-loader__mark::before,
+  .page-loader__mark::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+  }
+
+  .page-loader__mark::before {
+    transform: rotate(120deg);
+  }
+}
