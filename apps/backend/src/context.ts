@@ -8,4 +8,3 @@ export async function createContext({ req }: { req: Request }) {
 }
 
 export type Context = Awaited<ReturnType<typeof createContext>>;
-
