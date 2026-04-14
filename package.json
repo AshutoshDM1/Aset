@@ -9,6 +9,7 @@
     "dev:frontend": "pnpm --filter aset-frontend dev",
     "dev:backend": "pnpm --filter aset-backend dev",
     "build": "pnpm -r build",
+    "build:vercel": "pnpm --filter aset-backend exec prisma generate && pnpm --filter aset-frontend build",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "format": "prettier --write .",
