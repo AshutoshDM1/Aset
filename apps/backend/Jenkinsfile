@@ -1,0 +1,89 @@
+// Jenkins pipeline for the Aset backend only.
+// Brings up just the `api` service (and its `postgres` dependency) via docker compose.
+//
+// Prerequisites on the Jenkins agent:
+//   - docker + docker compose v2 installed
+//   - Jenkins user is in the `docker` group
+//   - `apps/backend/.env` exists on the agent (inject via Credentials, see notes below)
+
+pipeline {
+  agent any
+
+  options {
+    timestamps()
+    ansiColor('xterm')
+    timeout(time: 20, unit: 'MINUTES')
+    disableConcurrentBuilds()
+    buildDiscarder(logRotator(numToKeepStr: '20'))
+  }
+
+  environment {
+    COMPOSE_DIR  = 'apps/backend'
+    COMPOSE_FILE = 'apps/backend/docker-compose.yml'
+    IMAGE_TAG    = "aset-backend:${env.GIT_COMMIT?.take(7) ?: env.BUILD_NUMBER}"
+  }
+
+  stages {
+    stage('Checkout') {
+      steps { checkout scm }
+    }
+
+    stage('Inject .env') {
+      steps {
+        // Store the backend env as a Jenkins "Secret file" credential with id `aset-backend-env`.
+        withCredentials([file(credentialsId: 'aset-backend-env', variable: 'ENV_FILE')]) {
+          sh 'install -m 600 "$ENV_FILE" "$COMPOSE_DIR/.env"'
+        }
+      }
+    }
+
+    stage('Build image') {
+      steps {
+        sh '''
+          docker compose -f "$COMPOSE_FILE" build api
+          docker tag aset-backend:local "$IMAGE_TAG"
+        '''
+      }
+    }
+
+    stage('Deploy') {
+      steps {
+        // `up api` pulls in postgres via depends_on; --wait blocks until healthy.
+        sh '''
+          docker compose -f "$COMPOSE_FILE" up -d --wait api
+        '''
+      }
+    }
+
+    stage('Smoke test') {
+      steps {
+        sh '''
+          set -e
+          PORT="$(grep -E '^PORT=' "$COMPOSE_DIR/.env" | cut -d= -f2 || echo 5000)"
+          for i in $(seq 1 15); do
+            if curl -fsS "http://127.0.0.1:${PORT}/" >/dev/null 2>&1; then
+              echo "Backend is up on :${PORT}"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Backend did not respond in time"
+          docker compose -f "$COMPOSE_FILE" logs --tail=100 api
+          exit 1
+        '''
+      }
+    }
+  }
+
+  post {
+    failure {
+      sh '''
+        docker compose -f "$COMPOSE_FILE" ps || true
+        docker compose -f "$COMPOSE_FILE" logs --tail=200 api || true
+      '''
+    }
+    always {
+      sh 'docker image prune -f --filter "until=168h" || true'
+    }
+  }
+}
