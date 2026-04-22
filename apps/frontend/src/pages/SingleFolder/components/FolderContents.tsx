@@ -1,11 +1,10 @@
-import { useState } from 'react';
 import { useQueries } from '@tanstack/react-query';
 import { FileIcon } from 'lucide-react';
 import { trpc } from '@/utils/trpc';
 import FolderComponent, {
   type FolderColor,
 } from '@/shared/FolderComponent/FolderComponent';
-import { ImagePreviewDialog } from './ImagePreviewDialog';
+import ImageFilePreview from './ImageFilePreview';
 
 const COLOR_CYCLE: FolderColor[] = ['cyan', 'yellow', 'pink', 'black'];
 
@@ -20,10 +19,6 @@ type FolderContentsProps = {
 };
 
 export function FolderContents({ folderId }: FolderContentsProps) {
-  const [preview, setPreview] = useState<{
-    name: string;
-    url: string;
-  } | null>(null);
   const [foldersQuery, filesQuery] = useQueries({
     queries: [
       trpc.folder.list.queryOptions({ parentId: folderId }),
@@ -68,6 +63,9 @@ export function FolderContents({ folderId }: FolderContentsProps) {
   const folders = foldersQuery.data ?? [];
   const files = filesQuery.data ?? [];
 
+  const imageFiles = files.filter((f) => isImageFileName(f.name));
+  const otherFiles = files.filter((f) => !isImageFileName(f.name));
+
   if (folders.length === 0 && files.length === 0) {
     return (
       <p className="rounded-2xl border border-dashed border-border bg-muted/20 px-4 py-10 text-center text-sm text-muted-foreground">
@@ -78,8 +76,8 @@ export function FolderContents({ folderId }: FolderContentsProps) {
 
   return (
     <>
-      {folders.length > 0 ? (
-        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-9">
+      {folders.length > 0 || imageFiles.length > 0 ? (
+        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-10">
           {folders.map((item, index) => (
             <li key={`f-${item.id}`}>
               <FolderComponent
@@ -89,58 +87,35 @@ export function FolderContents({ folderId }: FolderContentsProps) {
               />
             </li>
           ))}
+          {imageFiles.map((item) => (
+            <li
+              key={`file-${item.id}`}
+              className="flex items-start justify-center"
+            >
+              <ImageFilePreview name={item.name} url={item.url} />
+            </li>
+          ))}
         </ul>
       ) : null}
-      {files.length > 0 ? (
+      {otherFiles.length > 0 ? (
         <ul
-          className={`flex flex-col gap-2 ${folders.length > 0 ? 'mt-6' : ''}`}
+          className={`flex flex-col gap-2 ${folders.length > 0 || imageFiles.length > 0 ? 'mt-6' : ''}`}
         >
-          {files.map((item) => {
-            const showPreview = isImageFileName(item.name);
-            const rowClass =
-              'flex w-full items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 text-left';
-            return (
-              <li key={`file-${item.id}`}>
-                {showPreview ? (
-                  <button
-                    type="button"
-                    className={`${rowClass} cursor-pointer transition-colors hover:bg-muted/40`}
-                    onClick={() =>
-                      setPreview({ name: item.name, url: item.url })
-                    }
-                  >
-                    <FileIcon
-                      className="size-5 shrink-0 text-muted-foreground"
-                      aria-hidden
-                    />
-                    <span className="min-w-0 truncate font-medium">
-                      {item.name}
-                    </span>
-                  </button>
-                ) : (
-                  <div className={rowClass}>
-                    <FileIcon
-                      className="size-5 shrink-0 text-muted-foreground"
-                      aria-hidden
-                    />
-                    <span className="min-w-0 truncate font-medium">
-                      {item.name}
-                    </span>
-                  </div>
-                )}
-              </li>
-            );
-          })}
+          {otherFiles.map((item) => (
+            <li key={`file-${item.id}`}>
+              <div className="flex w-full items-center gap-3 rounded-lg border border-border bg-card px-4 py-3 text-left">
+                <FileIcon
+                  className="size-5 shrink-0 text-muted-foreground"
+                  aria-hidden
+                />
+                <span className="min-w-0 truncate font-medium">
+                  {item.name}
+                </span>
+              </div>
+            </li>
+          ))}
         </ul>
       ) : null}
-      <ImagePreviewDialog
-        open={!!preview}
-        onOpenChange={(next) => {
-          if (!next) setPreview(null);
-        }}
-        fileName={preview?.name ?? ''}
-        imageUrl={preview?.url ?? ''}
-      />
     </>
   );
 }
