@@ -8,7 +8,14 @@ export const folderRouter = router({
     .query(async ({ ctx, input }) => {
       const folder = await ctx.db.folder.findFirst({
         where: { id: input.id, ownerId: ctx.auth.userId },
-        select: { id: true, name: true, parentId: true, createdAt: true },
+        select: {
+          id: true,
+          name: true,
+          parentId: true,
+          createdAt: true,
+          starred: true,
+          trashed: true,
+        },
       });
       if (!folder) {
         throw new TRPCError({
@@ -29,11 +36,26 @@ export const folderRouter = router({
     )
     .query(async ({ ctx, input }) => {
       const parentId = input?.parentId ?? null;
-      return ctx.db.folder.findMany({
-        where: { ownerId: ctx.auth.userId, parentId },
+      const folders = await ctx.db.folder.findMany({
+        where: { ownerId: ctx.auth.userId, parentId, trashed: false },
         orderBy: { name: 'asc' },
-        select: { id: true, name: true, createdAt: true },
+        select: {
+          id: true,
+          name: true,
+          createdAt: true,
+          starred: true,
+          trashed: true,
+          files: { select: { sizeMb: true } },
+        },
       });
+      return folders.map((f) => ({
+        id: f.id,
+        name: f.name,
+        createdAt: f.createdAt,
+        starred: f.starred,
+        trashed: f.trashed,
+        sizeMb: f.files.reduce((acc, file) => acc + file.sizeMb, 0),
+      }));
     }),
 
   create: protectedProcedure
@@ -66,17 +88,63 @@ export const folderRouter = router({
       return { id: folder.id, name: folder.name };
     }),
   getStarred: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.db.folder.findMany({
-      where: { ownerId: ctx.auth.userId, starred: true },
+    const folders = await ctx.db.folder.findMany({
+      where: { ownerId: ctx.auth.userId, starred: true, trashed: false },
       orderBy: { name: 'asc' },
-      select: { id: true, name: true, createdAt: true },
+      select: {
+        id: true,
+        name: true,
+        createdAt: true,
+        starred: true,
+        trashed: true,
+        files: { select: { sizeMb: true } },
+      },
     });
+    return folders.map((f) => ({
+      id: f.id,
+      name: f.name,
+      createdAt: f.createdAt,
+      starred: f.starred,
+      trashed: f.trashed,
+      sizeMb: f.files.reduce((acc, file) => acc + file.sizeMb, 0),
+    }));
   }),
   getTrash: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.db.folder.findMany({
+    const folders = await ctx.db.folder.findMany({
       where: { ownerId: ctx.auth.userId, trashed: true },
       orderBy: { name: 'asc' },
-      select: { id: true, name: true, createdAt: true },
+      select: {
+        id: true,
+        name: true,
+        createdAt: true,
+        starred: true,
+        trashed: true,
+        files: { select: { sizeMb: true } },
+      },
     });
+    return folders.map((f) => ({
+      id: f.id,
+      name: f.name,
+      createdAt: f.createdAt,
+      starred: f.starred,
+      trashed: f.trashed,
+      sizeMb: f.files.reduce((acc, file) => acc + file.sizeMb, 0),
+    }));
   }),
+  toggleStar: protectedProcedure
+    .input(z.object({ id: z.number(), starred: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.folder.update({
+        where: { id: input.id, ownerId: ctx.auth.userId },
+        data: { starred: input.starred },
+      });
+    }),
+  toggleTrash: protectedProcedure
+    .input(z.object({ id: z.number(), trashed: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.folder.update({
+        where: { id: input.id, ownerId: ctx.auth.userId },
+        data: { trashed: input.trashed },
+      });
+    }),
 });

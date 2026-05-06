@@ -1,15 +1,19 @@
 import { Link } from 'react-router';
 import { Folder } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ItemGridActions } from './ItemGridActions';
 
 export type FolderColor = 'cyan' | 'yellow' | 'pink' | 'black';
 
 interface FolderComponentProps {
   folderName: string;
-  folderId: string | number;
+  folderId: number;
   color?: FolderColor;
   to?: string;
   className?: string;
+  starred?: boolean;
+  trashed?: boolean;
+  onRefetch?: () => void;
 }
 
 const colorMap: Record<FolderColor, string> = {
@@ -25,31 +29,43 @@ const FolderComponent = ({
   color = 'cyan',
   to,
   className,
+  starred,
+  trashed,
+  onRefetch,
 }: FolderComponentProps) => {
-  const href = to ?? `/dashboard/my-files/${folderId}`;
+  const href = to ?? `/dashboard/folder/${folderId}`;
 
   return (
-    <Link
-      to={href}
-      className="block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-    >
-      <div
-        className={cn(
-          'group flex flex-col items-center rounded-2xl p-2 transition-transform duration-200 hover:-translate-y-1',
-          className,
-        )}
+    <div className="group relative">
+      <ItemGridActions
+        id={folderId}
+        type="folder"
+        starred={starred}
+        trashed={trashed}
+        onRefetch={onRefetch}
+      />
+      <Link
+        to={href}
+        className="block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <Folder
-          className={cn('size-20', colorMap[color])}
-          fill="currentColor"
-          strokeWidth={1.25}
-          aria-hidden
-        />
-        <p className="w-full truncate -mt-1.5 text-sm font-medium text-foreground text-center">
-          {folderName}
-        </p>
-      </div>
-    </Link>
+        <div
+          className={cn(
+            'flex flex-col items-center rounded-2xl p-2 transition-transform duration-200 group-hover:-translate-y-1',
+            className,
+          )}
+        >
+          <Folder
+            className={cn('size-20', colorMap[color])}
+            fill="currentColor"
+            strokeWidth={1.25}
+            aria-hidden
+          />
+          <p className="w-full truncate -mt-1.5 text-sm font-medium text-foreground text-center">
+            {folderName}
+          </p>
+        </div>
+      </Link>
+    </div>
   );
 };
 

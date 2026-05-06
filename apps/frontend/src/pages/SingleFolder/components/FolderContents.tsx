@@ -1,61 +1,66 @@
-import { FileIcon } from 'lucide-react';
 import FolderComponent, {
   type FolderColor,
 } from '@/shared/Dashboard/FolderComponent';
 import ImageFilePreview from '@/shared/Dashboard/ImageFilePreview';
+import { useViewMode } from '@/context/ViewModeContext';
+import {
+  UnifiedTable,
+  type UnifiedItem,
+} from '@/shared/Dashboard/UnifiedTable';
+import { isImageFileName } from '@/utils/file/file-utils';
+import { OtherFileTile } from '@/shared/Dashboard/OtherFileTile';
 
 const COLOR_CYCLE: FolderColor[] = ['cyan', 'yellow', 'pink', 'black'];
 
-const IMAGE_NAME = /\.(jpe?g|png|gif|webp|avif|svg|bmp|ico)$/i;
-
-function isImageFileName(name: string) {
-  return IMAGE_NAME.test(name);
-}
-
-type FolderItem = { id: number; name: string };
-type FileItem = { id: number; name: string; url: string };
+type FolderItem = {
+  id: number;
+  name: string;
+  createdAt: string | Date;
+  starred?: boolean;
+  trashed?: boolean;
+  sizeMb?: number;
+};
+type FileItem = {
+  id: number;
+  name: string;
+  url: string;
+  createdAt: string | Date;
+  sizeMb: number;
+  starred?: boolean;
+  trashed?: boolean;
+};
 
 type FolderContentsProps = {
   folders: FolderItem[];
   files: FileItem[];
   onRefetch?: () => void;
+  emptyMessage?: string;
 };
 
-function OtherFileTile({ name }: { name: string }) {
-  const dot = name.lastIndexOf('.');
-  const base = dot > 0 ? name.slice(0, dot) : name;
-  const ext = dot > 0 ? name.slice(dot) : '';
-
-  return (
-    <a
-      aria-label={name}
-      title={name}
-      className="group flex flex-col items-center rounded-2xl p-2 transition-transform duration-200 hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-    >
-      <div className="flex size-20 items-center justify-center overflow-hidden rounded-2xl bg-muted/40 ring-1 ring-border/60">
-        <FileIcon className="size-8 text-muted-foreground" aria-hidden />
-      </div>
-      <p className="text-sm text-foreground">
-        <span className="truncate  inline-block align-bottom">
-          {base.slice(0, 5)}
-          {base.length > 5 ? '..' : ''}
-        </span>
-        {ext}
-      </p>
-    </a>
-  );
-}
-
-export function FolderContents({ folders, files }: FolderContentsProps) {
+export function FolderContents({
+  folders,
+  files,
+  onRefetch,
+  emptyMessage = 'This folder is empty.',
+}: FolderContentsProps) {
+  const { viewMode } = useViewMode();
   const imageFiles = files.filter((f) => isImageFileName(f.name));
   const otherFiles = files.filter((f) => !isImageFileName(f.name));
 
   if (folders.length === 0 && files.length === 0) {
     return (
       <p className="rounded-2xl border border-dashed border-border bg-muted/20 px-4 py-10 text-center text-sm text-muted-foreground">
-        This folder is empty.
+        {emptyMessage}
       </p>
     );
+  }
+
+  if (viewMode === 'table') {
+    const items: UnifiedItem[] = [
+      ...folders.map((f) => ({ ...f, type: 'folder' as const })),
+      ...files.map((f) => ({ ...f, type: 'file' as const })),
+    ];
+    return <UnifiedTable items={items} onRefetch={onRefetch} />;
   }
 
   return (
@@ -66,17 +71,33 @@ export function FolderContents({ folders, files }: FolderContentsProps) {
             folderId={item.id}
             folderName={item.name}
             color={COLOR_CYCLE[index % COLOR_CYCLE.length]}
+            starred={item.starred}
+            trashed={item.trashed}
+            onRefetch={onRefetch}
           />
         </li>
       ))}
       {imageFiles.map((item) => (
         <li key={`file-${item.id}`} className="flex items-start justify-center">
-          <ImageFilePreview name={item.name} url={item.url} />
+          <ImageFilePreview
+            fileId={item.id}
+            name={item.name}
+            url={item.url}
+            starred={item.starred}
+            trashed={item.trashed}
+            onRefetch={onRefetch}
+          />
         </li>
       ))}
       {otherFiles.map((item) => (
         <li key={`file-${item.id}`} className="flex items-start justify-center">
-          <OtherFileTile name={item.name} />
+          <OtherFileTile
+            fileId={item.id}
+            name={item.name}
+            starred={item.starred}
+            trashed={item.trashed}
+            onRefetch={onRefetch}
+          />
         </li>
       ))}
     </ul>

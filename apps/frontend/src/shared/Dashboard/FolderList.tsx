@@ -4,6 +4,8 @@ import FolderComponent, {
   type FolderColor,
 } from '@/shared/Dashboard/FolderComponent';
 import Loader from '@/shared/PageLoader/Loader';
+import { useViewMode } from '@/context/ViewModeContext';
+import { FolderTable } from './FolderTable';
 
 export type FolderListMode = 'all' | 'starred' | 'trash' | 'children';
 
@@ -16,6 +18,7 @@ type FolderListProps = {
 const COLOR_CYCLE: FolderColor[] = ['cyan', 'yellow', 'pink', 'black'];
 
 export function FolderList({ mode = 'all', parentFolderId }: FolderListProps) {
+  const { viewMode } = useViewMode();
   let listQuery;
 
   if (mode === 'starred') {
@@ -72,6 +75,18 @@ export function FolderList({ mode = 'all', parentFolderId }: FolderListProps) {
     );
   }
 
+  if (viewMode === 'table') {
+    return (
+      <FolderTable
+        onRefetch={refetch}
+        folders={folders.map((f) => ({
+          ...f,
+          createdAt: new Date(f.createdAt),
+        }))}
+      />
+    );
+  }
+
   return (
     <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-9">
       {folders.map((folder, index) => (
@@ -80,6 +95,9 @@ export function FolderList({ mode = 'all', parentFolderId }: FolderListProps) {
             folderId={folder.id}
             folderName={folder.name}
             color={COLOR_CYCLE[index % COLOR_CYCLE.length]}
+            starred={folder.starred}
+            trashed={folder.trashed}
+            onRefetch={refetch}
           />
         </li>
       ))}

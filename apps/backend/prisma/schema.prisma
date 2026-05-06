@@ -65,6 +65,9 @@ model File {
   folderId Int?
   folder   Folder? @relation(fields: [folderId], references: [id], onDelete: Cascade)
 
+  starred Boolean @default(false)
+  trashed Boolean @default(false)
+
   @@index([ownerId])
   @@index([folderId])
 }

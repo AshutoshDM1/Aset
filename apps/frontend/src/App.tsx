@@ -20,7 +20,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />}>
             <Route index element={<DashboardStats />} />
             <Route path="my-files" element={<MyFiles />} />
-            <Route path="my-files/:folderId" element={<SingleFolder />} />
+            <Route path="folder/:folderId" element={<SingleFolder />} />
             <Route path="shared" element={<Shared />} />
             <Route path="recent" element={<Recent />} />
             <Route path="starred" element={<Starred />} />

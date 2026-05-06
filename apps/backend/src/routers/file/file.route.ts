@@ -23,14 +23,25 @@ export const fileRouter = router({
         });
       }
       const rows = await ctx.db.file.findMany({
-        where: { ownerId: ctx.auth.userId, folderId: input.folderId },
+        where: {
+          ownerId: ctx.auth.userId,
+          folderId: input.folderId,
+          trashed: false,
+        },
         orderBy: { name: 'asc' },
-        select: { id: true, name: true, createdAt: true, s3Url: true },
+        select: {
+          id: true,
+          name: true,
+          createdAt: true,
+          s3Url: true,
+          sizeMb: true,
+        },
       });
       return rows.map((f) => ({
         id: f.id,
         name: f.name,
         createdAt: f.createdAt,
+        sizeMb: f.sizeMb,
         url: resolvePublicFileUrl(f.s3Url),
       }));
     }),
@@ -146,15 +157,94 @@ export const fileRouter = router({
 
   getRecent: protectedProcedure.query(async ({ ctx }) => {
     const rows = await ctx.db.file.findMany({
-      where: { ownerId: ctx.auth.userId },
+      where: { ownerId: ctx.auth.userId, trashed: false },
       orderBy: { createdAt: 'desc' },
       take: 20,
-      select: { id: true, name: true, createdAt: true, s3Url: true },
+      select: {
+        id: true,
+        name: true,
+        createdAt: true,
+        s3Url: true,
+        sizeMb: true,
+        starred: true,
+        trashed: true,
+      },
     });
     return rows.map((f) => ({
       id: f.id,
       name: f.name,
       createdAt: f.createdAt,
+      sizeMb: f.sizeMb,
+      starred: f.starred,
+      trashed: f.trashed,
+      url: resolvePublicFileUrl(f.s3Url),
+    }));
+  }),
+
+  toggleStar: protectedProcedure
+    .input(z.object({ id: z.number(), starred: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.file.update({
+        where: { id: input.id, ownerId: ctx.auth.userId },
+        data: { starred: input.starred },
+      });
+    }),
+
+  toggleTrash: protectedProcedure
+    .input(z.object({ id: z.number(), trashed: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.file.update({
+        where: { id: input.id, ownerId: ctx.auth.userId },
+        data: { trashed: input.trashed },
+      });
+    }),
+
+  getStarred: protectedProcedure.query(async ({ ctx }) => {
+    const rows = await ctx.db.file.findMany({
+      where: { ownerId: ctx.auth.userId, starred: true, trashed: false },
+      orderBy: { name: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        createdAt: true,
+        s3Url: true,
+        sizeMb: true,
+        starred: true,
+        trashed: true,
+      },
+    });
+    return rows.map((f) => ({
+      id: f.id,
+      name: f.name,
+      createdAt: f.createdAt,
+      sizeMb: f.sizeMb,
+      starred: f.starred,
+      trashed: f.trashed,
+      url: resolvePublicFileUrl(f.s3Url),
+    }));
+  }),
+
+  getTrash: protectedProcedure.query(async ({ ctx }) => {
+    const rows = await ctx.db.file.findMany({
+      where: { ownerId: ctx.auth.userId, trashed: true },
+      orderBy: { name: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        createdAt: true,
+        s3Url: true,
+        sizeMb: true,
+        starred: true,
+        trashed: true,
+      },
+    });
+    return rows.map((f) => ({
+      id: f.id,
+      name: f.name,
+      createdAt: f.createdAt,
+      sizeMb: f.sizeMb,
+      starred: f.starred,
+      trashed: f.trashed,
       url: resolvePublicFileUrl(f.s3Url),
     }));
   }),
