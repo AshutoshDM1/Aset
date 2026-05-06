@@ -24,26 +24,26 @@ services:
       timeout: 5s
       retries: 5
 
-  api:
-    build:
-      context: ../..
-      dockerfile: apps/backend/Dockerfile
-    image: aset-backend:local
-    container_name: aset_backend
-    restart: unless-stopped
-    env_file:
-      - .env
-    environment:
-      NODE_ENV: production
-      PORT: ${PORT:-5000}
-      # Reach postgres over the compose network, not the host.
-      # Password is URL-encoded: `aset@db&123` -> `aset%40db%26123`.
-      DATABASE_URL: postgresql://asetdev:aset%40db%26123@postgres:5432/aset
-    ports:
-      - '${PORT:-5000}:${PORT:-5000}'
-    depends_on:
-      postgres:
-        condition: service_healthy
+  # api:
+  #   build:
+  #     context: ../..
+  #     dockerfile: apps/backend/Dockerfile
+  #   image: aset-backend:local
+  #   container_name: aset_backend
+  #   restart: unless-stopped
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     NODE_ENV: production
+  #     PORT: ${PORT:-5000}
+  #     # Reach postgres over the compose network, not the host.
+  #     # Password is URL-encoded: `aset@db&123` -> `aset%40db%26123`.
+  #     DATABASE_URL: postgresql://asetdev:aset%40db%26123@postgres:5432/aset
+  #   ports:
+  #     - '${PORT:-5000}:${PORT:-5000}'
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
 
 volumes:
   aset_postgres_data:

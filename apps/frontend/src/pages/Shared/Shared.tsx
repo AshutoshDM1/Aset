@@ -1,13 +1,19 @@
+import DashboardHeader from '@/shared/Dashboard/DashboardHeader';
+import { FolderList } from '@/shared/Dashboard/FolderList';
+
 export default function Shared() {
   return (
-    <div className="w-full p-4 rounded-lg shadow-dx">
-      <h1 className="text-2xl font-semibold tracking-tight">Shared with me</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Files shared with you will appear here.
-      </p>
-      <div className="mt-4">
-        <p>No shared items</p>
-      </div>
+    <div className="w-full rounded-lg bg-background p-4 shadow-sm ring-1 ring-border/60">
+      <DashboardHeader
+        folderId={0}
+        folderName="Shared with me"
+        folerDescription="Files and folders shared with you by others."
+        canUpload={false}
+        canCreate={false}
+      />
+      <section className="mt-6" aria-label="Shared Folders">
+        <FolderList mode="all" />
+      </section>
     </div>
   );
 }

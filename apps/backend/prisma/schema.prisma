@@ -13,22 +13,22 @@ datasource db {
 }
 
 model User {
-  id    String  @id
-  email String  @unique
-  name  String?
+  id      String       @id
+  email   String       @unique
+  name    String?
   folders Folder[]
   files   File[]
   storage UserStorage?
 }
 
 model UserStorage {
-  id        Int      @id @default(autoincrement())
-  userId    String   @unique
-    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  totalStorage     Float    @default(0) // stored in MB
-  usedStorage      Float    @default(0) // stored in MB
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           Int      @id @default(autoincrement())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  totalStorage Float    @default(0) // stored in MB
+  usedStorage  Float    @default(0) // stored in MB
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@index([userId])
 }
@@ -39,14 +39,15 @@ model Folder {
   createdAt DateTime @default(now())
 
   ownerId String
-  owner   User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   parentId Int?
   parent   Folder?  @relation("FolderTree", fields: [parentId], references: [id], onDelete: Cascade)
   children Folder[] @relation("FolderTree")
+  files    File[]
 
-  files File[]
-
+  starred  Boolean  @default(false)
+  trashed  Boolean  @default(false)
   @@index([ownerId])
   @@index([parentId])
 }
@@ -59,7 +60,7 @@ model File {
   createdAt DateTime @default(now())
 
   ownerId String
-  owner   User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   folderId Int?
   folder   Folder? @relation(fields: [folderId], references: [id], onDelete: Cascade)

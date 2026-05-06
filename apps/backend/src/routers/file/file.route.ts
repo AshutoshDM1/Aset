@@ -143,4 +143,19 @@ export const fileRouter = router({
         url: resolvePublicFileUrl(file.s3Url),
       };
     }),
+
+  getRecent: protectedProcedure.query(async ({ ctx }) => {
+    const rows = await ctx.db.file.findMany({
+      where: { ownerId: ctx.auth.userId },
+      orderBy: { createdAt: 'desc' },
+      take: 20,
+      select: { id: true, name: true, createdAt: true, s3Url: true },
+    });
+    return rows.map((f) => ({
+      id: f.id,
+      name: f.name,
+      createdAt: f.createdAt,
+      url: resolvePublicFileUrl(f.s3Url),
+    }));
+  }),
 });

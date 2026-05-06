@@ -3,20 +3,31 @@ import { trpc } from '@/utils/trpc';
 import FolderComponent, {
   type FolderColor,
 } from '@/shared/Dashboard/FolderComponent';
-import Loader from '../../shared/PageLoader/Loader';
+import Loader from '@/shared/PageLoader/Loader';
+
+export type FolderListMode = 'all' | 'starred' | 'trash' | 'children';
 
 type FolderListProps = {
-  /** Omit for drive root. Set to list children of a folder. */
+  /** Only used if mode is 'children' */
   parentFolderId?: number;
+  mode?: FolderListMode;
 };
 
 const COLOR_CYCLE: FolderColor[] = ['cyan', 'yellow', 'pink', 'black'];
 
-export function FolderList({ parentFolderId }: FolderListProps) {
-  const listQuery =
-    parentFolderId === undefined
-      ? trpc.folder.list.queryOptions()
-      : trpc.folder.list.queryOptions({ parentId: parentFolderId });
+export function FolderList({ mode = 'all', parentFolderId }: FolderListProps) {
+  let listQuery;
+
+  if (mode === 'starred') {
+    listQuery = trpc.folder.getStarred.queryOptions();
+  } else if (mode === 'trash') {
+    listQuery = trpc.folder.getTrash.queryOptions();
+  } else if (mode === 'children' && parentFolderId !== undefined) {
+    listQuery = trpc.folder.list.queryOptions({ parentId: parentFolderId });
+  } else {
+    // default to root level folders
+    listQuery = trpc.folder.list.queryOptions();
+  }
 
   const {
     data: folders,
@@ -50,9 +61,13 @@ export function FolderList({ parentFolderId }: FolderListProps) {
   }
 
   if (!folders?.length) {
+    let emptyMessage = 'No folders yet. Create one to get started.';
+    if (mode === 'starred') emptyMessage = 'No starred folders yet.';
+    if (mode === 'trash') emptyMessage = 'Trash is empty.';
+
     return (
       <p className="rounded-2xl border border-dashed border-border bg-muted/20 px-4 py-8 text-center text-sm text-muted-foreground">
-        No folders yet. Create one to get started.
+        {emptyMessage}
       </p>
     );
   }

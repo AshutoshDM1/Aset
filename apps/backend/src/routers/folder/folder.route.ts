@@ -65,4 +65,18 @@ export const folderRouter = router({
       });
       return { id: folder.id, name: folder.name };
     }),
+  getStarred: protectedProcedure.query(async ({ ctx }) => {
+    return ctx.db.folder.findMany({
+      where: { ownerId: ctx.auth.userId, starred: true },
+      orderBy: { name: 'asc' },
+      select: { id: true, name: true, createdAt: true },
+    });
+  }),
+  getTrash: protectedProcedure.query(async ({ ctx }) => {
+    return ctx.db.folder.findMany({
+      where: { ownerId: ctx.auth.userId, trashed: true },
+      orderBy: { name: 'asc' },
+      select: { id: true, name: true, createdAt: true },
+    });
+  }),
 });

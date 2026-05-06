@@ -1,5 +1,5 @@
 import DashboardHeader from '@/shared/Dashboard/DashboardHeader';
-import { FolderList } from './FolderList';
+import { FolderList } from '@/shared/Dashboard/FolderList';
 
 export default function MyFiles() {
   return (
@@ -12,7 +12,7 @@ export default function MyFiles() {
         canCreate
       />
       <section className="mt-6" aria-label="Folders">
-        <FolderList />
+        <FolderList mode="all" />
       </section>
     </div>
   );
