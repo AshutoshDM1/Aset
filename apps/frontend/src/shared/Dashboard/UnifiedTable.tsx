@@ -1,5 +1,6 @@
 import { format } from 'date-fns';
-import { FileIcon, Folder, ImageIcon } from 'lucide-react';
+import { FileIcon, Folder, ImageIcon, FileText } from 'lucide-react';
+import { Document, Page } from 'react-pdf';
 import {
   Table,
   TableBody,
@@ -13,6 +14,8 @@ import { Link } from 'react-router';
 import { useState } from 'react';
 import { ItemRowActions } from './ItemRowActions';
 import { ImagePreviewDialog } from './ImagePreviewDialog';
+import { PdfPreviewDialog } from './PdfPreviewDialog';
+import { isPdfFileName } from '@/utils/file/file-utils';
 
 export type UnifiedItem = {
   id: number;
@@ -36,8 +39,10 @@ export function UnifiedTable({ items, onRefetch }: UnifiedTableProps) {
   );
 
   const handleFileClick = (item: UnifiedItem) => {
-    if (item.type === 'file' && item.url && isImageFileName(item.name)) {
-      setPreview({ name: item.name, url: item.url });
+    if (item.type === 'file' && item.url) {
+      if (isImageFileName(item.name) || isPdfFileName(item.name)) {
+        setPreview({ name: item.name, url: item.url });
+      }
     }
   };
 
@@ -81,6 +86,23 @@ export function UnifiedTable({ items, onRefetch }: UnifiedTableProps) {
                           />
                         ) : isImageFileName(item.name) ? (
                           <ImageIcon className="size-5" />
+                        ) : isPdfFileName(item.name) && item.url ? (
+                          <Document
+                            file={item.url}
+                            loading={
+                              <FileText className="size-5 text-red-500/50" />
+                            }
+                          >
+                            <Page
+                              pageNumber={1}
+                              width={40}
+                              renderTextLayer={false}
+                              renderAnnotationLayer={false}
+                              loading={null}
+                            />
+                          </Document>
+                        ) : isPdfFileName(item.name) ? (
+                          <FileText className="size-5 text-red-500" />
                         ) : (
                           <FileIcon className="size-5" />
                         )}
@@ -116,10 +138,16 @@ export function UnifiedTable({ items, onRefetch }: UnifiedTableProps) {
       </div>
 
       <ImagePreviewDialog
-        open={!!preview}
+        open={!!preview && isImageFileName(preview.name)}
         onOpenChange={(open) => !open && setPreview(null)}
         fileName={preview?.name ?? ''}
         imageUrl={preview?.url ?? ''}
+      />
+      <PdfPreviewDialog
+        open={!!preview && isPdfFileName(preview.name)}
+        onOpenChange={(open) => !open && setPreview(null)}
+        fileName={preview?.name ?? ''}
+        fileUrl={preview?.url ?? ''}
       />
     </>
   );

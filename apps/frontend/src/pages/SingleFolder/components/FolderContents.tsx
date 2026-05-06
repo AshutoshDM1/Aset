@@ -7,8 +7,9 @@ import {
   UnifiedTable,
   type UnifiedItem,
 } from '@/shared/Dashboard/UnifiedTable';
-import { isImageFileName } from '@/utils/file/file-utils';
+import { isImageFileName, isPdfFileName } from '@/utils/file/file-utils';
 import { OtherFileTile } from '@/shared/Dashboard/OtherFileTile';
+import PdfFilePreview from '@/shared/Dashboard/PdfFilePreview';
 
 const COLOR_CYCLE: FolderColor[] = ['cyan', 'yellow', 'pink', 'black'];
 
@@ -45,7 +46,10 @@ export function FolderContents({
 }: FolderContentsProps) {
   const { viewMode } = useViewMode();
   const imageFiles = files.filter((f) => isImageFileName(f.name));
-  const otherFiles = files.filter((f) => !isImageFileName(f.name));
+  const pdfFiles = files.filter((f) => isPdfFileName(f.name));
+  const otherFiles = files.filter(
+    (f) => !isImageFileName(f.name) && !isPdfFileName(f.name),
+  );
 
   if (folders.length === 0 && files.length === 0) {
     return (
@@ -64,7 +68,7 @@ export function FolderContents({
   }
 
   return (
-    <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-10">
+    <ul className="grid gap-4 grid-cols-3 md:grid-cols-4 lg:grid-cols-10">
       {folders.map((item, index) => (
         <li key={`f-${item.id}`}>
           <FolderComponent
@@ -80,6 +84,18 @@ export function FolderContents({
       {imageFiles.map((item) => (
         <li key={`file-${item.id}`} className="flex items-start justify-center">
           <ImageFilePreview
+            fileId={item.id}
+            name={item.name}
+            url={item.url}
+            starred={item.starred}
+            trashed={item.trashed}
+            onRefetch={onRefetch}
+          />
+        </li>
+      ))}
+      {pdfFiles.map((item) => (
+        <li key={`file-${item.id}`} className="flex items-start justify-center">
+          <PdfFilePreview
             fileId={item.id}
             name={item.name}
             url={item.url}

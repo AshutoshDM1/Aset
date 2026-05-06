@@ -23,10 +23,12 @@ function DashboardNavbar({ className }: { className?: string }) {
         className,
       )}
     >
-      <div className="flex items-center justify-between gap-4 px-6 py-4">
-        <BreadcrumbComponent items={breadcrumbItems} />
-        <div className="flex items-center justify-between gap-4 w-full max-w-lg">
-          <DashboardNavbarSearch className="max-w-lg flex-1" />
+      <div className="flex items-center justify-between gap-4 px-4 py-2.5 sm:px-6 sm:py-4">
+        <div className="hidden md:block">
+          <BreadcrumbComponent items={breadcrumbItems} />
+        </div>
+        <div className="flex items-center justify-between gap-4 w-full md:max-w-xl">
+          <DashboardNavbarSearch className="flex-1" />
           <DashboardNavbarActions />
         </div>
       </div>

@@ -198,7 +198,7 @@ export default function Sidebar({ className }: { className?: string }) {
               <SidebarFolderList
                 key={item.id}
                 label={item.name}
-                href={`/dashboard/my-files/${item.id}`}
+                href={`/dashboard/folder/${item.id}`}
                 color={FOLDER_COLORS[index % FOLDER_COLORS.length]}
                 icon={Folder}
               />
