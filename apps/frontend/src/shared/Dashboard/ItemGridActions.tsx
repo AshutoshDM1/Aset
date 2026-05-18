@@ -18,6 +18,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
+import { Share2 } from 'lucide-react';
+import { ShareDialog } from './ShareDialog';
 import { RenameDialog } from './RenameDialog';
 import { useFileDownload } from './useFileDownload';
 
@@ -29,6 +31,7 @@ interface ItemGridActionsProps {
   trashed?: boolean;
   url?: string;
   onRefetch?: () => void;
+  isOwner?: boolean;
 }
 
 export function ItemGridActions({
@@ -39,9 +42,11 @@ export function ItemGridActions({
   trashed,
   url,
   onRefetch,
+  isOwner = true,
 }: ItemGridActionsProps) {
   const queryClient = useQueryClient();
   const [isRenameOpen, setIsRenameOpen] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
   const { download } = useFileDownload();
 
   const folderStarMutation = useMutation({
@@ -108,6 +113,9 @@ export function ItemGridActions({
     await download(id, name, url);
   };
 
+  const showTrigger = type === 'file' || isOwner;
+  if (!showTrigger) return null;
+
   return (
     <>
       <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
@@ -126,16 +134,30 @@ export function ItemGridActions({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
-            <DropdownMenuItem
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setIsRenameOpen(true);
-              }}
-            >
-              <Pencil className="size-3.5 mr-2" />
-              Rename
-            </DropdownMenuItem>
+            {isOwner && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsRenameOpen(true);
+                }}
+              >
+                <Pencil className="size-3.5 mr-2" />
+                Rename
+              </DropdownMenuItem>
+            )}
+            {type === 'folder' && isOwner && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsShareOpen(true);
+                }}
+              >
+                <Share2 className="size-3.5 mr-2" />
+                Share
+              </DropdownMenuItem>
+            )}
             {!trashed && (
               <DropdownMenuItem onClick={handleStar}>
                 <Star
@@ -153,22 +175,24 @@ export function ItemGridActions({
                 Download
               </DropdownMenuItem>
             )}
-            <DropdownMenuItem
-              onClick={handleTrash}
-              className={cn(!trashed && 'text-destructive')}
-            >
-              {trashed ? (
-                <>
-                  <RotateCcw className="size-3.5 mr-2" />
-                  Restore
-                </>
-              ) : (
-                <>
-                  <Trash2 className="size-3.5 mr-2" />
-                  Move to Trash
-                </>
-              )}
-            </DropdownMenuItem>
+            {isOwner && (
+              <DropdownMenuItem
+                onClick={handleTrash}
+                className={cn(!trashed && 'text-destructive')}
+              >
+                {trashed ? (
+                  <>
+                    <RotateCcw className="size-3.5 mr-2" />
+                    Restore
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="size-3.5 mr-2" />
+                    Move to Trash
+                  </>
+                )}
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -181,6 +205,15 @@ export function ItemGridActions({
         onOpenChange={setIsRenameOpen}
         onRefetch={onRefetch}
       />
+
+      {type === 'folder' && isOwner && (
+        <ShareDialog
+          id={id}
+          folderName={name}
+          open={isShareOpen}
+          onOpenChange={setIsShareOpen}
+        />
+      )}
     </>
   );
 }

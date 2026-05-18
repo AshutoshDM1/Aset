@@ -19,20 +19,28 @@ type FolderItem = {
   starred?: boolean;
   trashed?: boolean;
   sizeMb?: number;
+  ownerName?: string | null;
+  ownerEmail?: string | null;
 };
 
 type FolderTableProps = {
   folders: FolderItem[];
   onRefetch?: () => void;
+  isOwner?: boolean;
 };
 
-export function FolderTable({ folders, onRefetch }: FolderTableProps) {
+export function FolderTable({
+  folders,
+  onRefetch,
+  isOwner = true,
+}: FolderTableProps) {
   return (
     <div className="rounded-md border border-border bg-background">
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead className="w-[400px]">Name</TableHead>
+            <TableHead className="w-[300px]">Name</TableHead>
+            {!isOwner && <TableHead>Shared By</TableHead>}
             <TableHead>Size</TableHead>
             <TableHead>Created At</TableHead>
             <TableHead className="text-right">Actions</TableHead>
@@ -52,6 +60,30 @@ export function FolderTable({ folders, onRefetch }: FolderTableProps) {
                   <span className="truncate">{folder.name}</span>
                 </Link>
               </TableCell>
+              {!isOwner && (
+                <TableCell className="text-sm">
+                  {folder.ownerName ? (
+                    <div>
+                      <span className="font-medium text-foreground">
+                        {folder.ownerName}
+                      </span>
+                      {folder.ownerEmail && (
+                        <span className="block text-xs text-muted-foreground">
+                          {folder.ownerEmail}
+                        </span>
+                      )}
+                    </div>
+                  ) : folder.ownerEmail ? (
+                    <span className="text-muted-foreground">
+                      {folder.ownerEmail}
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground italic">
+                      Anonymous
+                    </span>
+                  )}
+                </TableCell>
+              )}
               <TableCell className="text-muted-foreground text-sm">
                 {folder.sizeMb !== undefined
                   ? formatFileSize(folder.sizeMb)
@@ -68,6 +100,7 @@ export function FolderTable({ folders, onRefetch }: FolderTableProps) {
                   starred={folder.starred}
                   trashed={folder.trashed}
                   onRefetch={onRefetch}
+                  isOwner={isOwner}
                 />
               </TableCell>
             </TableRow>

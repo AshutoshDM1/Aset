@@ -12,7 +12,7 @@ export default function Shared() {
         canCreate={false}
       />
       <section className="mt-6" aria-label="Shared Folders">
-        <FolderList mode="all" />
+        <FolderList mode="shared" />
       </section>
     </div>
   );

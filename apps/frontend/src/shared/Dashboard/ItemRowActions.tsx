@@ -18,6 +18,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
+import { Share2 } from 'lucide-react';
+import { ShareDialog } from './ShareDialog';
 import { RenameDialog } from './RenameDialog';
 import { useFileDownload } from './useFileDownload';
 
@@ -29,6 +31,7 @@ interface ItemRowActionsProps {
   trashed?: boolean;
   url?: string;
   onRefetch?: () => void;
+  isOwner?: boolean;
 }
 
 export function ItemRowActions({
@@ -39,9 +42,11 @@ export function ItemRowActions({
   trashed,
   url,
   onRefetch,
+  isOwner = true,
 }: ItemRowActionsProps) {
   const queryClient = useQueryClient();
   const [isRenameOpen, setIsRenameOpen] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   const folderStarMutation = useMutation({
     ...trpc.folder.toggleStar.mutationOptions(),
@@ -110,10 +115,12 @@ export function ItemRowActions({
     await download(id, name, url);
   };
 
+  const showTrigger = type === 'file' || isOwner;
+
   return (
     <>
       <div className="flex items-center justify-end gap-1 transition-opacity">
-        {!trashed && (
+        {!trashed && (type === 'file' || isOwner) && (
           <Button
             variant="ghost"
             size="icon"
@@ -129,19 +136,21 @@ export function ItemRowActions({
           </Button>
         )}
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-          onClick={handleTrash}
-          title={trashed ? 'Restore' : 'Move to Trash'}
-        >
-          {trashed ? (
-            <RotateCcw className="size-4" />
-          ) : (
-            <Trash2 className="size-4" />
-          )}
-        </Button>
+        {isOwner && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+            onClick={handleTrash}
+            title={trashed ? 'Restore' : 'Move to Trash'}
+          >
+            {trashed ? (
+              <RotateCcw className="size-4" />
+            ) : (
+              <Trash2 className="size-4" />
+            )}
+          </Button>
+        )}
 
         {type === 'file' && url && !trashed && (
           <Button
@@ -155,64 +164,81 @@ export function ItemRowActions({
           </Button>
         )}
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-muted-foreground hover:bg-muted"
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-            >
-              <MoreHorizontal className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-40">
-            <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsRenameOpen(true);
-              }}
-            >
-              <Pencil className="size-3.5 mr-2" />
-              Rename
-            </DropdownMenuItem>
-            {!trashed && (
-              <DropdownMenuItem onClick={handleStar}>
-                <Star
-                  className={cn(
-                    'size-3.5 mr-2',
-                    starred && 'fill-current text-yellow-400',
-                  )}
-                />
-                {starred ? 'Unstar' : 'Star'}
-              </DropdownMenuItem>
-            )}
-            {type === 'file' && url && !trashed && (
-              <DropdownMenuItem onClick={handleDownload}>
-                <Download className="size-3.5 mr-2" />
-                Download
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuItem
-              onClick={handleTrash}
-              className={cn(!trashed && 'text-destructive')}
-            >
-              {trashed ? (
-                <>
-                  <RotateCcw className="size-3.5 mr-2" />
-                  Restore
-                </>
-              ) : (
-                <>
-                  <Trash2 className="size-3.5 mr-2" />
-                  Move to Trash
-                </>
+        {showTrigger && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:bg-muted"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
+                <MoreHorizontal className="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              {isOwner && (
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsRenameOpen(true);
+                  }}
+                >
+                  <Pencil className="size-3.5 mr-2" />
+                  Rename
+                </DropdownMenuItem>
               )}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              {type === 'folder' && isOwner && (
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsShareOpen(true);
+                  }}
+                >
+                  <Share2 className="size-3.5 mr-2" />
+                  Share
+                </DropdownMenuItem>
+              )}
+              {!trashed && (type === 'file' || isOwner) && (
+                <DropdownMenuItem onClick={handleStar}>
+                  <Star
+                    className={cn(
+                      'size-3.5 mr-2',
+                      starred && 'fill-current text-yellow-400',
+                    )}
+                  />
+                  {starred ? 'Unstar' : 'Star'}
+                </DropdownMenuItem>
+              )}
+              {type === 'file' && url && !trashed && (
+                <DropdownMenuItem onClick={handleDownload}>
+                  <Download className="size-3.5 mr-2" />
+                  Download
+                </DropdownMenuItem>
+              )}
+              {isOwner && (
+                <DropdownMenuItem
+                  onClick={handleTrash}
+                  className={cn(!trashed && 'text-destructive')}
+                >
+                  {trashed ? (
+                    <>
+                      <RotateCcw className="size-3.5 mr-2" />
+                      Restore
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="size-3.5 mr-2" />
+                      Move to Trash
+                    </>
+                  )}
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
 
       <RenameDialog
@@ -223,6 +249,15 @@ export function ItemRowActions({
         onOpenChange={setIsRenameOpen}
         onRefetch={onRefetch}
       />
+
+      {type === 'folder' && isOwner && (
+        <ShareDialog
+          id={id}
+          folderName={name}
+          open={isShareOpen}
+          onOpenChange={setIsShareOpen}
+        />
+      )}
     </>
   );
 }

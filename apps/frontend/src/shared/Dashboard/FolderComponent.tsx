@@ -14,6 +14,7 @@ interface FolderComponentProps {
   starred?: boolean;
   trashed?: boolean;
   onRefetch?: () => void;
+  isOwner?: boolean;
 }
 
 const colorMap: Record<FolderColor, string> = {
@@ -32,6 +33,7 @@ const FolderComponent = ({
   starred,
   trashed,
   onRefetch,
+  isOwner = true,
 }: FolderComponentProps) => {
   const href = to ?? `/dashboard/folder/${folderId}`;
 
@@ -44,6 +46,7 @@ const FolderComponent = ({
         starred={starred}
         trashed={trashed}
         onRefetch={onRefetch}
+        isOwner={isOwner}
       />
       <Link
         to={href}

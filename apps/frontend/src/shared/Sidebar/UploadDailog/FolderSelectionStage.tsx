@@ -24,11 +24,10 @@ export default function FolderSelectionStage() {
   const [showCreateFolder, setShowCreateFolder] = useState(false);
 
   // tRPC Queries & Mutations
-  const {
-    data: folders,
-    isLoading: loadingFolders,
-    refetch: refetchFolders,
-  } = useQuery(trpc.folder.listAll.queryOptions());
+  const ownedQuery = useQuery(trpc.folder.listAll.queryOptions());
+  const sharedQuery = useQuery(trpc.folder.listShared.queryOptions());
+
+  const loadingFolders = ownedQuery.isLoading || sharedQuery.isLoading;
 
   const createFolderMutation = useMutation(
     trpc.folder.create.mutationOptions(),
@@ -43,7 +42,7 @@ export default function FolderSelectionStage() {
         name: newFolderName.trim(),
       });
       toast.success(`Folder "${newFolder.name}" created!`);
-      await refetchFolders();
+      await ownedQuery.refetch();
       setFolderId(newFolder.id);
       setNewFolderName('');
       setShowCreateFolder(false);
@@ -54,6 +53,14 @@ export default function FolderSelectionStage() {
     }
   };
 
+  const owned = ownedQuery.data ?? [];
+  const shared = (sharedQuery.data ?? []).filter((f) => f.canUpload);
+
+  const folders = [
+    ...owned.map((f) => ({ id: f.id, name: f.name })),
+    ...shared.map((f) => ({ id: f.id, name: `${f.name} (Shared)` })),
+  ];
+
   if (loadingFolders) {
     return (
       <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground py-8">
@@ -63,7 +70,7 @@ export default function FolderSelectionStage() {
     );
   }
 
-  if (!folders || folders.length === 0) {
+  if (folders.length === 0) {
     return (
       <div className="border border-dashed border-destructive/20 bg-destructive/5 rounded-2xl p-6 text-center space-y-4">
         <div className="flex justify-center">
@@ -101,7 +108,7 @@ export default function FolderSelectionStage() {
         {showCreateFolder && (
           <form
             onSubmit={handleCreateFolder}
-            className="bg-background border border-border p-4 rounded-xl space-y-3 mt-4 text-left animate-in slide-in-from-top-2 duration-200"
+            className="bg-background border p-4 rounded-xl space-y-3 mt-4 text-left border-destructive/20"
           >
             <Label
               htmlFor="new-folder-name"
@@ -116,9 +123,18 @@ export default function FolderSelectionStage() {
                 placeholder="Folder name..."
                 value={newFolderName}
                 onChange={(e) => setNewFolderName(e.target.value)}
+                disabled={createFolderMutation.isPending}
                 autoFocus
               />
-              <Button type="submit" size="sm" className="text-xs py-1 h-9">
+              <Button
+                type="submit"
+                size="sm"
+                className="text-xs py-1 h-9 gap-1.5"
+                disabled={createFolderMutation.isPending}
+              >
+                {createFolderMutation.isPending && (
+                  <Loader2 className="size-3.5 animate-spin" />
+                )}
                 Create
               </Button>
               <Button
@@ -127,6 +143,7 @@ export default function FolderSelectionStage() {
                 size="sm"
                 className="text-xs py-1 h-9 text-muted-foreground"
                 onClick={() => setShowCreateFolder(false)}
+                disabled={createFolderMutation.isPending}
               >
                 Cancel
               </Button>
@@ -147,6 +164,7 @@ export default function FolderSelectionStage() {
           <Select
             value={folderId ? String(folderId) : undefined}
             onValueChange={(val) => setFolderId(val)}
+            disabled={createFolderMutation.isPending}
           >
             <SelectTrigger className="flex-1 h-10 w-full rounded-lg border-input bg-background text-sm text-foreground font-medium select-none">
               <SelectValue placeholder="Select a destination folder" />
@@ -167,6 +185,7 @@ export default function FolderSelectionStage() {
             size="icon"
             className="shrink-0 h-10 w-10"
             onClick={() => setShowCreateFolder((prev) => !prev)}
+            disabled={createFolderMutation.isPending}
             title="Create new folder"
           >
             <FolderPlus className="size-4" />
@@ -177,7 +196,7 @@ export default function FolderSelectionStage() {
       {showCreateFolder && (
         <form
           onSubmit={handleCreateFolder}
-          className="bg-muted/30 border border-border p-4 rounded-xl space-y-3 animate-in slide-in-from-top-2 duration-200"
+          className="bg-muted/30 border border-border p-4 rounded-xl space-y-3"
         >
           <Label
             htmlFor="inline-folder-name"
@@ -192,9 +211,18 @@ export default function FolderSelectionStage() {
               placeholder="Folder name..."
               value={newFolderName}
               onChange={(e) => setNewFolderName(e.target.value)}
+              disabled={createFolderMutation.isPending}
               autoFocus
             />
-            <Button type="submit" size="sm" className="text-xs py-1 h-9">
+            <Button
+              type="submit"
+              size="sm"
+              className="text-xs py-1 h-9 gap-1.5"
+              disabled={createFolderMutation.isPending}
+            >
+              {createFolderMutation.isPending && (
+                <Loader2 className="size-3.5 animate-spin" />
+              )}
               Create
             </Button>
             <Button
@@ -203,6 +231,7 @@ export default function FolderSelectionStage() {
               size="sm"
               className="text-xs py-1 h-9 text-muted-foreground"
               onClick={() => setShowCreateFolder(false)}
+              disabled={createFolderMutation.isPending}
             >
               Cancel
             </Button>

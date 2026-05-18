@@ -15,18 +15,41 @@ export const fileRouter = router({
   listByFolder: protectedProcedure
     .input(z.object({ folderId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
-      const folder = await ctx.db.folder.findFirst({
-        where: { id: input.folderId, ownerId: ctx.auth.userId },
+      const currentUser = await ctx.db.user.findUnique({
+        where: { id: ctx.auth.userId },
       });
+      const userEmail = currentUser?.email || ctx.auth.email || '';
+
+      const folder = await ctx.db.folder.findUnique({
+        where: { id: input.folderId },
+        include: {
+          shares: {
+            where: { email: userEmail.toLowerCase().trim() },
+          },
+        },
+      });
+
       if (!folder) {
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: 'Folder not found',
         });
       }
+
+      const isOwner = folder.ownerId === ctx.auth.userId;
+      const isShared = folder.shares.length > 0;
+      const isPublic = folder.isPublic;
+
+      if (!isOwner && !isShared && !isPublic) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message:
+            'Access denied: You do not have permission to open this folder.',
+        });
+      }
+
       const rows = await ctx.db.file.findMany({
         where: {
-          ownerId: ctx.auth.userId,
           folderId: input.folderId,
           trashed: false,
         },
@@ -58,15 +81,47 @@ export const fileRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const folder = await ctx.db.folder.findFirst({
-        where: { id: input.folderId, ownerId: ctx.auth.userId },
+      const currentUser = await ctx.db.user.findUnique({
+        where: { id: ctx.auth.userId },
       });
+      const userEmail = currentUser?.email || ctx.auth.email || '';
+
+      const folder = await ctx.db.folder.findUnique({
+        where: { id: input.folderId },
+        include: {
+          shares: {
+            where: { email: userEmail.toLowerCase().trim() },
+          },
+        },
+      });
+
       if (!folder) {
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: 'Folder not found',
         });
       }
+
+      const isOwner = folder.ownerId === ctx.auth.userId;
+      const isShared = folder.shares.length > 0;
+      const isPublic = folder.isPublic;
+
+      let canUpload = false;
+      if (isOwner) {
+        canUpload = true;
+      } else if (isShared) {
+        canUpload = folder.shares[0].canUpload;
+      } else if (isPublic) {
+        canUpload = folder.publicCanUpload;
+      }
+
+      if (!canUpload) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'You do not have permission to upload files to this folder.',
+        });
+      }
+
       const storage = await ctx.db.userStorage.findUnique({
         where: { userId: ctx.auth.userId },
         select: { totalStorage: true, usedStorage: true },
@@ -117,15 +172,47 @@ export const fileRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const folder = await ctx.db.folder.findFirst({
-        where: { id: input.folderId, ownerId: ctx.auth.userId },
+      const currentUser = await ctx.db.user.findUnique({
+        where: { id: ctx.auth.userId },
       });
+      const userEmail = currentUser?.email || ctx.auth.email || '';
+
+      const folder = await ctx.db.folder.findUnique({
+        where: { id: input.folderId },
+        include: {
+          shares: {
+            where: { email: userEmail.toLowerCase().trim() },
+          },
+        },
+      });
+
       if (!folder) {
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: 'Folder not found',
         });
       }
+
+      const isOwner = folder.ownerId === ctx.auth.userId;
+      const isShared = folder.shares.length > 0;
+      const isPublic = folder.isPublic;
+
+      let canUpload = false;
+      if (isOwner) {
+        canUpload = true;
+      } else if (isShared) {
+        canUpload = folder.shares[0].canUpload;
+      } else if (isPublic) {
+        canUpload = folder.publicCanUpload;
+      }
+
+      if (!canUpload) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'You do not have permission to upload files to this folder.',
+        });
+      }
+
       const prefix = objectKeyPrefix(ctx.auth.userId, input.folderId);
       if (!input.objectKey.startsWith(prefix)) {
         throw new TRPCError({
@@ -231,8 +318,8 @@ export const fileRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const file = await ctx.db.file.findFirst({
-        where: { id: input.id, ownerId: ctx.auth.userId },
+      const file = await ctx.db.file.findUnique({
+        where: { id: input.id },
       });
       if (!file) {
         throw new TRPCError({
@@ -240,6 +327,44 @@ export const fileRouter = router({
           message: 'File not found',
         });
       }
+
+      const isFileOwner = file.ownerId === ctx.auth.userId;
+      let hasAccess = isFileOwner;
+
+      if (!hasAccess && file.folderId) {
+        const currentUser = await ctx.db.user.findUnique({
+          where: { id: ctx.auth.userId },
+        });
+        const userEmail = currentUser?.email || ctx.auth.email || '';
+
+        const folder = await ctx.db.folder.findUnique({
+          where: { id: file.folderId },
+          include: {
+            shares: {
+              where: { email: userEmail.toLowerCase().trim() },
+            },
+          },
+        });
+
+        if (folder) {
+          const isFolderOwner = folder.ownerId === ctx.auth.userId;
+          const isFolderShared = folder.shares.length > 0;
+          const isFolderPublic = folder.isPublic;
+
+          if (isFolderOwner || isFolderShared || isFolderPublic) {
+            hasAccess = true;
+          }
+        }
+      }
+
+      if (!hasAccess) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message:
+            'Access denied: You do not have permission to download this file.',
+        });
+      }
+
       const objectKey = extractObjectKey(file.s3Url);
       const downloadUrl = await presignGet(objectKey, file.name);
       return { downloadUrl };

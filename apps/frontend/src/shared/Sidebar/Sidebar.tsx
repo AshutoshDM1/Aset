@@ -14,7 +14,7 @@ import { trpc } from '@/utils/trpc';
 import { Clock3, Folder, Home, Plus, Star, Trash2, Users } from 'lucide-react';
 import * as React from 'react';
 import { Link, NavLink, useLocation } from 'react-router';
-import { useUploadStore } from '@/shared/Sidebar/UploadDailog.tsx/uploadStore';
+import { useUploadStore } from '@/shared/Sidebar/UploadDailog/uploadStore';
 
 type SidebarItem = {
   label: string;

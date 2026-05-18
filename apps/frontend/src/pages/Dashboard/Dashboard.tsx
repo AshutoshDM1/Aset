@@ -2,7 +2,7 @@ import { Outlet } from 'react-router';
 import Sidebar from '../../shared/Sidebar/Sidebar';
 import DashboardNavbar from '../../shared/DashboardNavbar/DashboardNavbar';
 import BottomNav from '../../shared/BottomNav/BottomNav';
-import UploadDailog from '@/shared/Sidebar/UploadDailog.tsx/UploadDailog';
+import UploadDailog from '@/shared/Sidebar/UploadDailog/UploadDailog';
 import { Button } from '@/components/ui/button';
 import { ArrowBigLeftDash } from 'lucide-react';
 

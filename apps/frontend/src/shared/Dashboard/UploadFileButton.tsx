@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { useUploadStore } from '@/shared/Sidebar/UploadDailog.tsx/uploadStore';
+import { useUploadStore } from '@/shared/Sidebar/UploadDailog/uploadStore';
 import { Upload } from 'lucide-react';
 
 type UploadFileButtonProps = {

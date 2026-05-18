@@ -1,5 +1,6 @@
 import { useQueries } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router';
+import { useUser } from '@clerk/react';
 import { Button } from '@/components/ui/button';
 import { trpc } from '@/utils/trpc';
 import { FolderContents } from './components/FolderContents';
@@ -7,6 +8,7 @@ import DashboardHeader from '@/shared/Dashboard/DashboardHeader';
 import Loader from '@/shared/PageLoader/Loader';
 
 export default function SingleFolder() {
+  const { user } = useUser();
   const { folderId } = useParams<{ folderId: string }>();
   const id = folderId ?? '';
   const isValidId = typeof id === 'string' && id.length > 0;
@@ -67,14 +69,30 @@ export default function SingleFolder() {
     );
   }
 
+  const isOwner = folder.ownerId === user?.id;
+
+  // Build the folder description respecting privacy choices
+  let folderDescription = `Folders and files in ${folder.name}`;
+  if (!isOwner) {
+    const ownerDetails = [];
+    if (folder.ownerName) ownerDetails.push(folder.ownerName);
+    if (folder.ownerEmail) ownerDetails.push(folder.ownerEmail);
+
+    if (ownerDetails.length > 0) {
+      folderDescription = `Shared by ${ownerDetails.join(' (')}${ownerDetails.length > 1 ? ')' : ''}`;
+    } else {
+      folderDescription = `Shared by Anonymous user`;
+    }
+  }
+
   return (
     <div className="w-full rounded-lg bg-background p-4 shadow-sm ring-1 ring-border/60">
       <DashboardHeader
         folderId={folder.id}
         folderName={folder.name}
-        folerDescription={`Folders and files in ${folder.name}`}
-        canUpload={true}
-        canCreate={true}
+        folerDescription={folderDescription}
+        canUpload={folder.canUpload}
+        canCreate={isOwner}
       />
       <section className="mt-6" aria-label="Folder contents">
         <FolderContents

@@ -48,8 +48,29 @@ model Folder {
 
   starred  Boolean  @default(false)
   trashed  Boolean  @default(false)
+
+  // Sharing features
+  isPublic          Boolean       @default(false)
+  publicCanUpload   Boolean       @default(false)
+  showOwnerName     Boolean       @default(true)
+  showOwnerEmail    Boolean       @default(true)
+  shares            FolderShare[]
+
   @@index([ownerId])
   @@index([parentId])
+}
+
+model FolderShare {
+  id        String   @id @default(uuid())
+  folderId  String
+  folder    Folder   @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  email     String
+  canUpload Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@unique([folderId, email])
+  @@index([folderId])
+  @@index([email])
 }
 
 model File {
