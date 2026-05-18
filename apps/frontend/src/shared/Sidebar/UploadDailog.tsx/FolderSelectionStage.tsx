@@ -146,7 +146,7 @@ export default function FolderSelectionStage() {
         <div className="flex items-center gap-2">
           <Select
             value={folderId ? String(folderId) : undefined}
-            onValueChange={(val) => setFolderId(Number(val))}
+            onValueChange={(val) => setFolderId(val)}
           >
             <SelectTrigger className="flex-1 h-10 w-full rounded-lg border-input bg-background text-sm text-foreground font-medium select-none">
               <SelectValue placeholder="Select a destination folder" />

@@ -11,9 +11,9 @@ export function DashboardNavbarSearch({ className }: { className?: string }) {
       />
       <Input
         placeholder="Search files, folders, and members..."
-        className="h-11 pl-10 pr-16"
+        className="h-11 pl-10 text-sm md:text-base pr-14 md:pr-16 "
       />
-      <kbd className="pointer-events-none absolute right-2 top-1/2 hidden -translate-y-1/2 rounded-md border bg-muted/40 px-2 py-1 text-[10px] font-medium text-muted-foreground sm:block">
+      <kbd className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 rounded-md border bg-muted/40 px-2 py-1 text-[10px] font-medium text-muted-foreground sm:block">
         ⌘K
       </kbd>
     </div>

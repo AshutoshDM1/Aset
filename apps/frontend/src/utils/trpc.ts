@@ -3,7 +3,13 @@ import { createTRPCClient, httpBatchLink } from '@trpc/client';
 import { createTRPCOptionsProxy } from '@trpc/tanstack-react-query';
 import type { AppRouter } from '@aset/api';
 import { getToken } from '@clerk/react';
-export const queryClient = new QueryClient();
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
 
 const apiUrl = import.meta.env.VITE_API_URL;
 if (!apiUrl) {

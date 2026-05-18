@@ -39,7 +39,7 @@ export function sanitizeFileName(name: string): string {
 
 export function buildObjectKey(
   userId: string,
-  folderId: number,
+  folderId: string | number,
   fileName: string,
 ): string {
   const safe = sanitizeFileName(fileName);
@@ -77,7 +77,10 @@ export function resolvePublicFileUrl(stored: string): string {
   return '';
 }
 
-export function objectKeyPrefix(userId: string, folderId: number): string {
+export function objectKeyPrefix(
+  userId: string,
+  folderId: string | number,
+): string {
   return `${userId}/${folderId}/`;
 }
 

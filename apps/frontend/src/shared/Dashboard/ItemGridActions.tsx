@@ -22,7 +22,7 @@ import { RenameDialog } from './RenameDialog';
 import { useFileDownload } from './useFileDownload';
 
 interface ItemGridActionsProps {
-  id: number;
+  id: string;
   type: 'folder' | 'file';
   name: string;
   starred?: boolean;

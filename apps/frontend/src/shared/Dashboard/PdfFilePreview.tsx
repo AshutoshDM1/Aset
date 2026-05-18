@@ -5,7 +5,7 @@ import { PdfPreviewDialog } from './PdfPreviewDialog';
 import { ItemGridActions } from './ItemGridActions';
 
 type PdfFilePreviewProps = {
-  fileId: number;
+  fileId: string;
   name: string;
   url: string;
   starred?: boolean;

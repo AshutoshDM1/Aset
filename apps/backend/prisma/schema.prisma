@@ -34,14 +34,14 @@ model UserStorage {
 }
 
 model Folder {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid())
   name      String
   createdAt DateTime @default(now())
 
   ownerId String
   owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
-  parentId Int?
+  parentId String?
   parent   Folder?  @relation("FolderTree", fields: [parentId], references: [id], onDelete: Cascade)
   children Folder[] @relation("FolderTree")
   files    File[]
@@ -53,7 +53,7 @@ model Folder {
 }
 
 model File {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid())
   name      String
   s3Url     String
   sizeMb    Float    @default(0) // size in MB
@@ -62,7 +62,7 @@ model File {
   ownerId String
   owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
-  folderId Int?
+  folderId String?
   folder   Folder? @relation(fields: [folderId], references: [id], onDelete: Cascade)
 
   starred Boolean @default(false)

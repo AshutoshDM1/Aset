@@ -18,7 +18,7 @@ import { PdfPreviewDialog } from './PdfPreviewDialog';
 import { isPdfFileName } from '@/utils/file/file-utils';
 
 export type UnifiedItem = {
-  id: number;
+  id: string;
   name: string;
   type: 'folder' | 'file';
   createdAt: string | Date;

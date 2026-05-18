@@ -14,7 +14,7 @@ import PdfFilePreview from '@/shared/Dashboard/PdfFilePreview';
 const COLOR_CYCLE: FolderColor[] = ['cyan', 'yellow', 'pink', 'black'];
 
 type FolderItem = {
-  id: number;
+  id: string;
   name: string;
   createdAt: string | Date;
   starred?: boolean;
@@ -22,7 +22,7 @@ type FolderItem = {
   sizeMb?: number;
 };
 type FileItem = {
-  id: number;
+  id: string;
   name: string;
   url: string;
   createdAt: string | Date;

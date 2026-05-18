@@ -13,7 +13,7 @@ import { ItemRowActions } from './ItemRowActions';
 import { formatFileSize } from '@/utils/file/file-utils';
 
 type FolderItem = {
-  id: number;
+  id: string;
   name: string;
   createdAt: Date;
   starred?: boolean;

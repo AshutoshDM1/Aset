@@ -4,10 +4,10 @@ import { z } from 'zod';
 
 export const folderRouter = router({
   getById: protectedProcedure
-    .input(z.object({ id: z.number().int().positive() }))
+    .input(z.object({ id: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
-      const folder = await ctx.db.folder.findFirst({
-        where: { id: input.id, ownerId: ctx.auth.userId },
+      const folder = await ctx.db.folder.findUnique({
+        where: { id: input.id },
         select: {
           id: true,
           name: true,
@@ -15,12 +15,20 @@ export const folderRouter = router({
           createdAt: true,
           starred: true,
           trashed: true,
+          ownerId: true,
         },
       });
       if (!folder) {
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: 'Folder not found',
+        });
+      }
+      if (folder.ownerId !== ctx.auth.userId) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message:
+            'Access denied: You do not have permission to open this folder.',
         });
       }
       return folder;
@@ -30,7 +38,7 @@ export const folderRouter = router({
     .input(
       z
         .object({
-          parentId: z.number().int().positive().nullable(),
+          parentId: z.string().uuid().nullable(),
         })
         .optional(),
     )
@@ -62,10 +70,10 @@ export const folderRouter = router({
     .input(
       z.object({
         name: z.string().min(1),
-        parentId: z.number().int().positive().optional(),
+        parentId: z.string().uuid().optional(),
       }),
     )
-    .output(z.object({ id: z.number(), name: z.string() }))
+    .output(z.object({ id: z.string(), name: z.string() }))
     .mutation(async ({ ctx, input }) => {
       if (input.parentId != null) {
         const parent = await ctx.db.folder.findFirst({
@@ -132,7 +140,7 @@ export const folderRouter = router({
     }));
   }),
   toggleStar: protectedProcedure
-    .input(z.object({ id: z.number(), starred: z.boolean() }))
+    .input(z.object({ id: z.string().uuid(), starred: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       return ctx.db.folder.update({
         where: { id: input.id, ownerId: ctx.auth.userId },
@@ -140,7 +148,7 @@ export const folderRouter = router({
       });
     }),
   toggleTrash: protectedProcedure
-    .input(z.object({ id: z.number(), trashed: z.boolean() }))
+    .input(z.object({ id: z.string().uuid(), trashed: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       return ctx.db.folder.update({
         where: { id: input.id, ownerId: ctx.auth.userId },
@@ -151,7 +159,7 @@ export const folderRouter = router({
   rename: protectedProcedure
     .input(
       z.object({
-        id: z.number().int().positive(),
+        id: z.string().uuid(),
         name: z.string().min(1).max(500),
       }),
     )

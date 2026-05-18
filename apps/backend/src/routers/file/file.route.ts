@@ -13,7 +13,7 @@ import {
 
 export const fileRouter = router({
   listByFolder: protectedProcedure
-    .input(z.object({ folderId: z.number().int().positive() }))
+    .input(z.object({ folderId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
       const folder = await ctx.db.folder.findFirst({
         where: { id: input.folderId, ownerId: ctx.auth.userId },
@@ -51,7 +51,7 @@ export const fileRouter = router({
   presignUpload: protectedProcedure
     .input(
       z.object({
-        folderId: z.number().int().positive(),
+        folderId: z.string().uuid(),
         fileName: z.string().min(1).max(500),
         contentType: z.string().max(200).optional(),
         sizeMb: z.number().nonnegative(),
@@ -111,7 +111,7 @@ export const fileRouter = router({
     .input(
       z.object({
         name: z.string().min(1).max(500),
-        folderId: z.number().int().positive(),
+        folderId: z.string().uuid(),
         objectKey: z.string().min(1).max(2000),
         sizeMb: z.number().nonnegative(),
       }),
@@ -184,7 +184,7 @@ export const fileRouter = router({
   }),
 
   toggleStar: protectedProcedure
-    .input(z.object({ id: z.number(), starred: z.boolean() }))
+    .input(z.object({ id: z.string().uuid(), starred: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       return ctx.db.file.update({
         where: { id: input.id, ownerId: ctx.auth.userId },
@@ -193,7 +193,7 @@ export const fileRouter = router({
     }),
 
   toggleTrash: protectedProcedure
-    .input(z.object({ id: z.number(), trashed: z.boolean() }))
+    .input(z.object({ id: z.string().uuid(), trashed: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       return ctx.db.file.update({
         where: { id: input.id, ownerId: ctx.auth.userId },
@@ -204,7 +204,7 @@ export const fileRouter = router({
   rename: protectedProcedure
     .input(
       z.object({
-        id: z.number().int().positive(),
+        id: z.string().uuid(),
         name: z.string().min(1).max(500),
       }),
     )
@@ -227,7 +227,7 @@ export const fileRouter = router({
   getDownloadUrl: protectedProcedure
     .input(
       z.object({
-        id: z.number().int().positive(),
+        id: z.string().uuid(),
       }),
     )
     .mutation(async ({ ctx, input }) => {

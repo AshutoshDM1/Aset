@@ -12,15 +12,15 @@ export interface UploadFileState {
 interface UploadStore {
   isOpen: boolean;
   isMinimized: boolean;
-  folderId: number | null;
+  folderId: string | null;
   files: UploadFileState[];
   isUploading: boolean;
 
-  openDialog: (initialFolderId?: number | null) => void;
+  openDialog: (initialFolderId?: string | null) => void;
   closeDialog: () => void;
   minimizeDialog: () => void;
   maximizeDialog: () => void;
-  setFolderId: (folderId: number | null) => void;
+  setFolderId: (folderId: string | null) => void;
   setFiles: (files: UploadFileState[]) => void;
   updateFileProgress: (id: string, progress: number) => void;
   updateFileStatus: (

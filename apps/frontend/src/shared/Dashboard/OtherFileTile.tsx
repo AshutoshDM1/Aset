@@ -2,7 +2,7 @@ import { FileIcon } from 'lucide-react';
 import { ItemGridActions } from './ItemGridActions';
 
 interface OtherFileTileProps {
-  fileId: number;
+  fileId: string;
   name: string;
   url?: string;
   starred?: boolean;

@@ -4,17 +4,47 @@ import { DashboardNavbarActions } from './DashboardNavbarActions';
 import BreadcrumbComponent from '../Breadcrumb/Breadcrumb';
 import { useLocation } from 'react-router';
 import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { trpc } from '@/utils/trpc';
+
+const UUID_REGEX =
+  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
 function DashboardNavbar({ className }: { className?: string }) {
   const location = useLocation();
+
+  const folderId = useMemo(() => {
+    const match = location.pathname.match(
+      /\/folder\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})/,
+    );
+    return match ? match[1] : null;
+  }, [location.pathname]);
+
+  const { data: folder } = useQuery({
+    ...trpc.folder.getById.queryOptions({ id: folderId ?? '' }),
+    enabled: !!folderId,
+    retry: false,
+  });
+
   const breadcrumbItems = useMemo(() => {
     const pathnames = location.pathname.split('/').filter(Boolean);
-    const breadcrumbItems = pathnames.map((name, index) => ({
-      label: name.charAt(0).toUpperCase() + name.slice(1),
-      href: `/${pathnames.slice(0, index + 1).join('/')}`,
-    }));
+    const breadcrumbItems = pathnames.map((name, index) => {
+      let label = name.charAt(0).toUpperCase() + name.slice(1);
+      let href = `/${pathnames.slice(0, index + 1).join('/')}`;
+
+      if (name.toLowerCase() === 'folder') {
+        href = '/dashboard/my-files';
+      } else if (UUID_REGEX.test(name)) {
+        label = folder?.name || 'Loading...';
+      }
+
+      return {
+        label,
+        href,
+      };
+    });
     return breadcrumbItems;
-  }, [location]);
+  }, [location, folder?.name]);
 
   return (
     <header

@@ -20,7 +20,7 @@ import { ImagePreviewDialog } from './ImagePreviewDialog';
 import { PdfPreviewDialog } from './PdfPreviewDialog';
 
 type FileItem = {
-  id: number;
+  id: string;
   name: string;
   url: string;
   createdAt: Date;

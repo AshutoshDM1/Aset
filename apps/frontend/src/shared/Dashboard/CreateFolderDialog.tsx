@@ -24,7 +24,7 @@ type CreateFolderDialogProps = {
   /** Wait until `user.me` has synced so `Folder.ownerId` FK succeeds */
   canCreate?: boolean;
   /** Create inside this folder; omit for drive root */
-  parentFolderId?: number;
+  parentFolderId?: string;
 };
 
 export function CreateFolderDialog({

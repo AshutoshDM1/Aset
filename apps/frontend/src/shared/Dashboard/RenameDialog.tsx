@@ -20,7 +20,7 @@ import { Input } from '@/components/ui/input';
 import { trpc } from '@/utils/trpc';
 
 type RenameDialogProps = {
-  id: number;
+  id: string;
   type: 'folder' | 'file';
   currentName: string;
   open: boolean;

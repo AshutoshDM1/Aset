@@ -3,7 +3,7 @@ import { useUploadStore } from '@/shared/Sidebar/UploadDailog.tsx/uploadStore';
 import { Upload } from 'lucide-react';
 
 type UploadFileButtonProps = {
-  folderId: number;
+  folderId: string | number;
   canUpload: boolean;
 };
 
@@ -19,7 +19,11 @@ export function UploadFileButton({
       variant="outline"
       size="sm"
       disabled={!canUpload}
-      onClick={() => openDialog(folderId > 0 ? folderId : null)}
+      onClick={() =>
+        openDialog(
+          typeof folderId === 'string' && folderId.length > 0 ? folderId : null,
+        )
+      }
       className="gap-1.5"
     >
       <Upload className="size-4" />

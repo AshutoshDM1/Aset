@@ -8,15 +8,15 @@ import Loader from '@/shared/PageLoader/Loader';
 
 export default function SingleFolder() {
   const { folderId } = useParams<{ folderId: string }>();
-  const id = Number(folderId);
-  const isValidId = Number.isInteger(id) && id > 0;
+  const id = folderId ?? '';
+  const isValidId = typeof id === 'string' && id.length > 0;
 
   const [folderQuery, foldersQuery, filesQuery] = useQueries({
     queries: [
       {
         ...trpc.folder.getById.queryOptions({ id }),
         enabled: isValidId,
-        retry: true,
+        retry: false,
       },
       {
         ...trpc.folder.list.queryOptions({ parentId: id }),
@@ -46,13 +46,22 @@ export default function SingleFolder() {
   const folder = folderQuery.data;
 
   if (isError || !folder) {
+    let errorMsg = 'Something went wrong';
+    if (folderQuery.error) {
+      errorMsg = folderQuery.error.message;
+    } else if (foldersQuery.error) {
+      errorMsg = foldersQuery.error.message;
+    } else if (filesQuery.error) {
+      errorMsg = filesQuery.error.message;
+    } else if (!folder) {
+      errorMsg = 'Folder not found';
+    }
+
     return (
       <div className="w-full rounded-lg bg-background p-4 shadow-sm ring-1 ring-border/60">
-        <p className="text-sm text-destructive">
-          {folderQuery.isError ? 'Folder not found' : 'Something went wrong'}
-        </p>
+        <p className="text-sm text-destructive font-medium">{errorMsg}</p>
         <Button variant="outline" size="sm" className="mt-4" asChild>
-          <Link to="/dashboard">Back to All files</Link>
+          <Link to="/dashboard/my-files">Back to My files</Link>
         </Button>
       </div>
     );

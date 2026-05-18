@@ -4,7 +4,7 @@ import { ImagePreviewDialog } from './ImagePreviewDialog';
 import { ItemGridActions } from './ItemGridActions';
 
 type ImageFilePreviewProps = {
-  fileId: number;
+  fileId: string;
   name: string;
   url: string;
   starred?: boolean;

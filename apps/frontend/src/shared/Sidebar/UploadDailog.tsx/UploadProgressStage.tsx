@@ -76,7 +76,7 @@ export default function UploadProgressStage() {
                   className={cn(
                     'h-1.5',
                     isSuccess &&
-                      '[&>[data-slot=progress-indicator]]:bg-green-500',
+                      '*:data-[slot=progress-indicator]:bg-green-500',
                   )}
                 />
               )}

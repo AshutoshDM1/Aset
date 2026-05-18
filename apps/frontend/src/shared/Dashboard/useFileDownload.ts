@@ -7,7 +7,7 @@ export function useFileDownload() {
     ...trpc.file.getDownloadUrl.mutationOptions(),
   });
 
-  const handleDownload = async (id: number, name: string, url?: string) => {
+  const handleDownload = async (id: string, name: string, url?: string) => {
     const loadingToast = toast.loading('Generating secure download link...');
     try {
       const res = await downloadMutation.mutateAsync({ id });

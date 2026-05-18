@@ -7,7 +7,7 @@ export type FolderColor = 'cyan' | 'yellow' | 'pink' | 'black';
 
 interface FolderComponentProps {
   folderName: string;
-  folderId: number;
+  folderId: string;
   color?: FolderColor;
   to?: string;
   className?: string;

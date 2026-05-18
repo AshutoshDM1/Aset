@@ -3,7 +3,7 @@ import { UploadFileButton } from './UploadFileButton';
 import { ViewToggle } from './ViewToggle';
 
 interface DashboardHeaderProps {
-  folderId: number;
+  folderId: string | number;
   folderName: string;
   folerDescription: string;
   canUpload: boolean;
@@ -20,7 +20,9 @@ const DashboardHeader = ({
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{folderName}</h1>
+        <h1 className="text-xl md:text-2xl font-semibold tracking-tight">
+          {folderName}
+        </h1>
         <p className="mt-1 text-sm text-muted-foreground">{folerDescription}</p>
       </div>
       <div className="flex items-center gap-2">
@@ -29,7 +31,11 @@ const DashboardHeader = ({
           {canCreate && (
             <CreateFolderDialog
               canCreate={true}
-              parentFolderId={folderId > 0 ? folderId : undefined}
+              parentFolderId={
+                typeof folderId === 'string' && folderId.length > 0
+                  ? folderId
+                  : undefined
+              }
             />
           )}
           {canUpload && (

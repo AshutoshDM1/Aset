@@ -11,7 +11,7 @@ export type FolderListMode = 'all' | 'starred' | 'trash' | 'children';
 
 type FolderListProps = {
   /** Only used if mode is 'children' */
-  parentFolderId?: number;
+  parentFolderId?: string;
   mode?: FolderListMode;
 };
 
