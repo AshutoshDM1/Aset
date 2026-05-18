@@ -6,6 +6,7 @@ import { useLocation } from 'react-router';
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { trpc } from '@/utils/trpc';
+import Logo from '../Navbar/Logo';
 
 const UUID_REGEX =
   /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
@@ -56,9 +57,13 @@ function DashboardNavbar({ className }: { className?: string }) {
       <div className="flex items-center justify-between gap-4 px-4 py-2.5 sm:px-6 sm:py-4">
         <div className="hidden md:block">
           <BreadcrumbComponent items={breadcrumbItems} />
+          <DashboardNavbarSearch className="flex-1" />
         </div>
         <div className="flex items-center justify-between gap-4 w-full md:max-w-xl">
-          <DashboardNavbarSearch className="flex-1" />
+          <div className="flex items-center gap-2 lock md:hidden">
+            <Logo className="size-8" />
+            <h1 className="text-lg font-bold">Aset</h1>
+          </div>
           <DashboardNavbarActions />
         </div>
       </div>

@@ -22,6 +22,7 @@ import { Share2 } from 'lucide-react';
 import { ShareDialog } from './ShareDialog';
 import { RenameDialog } from './RenameDialog';
 import { useFileDownload } from './useFileDownload';
+import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 
 interface ItemGridActionsProps {
   id: string;
@@ -47,6 +48,7 @@ export function ItemGridActions({
   const queryClient = useQueryClient();
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const { download } = useFileDownload();
 
   const folderStarMutation = useMutation({
@@ -87,6 +89,36 @@ export function ItemGridActions({
     },
   });
 
+  const folderDeletePermanentlyMutation = useMutation({
+    ...trpc.folder.deletePermanently.mutationOptions(),
+    onSuccess: () => {
+      void queryClient.invalidateQueries(trpc.folder.list.queryFilter());
+      void queryClient.invalidateQueries(trpc.folder.getTrash.queryFilter());
+      void queryClient.invalidateQueries(trpc.user.me.queryFilter());
+      setIsDeleteConfirmOpen(false);
+      onRefetch?.();
+      toast.success('Folder permanently deleted');
+    },
+    onError: (err) => {
+      toast.error(err.message || 'Could not permanently delete folder');
+    },
+  });
+
+  const fileDeletePermanentlyMutation = useMutation({
+    ...trpc.file.deletePermanently.mutationOptions(),
+    onSuccess: () => {
+      void queryClient.invalidateQueries(trpc.file.getRecent.queryFilter());
+      void queryClient.invalidateQueries(trpc.file.getTrash.queryFilter());
+      void queryClient.invalidateQueries(trpc.user.me.queryFilter());
+      setIsDeleteConfirmOpen(false);
+      onRefetch?.();
+      toast.success('File permanently deleted');
+    },
+    onError: (err) => {
+      toast.error(err.message || 'Could not permanently delete file');
+    },
+  });
+
   const handleStar = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -111,6 +143,20 @@ export function ItemGridActions({
     e.preventDefault();
     e.stopPropagation();
     await download(id, name, url);
+  };
+
+  const handleDeletePermanently = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDeleteConfirmOpen(true);
+  };
+
+  const handleConfirmDeletePermanently = () => {
+    if (type === 'folder') {
+      folderDeletePermanentlyMutation.mutate({ id });
+    } else {
+      fileDeletePermanentlyMutation.mutate({ id });
+    }
   };
 
   const showTrigger = type === 'file' || isOwner;
@@ -193,6 +239,15 @@ export function ItemGridActions({
                 )}
               </DropdownMenuItem>
             )}
+            {isOwner && trashed && (
+              <DropdownMenuItem
+                onClick={handleDeletePermanently}
+                className="text-destructive font-medium"
+              >
+                <Trash2 className="size-3.5 mr-2" />
+                Delete Permanently
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -214,6 +269,18 @@ export function ItemGridActions({
           onOpenChange={setIsShareOpen}
         />
       )}
+
+      <DeleteConfirmDialog
+        open={isDeleteConfirmOpen}
+        onOpenChange={setIsDeleteConfirmOpen}
+        onConfirm={handleConfirmDeletePermanently}
+        type={type}
+        name={name}
+        isPending={
+          folderDeletePermanentlyMutation.isPending ||
+          fileDeletePermanentlyMutation.isPending
+        }
+      />
     </>
   );
 }

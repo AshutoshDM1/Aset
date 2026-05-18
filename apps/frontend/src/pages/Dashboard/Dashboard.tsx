@@ -13,7 +13,7 @@ export default function Dashboard() {
       <main className="flex-1 min-h-dvh min-w-0 lg:pl-[280px] pb-16 lg:pb-0">
         <div className="min-h-dvh flex flex-col">
           <DashboardNavbar />
-          <div className="block sm:hidden text-sm px-2 pt-2">
+          <div className="block sm:hidden text-sm px-4 pt-4">
             <Button
               onClick={() => {
                 window.history.back();
@@ -23,7 +23,7 @@ export default function Dashboard() {
               <ArrowBigLeftDash /> Back
             </Button>
           </div>
-          <div className="flex-1 p-2 sm:p-6">
+          <div className="flex-1 p-4 sm:p-6">
             <Outlet />
           </div>
         </div>

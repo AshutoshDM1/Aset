@@ -6,9 +6,7 @@ interface LogoProps {
 
 const Logo = ({ className }: LogoProps) => {
   return (
-    <div
-      className={cn('flex items-center justify-center w-10 h-10', className)}
-    >
+    <div className={cn('flex items-center justify-center size-10', className)}>
       <img
         src="/favicon.svg"
         alt="Aset"

@@ -1,6 +1,7 @@
 import {
   PutObjectCommand,
   GetObjectCommand,
+  DeleteObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -113,4 +114,15 @@ export async function presignGet(
     ResponseContentDisposition: `attachment; filename="${sanitizeFileName(fileName)}"`,
   });
   return getSignedUrl(client, command, { expiresIn: 300 });
+}
+
+export async function deleteObject(objectKey: string): Promise<void> {
+  const bucket = process.env.R2_BUCKET?.trim();
+  if (!bucket) throw new Error('R2_BUCKET is required');
+  const client = r2Client();
+  const command = new DeleteObjectCommand({
+    Bucket: bucket,
+    Key: objectKey,
+  });
+  await client.send(command);
 }

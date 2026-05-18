@@ -9,6 +9,7 @@ import {
   storageUrlForKey,
   presignGet,
   extractObjectKey,
+  deleteObject,
 } from '../../utils/r2';
 
 export const fileRouter = router({
@@ -286,6 +287,39 @@ export const fileRouter = router({
         where: { id: input.id, ownerId: ctx.auth.userId },
         data: { trashed: input.trashed },
       });
+    }),
+
+  deletePermanently: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const file = await ctx.db.file.findFirst({
+        where: { id: input.id, ownerId: ctx.auth.userId },
+      });
+      if (!file) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'File not found',
+        });
+      }
+
+      try {
+        const objectKey = extractObjectKey(file.s3Url);
+        await deleteObject(objectKey);
+      } catch (err) {
+        console.error('Failed to delete file from S3:', err);
+      }
+
+      await ctx.db.$transaction([
+        ctx.db.file.delete({
+          where: { id: input.id },
+        }),
+        ctx.db.userStorage.update({
+          where: { userId: ctx.auth.userId },
+          data: { usedStorage: { decrement: file.sizeMb } },
+        }),
+      ]);
+
+      return { success: true };
     }),
 
   rename: protectedProcedure
