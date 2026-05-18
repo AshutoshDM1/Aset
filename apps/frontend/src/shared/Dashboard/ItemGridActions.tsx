@@ -1,26 +1,48 @@
-import { Star, Trash2, RotateCcw } from 'lucide-react';
+import { useState } from 'react';
+import {
+  Star,
+  Trash2,
+  RotateCcw,
+  MoreVertical,
+  Pencil,
+  Download,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { trpc } from '@/utils/trpc';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
+import { RenameDialog } from './RenameDialog';
+import { useFileDownload } from './useFileDownload';
 
 interface ItemGridActionsProps {
   id: number;
   type: 'folder' | 'file';
+  name: string;
   starred?: boolean;
   trashed?: boolean;
+  url?: string;
   onRefetch?: () => void;
 }
 
 export function ItemGridActions({
   id,
   type,
+  name,
   starred,
   trashed,
+  url,
   onRefetch,
 }: ItemGridActionsProps) {
   const queryClient = useQueryClient();
+  const [isRenameOpen, setIsRenameOpen] = useState(false);
+  const { download } = useFileDownload();
 
   const folderStarMutation = useMutation({
     ...trpc.folder.toggleStar.mutationOptions(),
@@ -80,37 +102,85 @@ export function ItemGridActions({
     }
   };
 
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    await download(id, name, url);
+  };
+
   return (
-    <div className="absolute top-1 right-1 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-      {!trashed && (
-        <Button
-          variant="secondary"
-          size="icon"
-          className={cn(
-            'size-7 rounded-full bg-background/80 backdrop-blur shadow-sm border border-border',
-            starred
-              ? 'text-yellow-400 hover:text-yellow-500'
-              : 'text-muted-foreground hover:text-foreground',
-          )}
-          onClick={handleStar}
-          title={starred ? 'Unstar' : 'Star'}
-        >
-          <Star className={cn('size-3.5', starred && 'fill-current')} />
-        </Button>
-      )}
-      <Button
-        variant="secondary"
-        size="icon"
-        className="size-7 rounded-full bg-background/80 backdrop-blur shadow-sm border border-border text-muted-foreground hover:text-destructive"
-        onClick={handleTrash}
-        title={trashed ? 'Restore' : 'Move to Trash'}
-      >
-        {trashed ? (
-          <RotateCcw className="size-3.5" />
-        ) : (
-          <Trash2 className="size-3.5" />
-        )}
-      </Button>
-    </div>
+    <>
+      <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="secondary"
+              size="icon"
+              className="size-7 rounded-full bg-background/80 backdrop-blur shadow-sm border border-border text-muted-foreground hover:text-foreground animate-in"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+            >
+              <MoreVertical className="size-3.5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsRenameOpen(true);
+              }}
+            >
+              <Pencil className="size-3.5 mr-2" />
+              Rename
+            </DropdownMenuItem>
+            {!trashed && (
+              <DropdownMenuItem onClick={handleStar}>
+                <Star
+                  className={cn(
+                    'size-3.5 mr-2',
+                    starred && 'fill-current text-yellow-400',
+                  )}
+                />
+                {starred ? 'Unstar' : 'Star'}
+              </DropdownMenuItem>
+            )}
+            {type === 'file' && url && !trashed && (
+              <DropdownMenuItem onClick={handleDownload}>
+                <Download className="size-3.5 mr-2" />
+                Download
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem
+              onClick={handleTrash}
+              className={cn(!trashed && 'text-destructive')}
+            >
+              {trashed ? (
+                <>
+                  <RotateCcw className="size-3.5 mr-2" />
+                  Restore
+                </>
+              ) : (
+                <>
+                  <Trash2 className="size-3.5 mr-2" />
+                  Move to Trash
+                </>
+              )}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <RenameDialog
+        id={id}
+        type={type}
+        currentName={name}
+        open={isRenameOpen}
+        onOpenChange={setIsRenameOpen}
+        onRefetch={onRefetch}
+      />
+    </>
   );
 }

@@ -4,6 +4,7 @@ import { ItemGridActions } from './ItemGridActions';
 interface OtherFileTileProps {
   fileId: number;
   name: string;
+  url?: string;
   starred?: boolean;
   trashed?: boolean;
   onRefetch?: () => void;
@@ -12,6 +13,7 @@ interface OtherFileTileProps {
 export function OtherFileTile({
   fileId,
   name,
+  url,
   starred,
   trashed,
   onRefetch,
@@ -25,8 +27,10 @@ export function OtherFileTile({
       <ItemGridActions
         id={fileId}
         type="file"
+        name={name}
         starred={starred}
         trashed={trashed}
+        url={url}
         onRefetch={onRefetch}
       />
       <div

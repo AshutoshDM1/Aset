@@ -1,4 +1,8 @@
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  PutObjectCommand,
+  GetObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'node:crypto';
 
@@ -75,4 +79,35 @@ export function resolvePublicFileUrl(stored: string): string {
 
 export function objectKeyPrefix(userId: string, folderId: number): string {
   return `${userId}/${folderId}/`;
+}
+
+export function extractObjectKey(storedUrl: string): string {
+  const base = publicBase();
+  if (base && storedUrl.startsWith(base)) {
+    return storedUrl.slice(base.length).replace(/^\//, '');
+  }
+  if (/^https?:\/\//i.test(storedUrl)) {
+    try {
+      const url = new URL(storedUrl);
+      return decodeURIComponent(url.pathname.replace(/^\//, ''));
+    } catch {
+      return storedUrl;
+    }
+  }
+  return storedUrl;
+}
+
+export async function presignGet(
+  objectKey: string,
+  fileName: string,
+): Promise<string> {
+  const bucket = process.env.R2_BUCKET?.trim();
+  if (!bucket) throw new Error('R2_BUCKET is required');
+  const client = r2Client();
+  const command = new GetObjectCommand({
+    Bucket: bucket,
+    Key: objectKey,
+    ResponseContentDisposition: `attachment; filename="${sanitizeFileName(fileName)}"`,
+  });
+  return getSignedUrl(client, command, { expiresIn: 300 });
 }

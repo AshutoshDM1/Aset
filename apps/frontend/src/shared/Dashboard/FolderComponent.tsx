@@ -40,6 +40,7 @@ const FolderComponent = ({
       <ItemGridActions
         id={folderId}
         type="folder"
+        name={folderName}
         starred={starred}
         trashed={trashed}
         onRefetch={onRefetch}

@@ -1,5 +1,6 @@
 import { format } from 'date-fns';
-import { FileIcon, ImageIcon } from 'lucide-react';
+import { FileIcon, ImageIcon, FileText } from 'lucide-react';
+import { Document, Page } from 'react-pdf';
 import {
   Table,
   TableBody,
@@ -8,10 +9,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { formatFileSize, isImageFileName } from '@/utils/file/file-utils';
+import {
+  formatFileSize,
+  isImageFileName,
+  isPdfFileName,
+} from '@/utils/file/file-utils';
 import { useState } from 'react';
 import { ItemRowActions } from './ItemRowActions';
 import { ImagePreviewDialog } from './ImagePreviewDialog';
+import { PdfPreviewDialog } from './PdfPreviewDialog';
 
 type FileItem = {
   id: number;
@@ -34,8 +40,10 @@ export function FileTable({ files, onRefetch }: FileTableProps) {
   );
 
   const handleFileClick = (file: FileItem) => {
-    if (isImageFileName(file.name) && file.url) {
-      setPreview({ name: file.name, url: file.url });
+    if (file.url) {
+      if (isImageFileName(file.name) || isPdfFileName(file.name)) {
+        setPreview({ name: file.name, url: file.url });
+      }
     }
   };
 
@@ -68,6 +76,23 @@ export function FileTable({ files, onRefetch }: FileTableProps) {
                         />
                       ) : isImageFileName(file.name) ? (
                         <ImageIcon className="size-5" />
+                      ) : isPdfFileName(file.name) && file.url ? (
+                        <Document
+                          file={file.url}
+                          loading={
+                            <FileText className="size-5 text-red-500/50" />
+                          }
+                        >
+                          <Page
+                            pageNumber={1}
+                            width={40}
+                            renderTextLayer={false}
+                            renderAnnotationLayer={false}
+                            loading={null}
+                          />
+                        </Document>
+                      ) : isPdfFileName(file.name) ? (
+                        <FileText className="size-5 text-red-500" />
                       ) : (
                         <FileIcon className="size-5" />
                       )}
@@ -87,6 +112,7 @@ export function FileTable({ files, onRefetch }: FileTableProps) {
                   <ItemRowActions
                     id={file.id}
                     type="file"
+                    name={file.name}
                     starred={file.starred}
                     trashed={file.trashed}
                     url={file.url}
@@ -100,10 +126,16 @@ export function FileTable({ files, onRefetch }: FileTableProps) {
       </div>
 
       <ImagePreviewDialog
-        open={!!preview}
+        open={!!preview && isImageFileName(preview.name)}
         onOpenChange={(open) => !open && setPreview(null)}
         fileName={preview?.name ?? ''}
         imageUrl={preview?.url ?? ''}
+      />
+      <PdfPreviewDialog
+        open={!!preview && isPdfFileName(preview.name)}
+        onOpenChange={(open) => !open && setPreview(null)}
+        fileName={preview?.name ?? ''}
+        fileUrl={preview?.url ?? ''}
       />
     </>
   );

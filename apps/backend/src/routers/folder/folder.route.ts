@@ -147,4 +147,38 @@ export const folderRouter = router({
         data: { trashed: input.trashed },
       });
     }),
+
+  rename: protectedProcedure
+    .input(
+      z.object({
+        id: z.number().int().positive(),
+        name: z.string().min(1).max(500),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const folder = await ctx.db.folder.findFirst({
+        where: { id: input.id, ownerId: ctx.auth.userId },
+      });
+      if (!folder) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Folder not found',
+        });
+      }
+      return ctx.db.folder.update({
+        where: { id: input.id },
+        data: { name: input.name },
+      });
+    }),
+
+  listAll: protectedProcedure.query(async ({ ctx }) => {
+    return ctx.db.folder.findMany({
+      where: { ownerId: ctx.auth.userId, trashed: false },
+      orderBy: { name: 'asc' },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+  }),
 });

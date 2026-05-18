@@ -7,6 +7,8 @@ import {
   presignPut,
   resolvePublicFileUrl,
   storageUrlForKey,
+  presignGet,
+  extractObjectKey,
 } from '../../utils/r2';
 
 export const fileRouter = router({
@@ -197,6 +199,50 @@ export const fileRouter = router({
         where: { id: input.id, ownerId: ctx.auth.userId },
         data: { trashed: input.trashed },
       });
+    }),
+
+  rename: protectedProcedure
+    .input(
+      z.object({
+        id: z.number().int().positive(),
+        name: z.string().min(1).max(500),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const file = await ctx.db.file.findFirst({
+        where: { id: input.id, ownerId: ctx.auth.userId },
+      });
+      if (!file) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'File not found',
+        });
+      }
+      return ctx.db.file.update({
+        where: { id: input.id },
+        data: { name: input.name },
+      });
+    }),
+
+  getDownloadUrl: protectedProcedure
+    .input(
+      z.object({
+        id: z.number().int().positive(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const file = await ctx.db.file.findFirst({
+        where: { id: input.id, ownerId: ctx.auth.userId },
+      });
+      if (!file) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'File not found',
+        });
+      }
+      const objectKey = extractObjectKey(file.s3Url);
+      const downloadUrl = await presignGet(objectKey, file.name);
+      return { downloadUrl };
     }),
 
   getStarred: protectedProcedure.query(async ({ ctx }) => {

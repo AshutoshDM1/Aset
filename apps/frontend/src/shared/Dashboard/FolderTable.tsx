@@ -64,6 +64,7 @@ export function FolderTable({ folders, onRefetch }: FolderTableProps) {
                 <ItemRowActions
                   id={folder.id}
                   type="folder"
+                  name={folder.name}
                   starred={folder.starred}
                   trashed={folder.trashed}
                   onRefetch={onRefetch}

@@ -40,6 +40,7 @@ export function FolderList({ mode = 'all', parentFolderId }: FolderListProps) {
     refetch,
   } = useQuery(listQuery);
 
+  console.log(isError, error);
   if (isLoading) {
     return (
       <div className="py-10">

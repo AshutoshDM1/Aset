@@ -110,6 +110,7 @@ export function FolderContents({
           <OtherFileTile
             fileId={item.id}
             name={item.name}
+            url={item.url}
             starred={item.starred}
             trashed={item.trashed}
             onRefetch={onRefetch}

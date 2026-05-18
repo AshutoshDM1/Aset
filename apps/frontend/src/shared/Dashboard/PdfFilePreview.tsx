@@ -34,8 +34,10 @@ const PdfFilePreview = ({
         <ItemGridActions
           id={fileId}
           type="file"
+          name={name}
           starred={starred}
           trashed={trashed}
+          url={url}
           onRefetch={onRefetch}
         />
         <button

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import { clerkMiddleware } from '@clerk/express';
 import express from 'express';
@@ -33,7 +35,26 @@ app.get('/', (req, res) => {
 app.use(
   '/trpc',
   clerkMiddleware(),
-  createExpressMiddleware({ router: appRouter, createContext }),
+  createExpressMiddleware({
+    router: appRouter,
+    createContext,
+    onError({ error, path }) {
+      console.error(`[tRPC Error] on path "${path}":`, error);
+    },
+  }),
+);
+
+// Global express error handling middleware
+app.use(
+  (
+    err: any,
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) => {
+    console.error('[Express Global Error]:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  },
 );
 
 app.listen(Number(PORT), '0.0.0.0', () => {

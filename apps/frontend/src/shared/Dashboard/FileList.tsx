@@ -2,9 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 import { trpc } from '@/utils/trpc';
 import Loader from '@/shared/PageLoader/Loader';
 import ImageFilePreview from './ImageFilePreview';
+import PdfFilePreview from './PdfFilePreview';
 import { useViewMode } from '@/context/ViewModeContext';
 import { FileTable } from './FileTable';
-import { isImageFileName } from '@/utils/file/file-utils';
+import { isImageFileName, isPdfFileName } from '@/utils/file/file-utils';
 import { OtherFileTile } from './OtherFileTile';
 
 export type FileListMode = 'recent' | 'starred' | 'trash';
@@ -93,10 +94,20 @@ export function FileList({ mode = 'recent' }: FileListProps) {
               trashed={file.trashed}
               onRefetch={refetch}
             />
+          ) : isPdfFileName(file.name) ? (
+            <PdfFilePreview
+              fileId={file.id}
+              name={file.name}
+              url={file.url}
+              starred={file.starred}
+              trashed={file.trashed}
+              onRefetch={refetch}
+            />
           ) : (
             <OtherFileTile
               fileId={file.id}
               name={file.name}
+              url={file.url}
               starred={file.starred}
               trashed={file.trashed}
               onRefetch={refetch}

@@ -125,6 +125,7 @@ export function UnifiedTable({ items, onRefetch }: UnifiedTableProps) {
                   <ItemRowActions
                     id={item.id}
                     type={item.type}
+                    name={item.name}
                     starred={item.starred}
                     trashed={item.trashed}
                     url={item.url}

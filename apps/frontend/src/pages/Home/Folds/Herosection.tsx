@@ -9,7 +9,7 @@ const Herosection = () => {
     <>
       <div className="max-w-5xl mx-auto text-center py-28">
         <HeroBadge />
-        <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-zinc-900 dark:text-white mb-6 leading-tight">
+        <h1 className="text-2xl md:text-7xl font-bold tracking-tight text-zinc-900 dark:text-white mb-6 leading-tight">
           Upload, organize, and share <br className="hidden md:block" />
           files without the chaos.
         </h1>
@@ -48,8 +48,8 @@ const HeroBadge = () => {
         <span className="flex items-center gap-2 px-3 py-1 rounded-full bg-secondary-foreground text-secondary text-xs font-semibold ">
           New
         </span>
-        <span className="text-sm pr-2">
-          A lightweight cloud drive for everyday files
+        <span className="pr-2 text-xs md:text-sm font-semibold">
+          A lightweight cloud drive
         </span>
       </div>
     </div>
@@ -58,7 +58,7 @@ const HeroBadge = () => {
 
 const HeroSubheadline = () => {
   return (
-    <p className="mt-4 text-lg md:text-xl text-zinc-600 dark:text-zinc-300 font-medium">
+    <p className="mt-4 text-sm md:text-xl text-zinc-600 dark:text-zinc-300 font-medium">
       Drop in documents, images, and projects—keep them in folders you control.
       Share when you need to, with{' '}
       <span className="font-semibold text-zinc-900 dark:text-white">
@@ -75,7 +75,7 @@ const HeroCTA = () => {
       <Link to="/dashboard">
         <button
           className={cn(
-            'text-lg text-primary-foreground bg-linear-to-b from-indigo-600 via-indigo-500 to-indigo-400  hover:bg-indigo-500/70 rounded-4xl px-4 py-2.5 font-semibold shadow-[0_3px_17px_rgba(0,0,0,0.2)] shadow-[#5E43F3] ',
+            'text-sm md:text-lg text-primary-foreground bg-linear-to-b from-indigo-600 via-indigo-500 to-indigo-400  hover:bg-indigo-500/70 rounded-4xl px-4 py-2.5 font-semibold shadow-[0_3px_17px_rgba(0,0,0,0.2)] shadow-[#5E43F3] ',
             'ring-1 ring-indigo-600/90 hover:ring-indigo-500/70',
             'transition-colors duration-300 ease-in-out cursor-pointer text-white',
             'flex items-center gap-2',

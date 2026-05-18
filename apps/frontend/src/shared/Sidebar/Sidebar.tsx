@@ -14,6 +14,7 @@ import { trpc } from '@/utils/trpc';
 import { Clock3, Folder, Home, Plus, Star, Trash2, Users } from 'lucide-react';
 import * as React from 'react';
 import { Link, NavLink, useLocation } from 'react-router';
+import { useUploadStore } from '@/shared/Sidebar/UploadDailog.tsx/uploadStore';
 
 type SidebarItem = {
   label: string;
@@ -177,7 +178,11 @@ export default function Sidebar({ className }: { className?: string }) {
           </div>
         </Link>
         <div className="p-4">
-          <Button className="w-full py-5" size="lg">
+          <Button
+            className="w-full py-5"
+            size="lg"
+            onClick={() => useUploadStore.getState().openDialog()}
+          >
             <Plus aria-hidden data-icon="inline-start" />
             Upload New
           </Button>
