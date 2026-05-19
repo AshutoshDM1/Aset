@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useState } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Info,
@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { DetailsDialog } from './DetailsDialog';
 import { cn } from '@/lib/utils';
+import { motion, useMotionValue } from 'motion/react';
 
 type ImagePreviewDialogProps = {
   open: boolean;
@@ -47,12 +48,19 @@ export function ImagePreviewDialog({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
-  const handleZoomIn = () => setScale((s) => Math.min(s + 0.25, 3));
-  const handleZoomOut = () => setScale((s) => Math.max(s - 0.25, 0.5));
+  // Motion values for hardware-accelerated, zero-render dragging
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const handleZoomIn = () => setScale((s) => Math.min(s + 0.25, 4));
+  const handleZoomOut = () => setScale((s) => Math.max(s - 0.25, 0.25));
   const handleRotate = () => setRotate((r) => (r + 90) % 360);
+
   const handleReset = () => {
     setScale(1);
     setRotate(0);
+    x.set(0);
+    y.set(0);
   };
 
   const handleClose = () => {
@@ -60,6 +68,105 @@ export function ImagePreviewDialog({
     setIsFullscreen(false);
     onOpenChange(false);
   };
+
+  // Keep scale updated in a ref for static gesture handlers
+  const scaleRef = useRef(scale);
+  useEffect(() => {
+    scaleRef.current = scale;
+  }, [scale]);
+
+  // Gesture refs
+  const pinchStartDistanceRef = useRef(0);
+  const pinchStartScaleRef = useRef(1);
+  const isPinchZoomingRef = useRef(false);
+  const activeContainerRef = useRef<HTMLDivElement | null>(null);
+
+  // 1. Mouse Wheel Zoom handler
+  const preventDefaultWheel = useCallback((e: WheelEvent) => {
+    e.preventDefault();
+    const zoomFactor = 0.08;
+    setScale((s) => {
+      const newScale = s + (e.deltaY < 0 ? zoomFactor : -zoomFactor);
+      return Math.max(0.25, Math.min(newScale, 4));
+    });
+  }, []);
+
+  // 2. Pinch-to-zoom mobile gesture handlers
+  const handleTouchStart = useCallback((e: TouchEvent) => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      isPinchZoomingRef.current = true;
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY,
+      );
+      pinchStartDistanceRef.current = dist;
+      pinchStartScaleRef.current = scaleRef.current;
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (e.touches.length === 2 && isPinchZoomingRef.current) {
+      e.preventDefault();
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY,
+      );
+      if (pinchStartDistanceRef.current > 0) {
+        const factor = dist / pinchStartDistanceRef.current;
+        const newScale = pinchStartScaleRef.current * factor;
+        setScale(Math.max(0.25, Math.min(newScale, 4)));
+      }
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback((e: TouchEvent) => {
+    if (e.touches.length < 2) {
+      isPinchZoomingRef.current = false;
+      pinchStartDistanceRef.current = 0;
+    }
+  }, []);
+
+  // Callback Ref for the container to attach event listeners the millisecond the node mounts
+  const containerCallbackRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (activeContainerRef.current) {
+        const container = activeContainerRef.current;
+        container.removeEventListener('wheel', preventDefaultWheel);
+        container.removeEventListener('touchstart', handleTouchStart);
+        container.removeEventListener('touchmove', handleTouchMove);
+        container.removeEventListener('touchend', handleTouchEnd);
+        container.removeEventListener('touchcancel', handleTouchEnd);
+        activeContainerRef.current = null;
+      }
+
+      if (node) {
+        activeContainerRef.current = node;
+        node.addEventListener('wheel', preventDefaultWheel, { passive: false });
+        node.addEventListener('touchstart', handleTouchStart, {
+          passive: false,
+        });
+        node.addEventListener('touchmove', handleTouchMove, { passive: false });
+        node.addEventListener('touchend', handleTouchEnd);
+        node.addEventListener('touchcancel', handleTouchEnd);
+      }
+    },
+    [preventDefaultWheel, handleTouchStart, handleTouchMove, handleTouchEnd],
+  );
+
+  // Reset coordinates if modal or zoom changes to 1
+  useEffect(() => {
+    if (scale === 1 && rotate === 0) {
+      x.set(0);
+      y.set(0);
+    }
+  }, [scale, rotate, x, y]);
+
+  useEffect(() => {
+    if (!open) {
+      handleReset();
+    }
+  }, [open]);
 
   return (
     <>
@@ -73,108 +180,149 @@ export function ImagePreviewDialog({
           className={cn(
             'flex flex-col gap-4 overflow-hidden p-6 transition-all duration-300',
             isFullscreen
-              ? 'max-w-[100vw] h-[100dvh] w-screen border-none rounded-none p-4'
-              : 'max-w-[min(100vw-2rem,64rem)] max-h-[calc(100dvh-2rem)] rounded-2xl h-[85dvh]',
+              ? '!fixed !inset-0 !z-50 !w-screen !h-screen !max-w-none !max-h-none !p-0 !rounded-none !border-none !translate-x-0 !translate-y-0 !top-0 !left-0 flex flex-col gap-0 bg-black'
+              : 'w-full max-w-[calc(100vw-2rem)] sm:max-w-[calc(100vw-2rem)] md:max-w-[80vw] lg:max-w-[64rem] max-h-[calc(100dvh-2rem)] rounded-2xl h-[85dvh]',
           )}
+          style={
+            isFullscreen
+              ? {
+                  transform: 'none',
+                  top: 0,
+                  left: 0,
+                  maxWidth: '100vw',
+                  width: '100vw',
+                  height: '100dvh',
+                  maxHeight: '100dvh',
+                  borderRadius: 0,
+                  border: 'none',
+                }
+              : undefined
+          }
         >
-          <DialogHeader className="shrink-0 pr-12">
-            <DialogTitle className="truncate text-base font-semibold">
-              {fileName}
-            </DialogTitle>
-            <DialogDescription className="sr-only">
-              Preview of uploaded image file
-            </DialogDescription>
-          </DialogHeader>
+          {/* Hide header in full screen for true immersive display */}
+          {!isFullscreen && (
+            <DialogHeader className="shrink-0 pr-12">
+              <DialogTitle className="truncate text-base font-semibold">
+                {fileName}
+              </DialogTitle>
+              <DialogDescription className="sr-only">
+                Preview of uploaded image file
+              </DialogDescription>
+            </DialogHeader>
+          )}
 
-          {/* Toolbar */}
-          <div className="flex flex-wrap items-center justify-between gap-2 bg-muted/40 border border-border/40 rounded-xl px-3 py-1.5 shrink-0 text-sm">
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-8"
-                onClick={handleZoomIn}
-                title="Zoom In"
-              >
-                <ZoomIn className="size-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-8"
-                onClick={handleZoomOut}
-                disabled={scale <= 0.5}
-                title="Zoom Out"
-              >
-                <ZoomOut className="size-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-8"
-                onClick={handleRotate}
-                title="Rotate 90°"
-              >
-                <RotateCw className="size-4" />
-              </Button>
-              {(scale !== 1 || rotate !== 0) && (
+          {/* Floating Close indicator in fullscreen */}
+          {isFullscreen && (
+            <div className="absolute top-4 left-4 z-50 text-white/95 font-medium text-sm select-none pointer-events-none drop-shadow-md">
+              {fileName}
+            </div>
+          )}
+
+          {/* Normal Mode Toolbar */}
+          {!isFullscreen && (
+            <div className="flex flex-wrap items-center justify-between gap-2 bg-muted/40 border border-border/40 rounded-xl px-3 py-1.5 shrink-0 text-sm">
+              <div className="flex items-center gap-1">
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="size-8 text-primary"
-                  onClick={handleReset}
-                  title="Reset Transform"
+                  className="size-8"
+                  onClick={handleZoomIn}
+                  title="Zoom In"
                 >
-                  <RefreshCw className="size-4" />
+                  <ZoomIn className="size-4" />
                 </Button>
-              )}
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              {fileId && (
                 <Button
-                  variant="secondary"
-                  size="sm"
-                  className="h-8 gap-1.5 rounded-lg px-3 font-medium text-xs shadow-sm"
-                  onClick={() => setIsDetailsOpen(true)}
+                  variant="ghost"
+                  size="icon"
+                  className="size-8"
+                  onClick={handleZoomOut}
+                  disabled={scale <= 0.25}
+                  title="Zoom Out"
                 >
-                  <Info className="size-3.5" />
-                  <span>View Details</span>
+                  <ZoomOut className="size-4" />
                 </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-8 hidden sm:inline-flex"
-                onClick={() => setIsFullscreen(!isFullscreen)}
-                title={isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
-              >
-                {isFullscreen ? (
-                  <Minimize2 className="size-4" />
-                ) : (
-                  <Maximize2 className="size-4" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-8"
+                  onClick={handleRotate}
+                  title="Rotate 90°"
+                >
+                  <RotateCw className="size-4" />
+                </Button>
+                {(scale !== 1 ||
+                  rotate !== 0 ||
+                  x.get() !== 0 ||
+                  y.get() !== 0) && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 text-primary animate-in zoom-in duration-200"
+                    onClick={handleReset}
+                    title="Reset Preview"
+                  >
+                    <RefreshCw className="size-4" />
+                  </Button>
                 )}
-              </Button>
-            </div>
-          </div>
+              </div>
 
-          {/* Image Container */}
+              <div className="flex items-center gap-1.5">
+                {fileId && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="h-8 gap-1.5 rounded-lg px-3 font-medium text-xs shadow-sm"
+                    onClick={() => setIsDetailsOpen(true)}
+                  >
+                    <Info className="size-3.5" />
+                    <span>View Details</span>
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-8"
+                  onClick={() => setIsFullscreen(true)}
+                  title="Enter Full Screen"
+                >
+                  <Maximize2 className="size-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Image Viewport Container */}
           {imageUrl ? (
-            <div className="flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden rounded-2xl bg-black/5 dark:bg-black/20 border border-border/60 relative group/viewport">
-              <div
-                className="size-full flex items-center justify-center transition-transform duration-200 ease-out"
-                style={{
-                  transform: `scale(${scale}) rotate(${rotate}deg)`,
-                }}
+            <div
+              ref={containerCallbackRef}
+              className={cn(
+                'flex-1 min-h-0 w-full flex items-center justify-center overflow-hidden relative group/viewport select-none',
+                isFullscreen
+                  ? 'bg-black w-screen h-screen'
+                  : 'rounded-2xl bg-black/5 dark:bg-black/20 border border-border/60',
+              )}
+            >
+              <motion.div
+                drag
+                dragMomentum={false}
+                dragElastic={0.5}
+                style={{ x, y, scale, rotate }}
+                className="flex items-center justify-center cursor-grab active:cursor-grabbing"
               >
                 <img
                   src={imageUrl}
                   alt={fileName}
-                  className="max-h-full max-w-full object-contain select-none shadow-md rounded-lg transition-shadow"
+                  className={cn(
+                    'object-contain select-none shadow-md rounded-lg pointer-events-none',
+                    isFullscreen
+                      ? 'max-h-[92dvh] max-w-[95vw]'
+                      : 'max-h-[60dvh] max-w-[90%]',
+                  )}
                   draggable={false}
                 />
-              </div>
-              <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/60 text-white text-[10px] font-mono pointer-events-none opacity-0 group-hover/viewport:opacity-100 transition-opacity">
+              </motion.div>
+
+              <span className="absolute bottom-4 right-4 px-2.5 py-1 rounded bg-black/60 text-white text-[11px] font-mono pointer-events-none opacity-0 group-hover/viewport:opacity-100 transition-opacity z-10">
                 {Math.round(scale * 100)}%
               </span>
             </div>
@@ -187,6 +335,75 @@ export function ImagePreviewDialog({
                 </code>{' '}
                 on the server (e.g. your R2 public dev URL).
               </p>
+            </div>
+          )}
+
+          {/* Floating Immersive Toolbar (Fullscreen Mode Only) */}
+          {isFullscreen && (
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1.5 bg-black/75 backdrop-blur-md border border-white/10 rounded-2xl px-4 py-2 text-white shadow-xl animate-in fade-in slide-in-from-bottom-4 duration-300">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-9 text-white/80 hover:text-white hover:bg-white/10 rounded-xl"
+                onClick={handleZoomIn}
+                title="Zoom In"
+              >
+                <ZoomIn className="size-4.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-9 text-white/80 hover:text-white hover:bg-white/10 rounded-xl"
+                onClick={handleZoomOut}
+                disabled={scale <= 0.25}
+                title="Zoom Out"
+              >
+                <ZoomOut className="size-4.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-9 text-white/80 hover:text-white hover:bg-white/10 rounded-xl"
+                onClick={handleRotate}
+                title="Rotate 90°"
+              >
+                <RotateCw className="size-4.5" />
+              </Button>
+              {(scale !== 1 ||
+                rotate !== 0 ||
+                x.get() !== 0 ||
+                y.get() !== 0) && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-9 text-primary hover:bg-white/10 rounded-xl"
+                  onClick={handleReset}
+                  title="Reset Preview"
+                >
+                  <RefreshCw className="size-4.5" />
+                </Button>
+              )}
+              <div className="h-4 w-px bg-white/15 mx-1" />
+              {fileId && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-9 gap-1.5 text-white/80 hover:text-white hover:bg-white/10 rounded-xl px-3 text-xs font-semibold"
+                  onClick={() => setIsDetailsOpen(true)}
+                >
+                  <Info className="size-4" />
+                  <span>Details</span>
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-9 text-white/80 hover:text-white hover:bg-white/10 rounded-xl"
+                onClick={() => setIsFullscreen(false)}
+                title="Exit Full Screen"
+              >
+                <Minimize2 className="size-4.5" />
+              </Button>
             </div>
           )}
         </DialogContent>
