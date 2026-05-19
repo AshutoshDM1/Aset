@@ -12,7 +12,7 @@ const NAV_ITEMS = [
 
 export default function BottomNav() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 flex h-16 items-center justify-around border-t bg-background/80 backdrop-blur-lg lg:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 flex  items-center justify-around border-t bg-background/80 backdrop-blur-lg lg:hidden pb-6 pt-3">
       {NAV_ITEMS.map((item) => {
         const Icon = item.icon;
         return (

@@ -35,14 +35,12 @@ type FileTableProps = {
 };
 
 export function FileTable({ files, onRefetch }: FileTableProps) {
-  const [preview, setPreview] = useState<{ name: string; url: string } | null>(
-    null,
-  );
+  const [preview, setPreview] = useState<FileItem | null>(null);
 
   const handleFileClick = (file: FileItem) => {
     if (file.url) {
       if (isImageFileName(file.name) || isPdfFileName(file.name)) {
-        setPreview({ name: file.name, url: file.url });
+        setPreview(file);
       }
     }
   };
@@ -117,6 +115,8 @@ export function FileTable({ files, onRefetch }: FileTableProps) {
                     trashed={file.trashed}
                     url={file.url}
                     onRefetch={onRefetch}
+                    sizeMb={file.sizeMb}
+                    createdAt={file.createdAt}
                   />
                 </TableCell>
               </TableRow>
@@ -130,6 +130,11 @@ export function FileTable({ files, onRefetch }: FileTableProps) {
         onOpenChange={(open) => !open && setPreview(null)}
         fileName={preview?.name ?? ''}
         imageUrl={preview?.url ?? ''}
+        fileId={preview?.id}
+        sizeMb={preview?.sizeMb}
+        createdAt={preview?.createdAt}
+        starred={preview?.starred}
+        trashed={preview?.trashed}
       />
       <PdfPreviewDialog
         open={!!preview && isPdfFileName(preview.name)}

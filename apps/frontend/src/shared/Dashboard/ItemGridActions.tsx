@@ -6,6 +6,7 @@ import {
   MoreVertical,
   Pencil,
   Download,
+  Info,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { trpc } from '@/utils/trpc';
@@ -21,8 +22,9 @@ import {
 import { Share2 } from 'lucide-react';
 import { ShareDialog } from './ShareDialog';
 import { RenameDialog } from './RenameDialog';
-import { useFileDownload } from './useFileDownload';
+import { useFileDownload } from '../../hooks/useFileDownload';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
+import { DetailsDialog } from './DetailsDialog';
 
 interface ItemGridActionsProps {
   id: string;
@@ -33,6 +35,8 @@ interface ItemGridActionsProps {
   url?: string;
   onRefetch?: () => void;
   isOwner?: boolean;
+  sizeMb?: number;
+  createdAt?: Date | string;
 }
 
 export function ItemGridActions({
@@ -44,11 +48,14 @@ export function ItemGridActions({
   url,
   onRefetch,
   isOwner = true,
+  sizeMb,
+  createdAt,
 }: ItemGridActionsProps) {
   const queryClient = useQueryClient();
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const { download } = useFileDownload();
 
   const folderStarMutation = useMutation({
@@ -164,22 +171,33 @@ export function ItemGridActions({
 
   return (
     <>
-      <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+      <div className="absolute top-1.5 right-1.5 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity z-10">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="secondary"
               size="icon"
-              className="size-7 rounded-full bg-background/80 backdrop-blur shadow-sm border border-border text-muted-foreground hover:text-foreground animate-in"
+              className="size-8 rounded-full bg-background/90 backdrop-blur shadow-sm border border-border text-muted-foreground hover:text-foreground hover:bg-background transition-all"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
               }}
             >
-              <MoreVertical className="size-3.5" />
+              <MoreVertical className="size-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-40">
+          <DropdownMenuContent align="end" className="w-44">
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsDetailsOpen(true);
+              }}
+            >
+              <Info className="size-3.5 mr-2" />
+              View Details
+            </DropdownMenuItem>
+
             {isOwner && (
               <DropdownMenuItem
                 onClick={(e) => {
@@ -280,6 +298,19 @@ export function ItemGridActions({
           folderDeletePermanentlyMutation.isPending ||
           fileDeletePermanentlyMutation.isPending
         }
+      />
+
+      <DetailsDialog
+        open={isDetailsOpen}
+        onOpenChange={setIsDetailsOpen}
+        id={id}
+        type={type}
+        name={name}
+        sizeMb={sizeMb}
+        createdAt={createdAt}
+        starred={starred}
+        trashed={trashed}
+        url={url}
       />
     </>
   );

@@ -34,14 +34,12 @@ type UnifiedTableProps = {
 };
 
 export function UnifiedTable({ items, onRefetch }: UnifiedTableProps) {
-  const [preview, setPreview] = useState<{ name: string; url: string } | null>(
-    null,
-  );
+  const [preview, setPreview] = useState<UnifiedItem | null>(null);
 
   const handleFileClick = (item: UnifiedItem) => {
     if (item.type === 'file' && item.url) {
       if (isImageFileName(item.name) || isPdfFileName(item.name)) {
-        setPreview({ name: item.name, url: item.url });
+        setPreview(item);
       }
     }
   };
@@ -130,6 +128,8 @@ export function UnifiedTable({ items, onRefetch }: UnifiedTableProps) {
                     trashed={item.trashed}
                     url={item.url}
                     onRefetch={onRefetch}
+                    sizeMb={item.sizeMb}
+                    createdAt={item.createdAt}
                   />
                 </TableCell>
               </TableRow>
@@ -143,6 +143,11 @@ export function UnifiedTable({ items, onRefetch }: UnifiedTableProps) {
         onOpenChange={(open) => !open && setPreview(null)}
         fileName={preview?.name ?? ''}
         imageUrl={preview?.url ?? ''}
+        fileId={preview?.id}
+        sizeMb={preview?.sizeMb}
+        createdAt={preview?.createdAt}
+        starred={preview?.starred}
+        trashed={preview?.trashed}
       />
       <PdfPreviewDialog
         open={!!preview && isPdfFileName(preview.name)}

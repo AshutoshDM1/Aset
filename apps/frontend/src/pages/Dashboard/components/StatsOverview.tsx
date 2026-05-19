@@ -19,7 +19,7 @@ export function StatsOverview() {
   return (
     <section
       aria-label="Overview stats"
-      className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
+      className="grid gap-4 grid-cols-2 xl:grid-cols-4"
     >
       {statsMock.map((stat) => {
         const Icon = iconById[stat.id];

@@ -93,6 +93,8 @@ export function FileList({ mode = 'recent' }: FileListProps) {
               starred={file.starred}
               trashed={file.trashed}
               onRefetch={refetch}
+              createdAt={file.createdAt}
+              sizeMb={file.sizeMb}
             />
           ) : isPdfFileName(file.name) ? (
             <PdfFilePreview
@@ -102,6 +104,8 @@ export function FileList({ mode = 'recent' }: FileListProps) {
               starred={file.starred}
               trashed={file.trashed}
               onRefetch={refetch}
+              createdAt={file.createdAt}
+              sizeMb={file.sizeMb}
             />
           ) : (
             <OtherFileTile
@@ -111,6 +115,8 @@ export function FileList({ mode = 'recent' }: FileListProps) {
               starred={file.starred}
               trashed={file.trashed}
               onRefetch={refetch}
+              createdAt={file.createdAt}
+              sizeMb={file.sizeMb}
             />
           )}
         </li>

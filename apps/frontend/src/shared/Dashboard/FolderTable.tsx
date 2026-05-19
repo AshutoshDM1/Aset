@@ -101,6 +101,8 @@ export function FolderTable({
                   trashed={folder.trashed}
                   onRefetch={onRefetch}
                   isOwner={isOwner}
+                  sizeMb={folder.sizeMb}
+                  createdAt={folder.createdAt}
                 />
               </TableCell>
             </TableRow>

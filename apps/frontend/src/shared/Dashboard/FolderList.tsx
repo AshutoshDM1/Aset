@@ -125,6 +125,8 @@ export function FolderList({ mode = 'all', parentFolderId }: FolderListProps) {
             trashed={(folder as any).trashed ?? false}
             onRefetch={refetch}
             isOwner={isOwner}
+            createdAt={folder.createdAt}
+            sizeMb={folder.sizeMb}
           />
         </li>
       ))}

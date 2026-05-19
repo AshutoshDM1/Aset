@@ -8,6 +8,8 @@ interface OtherFileTileProps {
   starred?: boolean;
   trashed?: boolean;
   onRefetch?: () => void;
+  createdAt?: Date | string;
+  sizeMb?: number;
 }
 
 export function OtherFileTile({
@@ -17,6 +19,8 @@ export function OtherFileTile({
   starred,
   trashed,
   onRefetch,
+  createdAt,
+  sizeMb,
 }: OtherFileTileProps) {
   const dot = name.lastIndexOf('.');
   const base = dot > 0 ? name.slice(0, dot) : name;
@@ -32,6 +36,8 @@ export function OtherFileTile({
         trashed={trashed}
         url={url}
         onRefetch={onRefetch}
+        sizeMb={sizeMb}
+        createdAt={createdAt}
       />
       <div
         aria-label={name}

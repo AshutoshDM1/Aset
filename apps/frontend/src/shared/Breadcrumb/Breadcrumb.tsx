@@ -12,32 +12,38 @@ interface BreadcrumbComponentProps {
     label: string;
     href: string;
   }[];
+  className?: string;
 }
 
-const BreadcrumbComponent = ({ items }: BreadcrumbComponentProps) => {
+const BreadcrumbComponent = ({
+  items,
+  className,
+}: BreadcrumbComponentProps) => {
   return (
-    <Breadcrumb>
-      <BreadcrumbList>
-        <BreadcrumbItem>
-          <Link to="/">
-            <Home
-              aria-hidden
-              data-icon="inline-start"
-              className="size-4 ml-2"
-            />
-          </Link>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator />
-        {items.map((item, index) => (
-          <>
-            <BreadcrumbItem key={item.href}>
-              <Link to={item.href}>{item.label}</Link>
-            </BreadcrumbItem>
-            {index !== items.length - 1 && <BreadcrumbSeparator />}
-          </>
-        ))}
-      </BreadcrumbList>
-    </Breadcrumb>
+    <div className={className}>
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <Link to="/">
+              <Home
+                aria-hidden
+                data-icon="inline-start"
+                className="size-4 ml-2"
+              />
+            </Link>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          {items.map((item, index) => (
+            <>
+              <BreadcrumbItem key={item.href}>
+                <Link to={item.href}>{item.label}</Link>
+              </BreadcrumbItem>
+              {index !== items.length - 1 && <BreadcrumbSeparator />}
+            </>
+          ))}
+        </BreadcrumbList>
+      </Breadcrumb>
+    </div>
   );
 };
 

@@ -6,6 +6,7 @@ import {
   RotateCcw,
   MoreHorizontal,
   Pencil,
+  Info,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { trpc } from '@/utils/trpc';
@@ -21,8 +22,9 @@ import {
 import { Share2 } from 'lucide-react';
 import { ShareDialog } from './ShareDialog';
 import { RenameDialog } from './RenameDialog';
-import { useFileDownload } from './useFileDownload';
+import { useFileDownload } from '../../hooks/useFileDownload';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
+import { DetailsDialog } from './DetailsDialog';
 
 interface ItemRowActionsProps {
   id: string;
@@ -33,6 +35,8 @@ interface ItemRowActionsProps {
   url?: string;
   onRefetch?: () => void;
   isOwner?: boolean;
+  sizeMb?: number;
+  createdAt?: Date | string;
 }
 
 export function ItemRowActions({
@@ -44,11 +48,14 @@ export function ItemRowActions({
   url,
   onRefetch,
   isOwner = true,
+  sizeMb,
+  createdAt,
 }: ItemRowActionsProps) {
   const queryClient = useQueryClient();
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   const folderStarMutation = useMutation({
     ...trpc.folder.toggleStar.mutationOptions(),
@@ -171,7 +178,7 @@ export function ItemRowActions({
             size="icon"
             className={
               starred
-                ? 'text-yellow-400 hover:text-yellow-500 hover:bg-yellow-400/10'
+                ? 'text-yellow-400 hover:text-yellow-500 hover:bg-yellow-400/10 animate-in fade-in duration-200'
                 : 'text-muted-foreground'
             }
             onClick={handleStar}
@@ -186,7 +193,7 @@ export function ItemRowActions({
             <Button
               variant="ghost"
               size="icon"
-              className="text-muted-foreground hover:text-primary hover:bg-primary/10"
+              className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
               onClick={handleTrash}
               title={trashed ? 'Restore' : 'Move to Trash'}
             >
@@ -200,7 +207,7 @@ export function ItemRowActions({
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-destructive hover:bg-destructive/10"
+                className="text-destructive hover:bg-destructive/10 transition-colors"
                 onClick={handleDeletePermanently}
                 title="Delete Permanently"
               >
@@ -214,7 +221,7 @@ export function ItemRowActions({
           <Button
             variant="ghost"
             size="icon"
-            className="text-muted-foreground hover:bg-primary/10 hover:text-primary"
+            className="text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
             onClick={handleDownload}
             title="Download"
           >
@@ -236,7 +243,17 @@ export function ItemRowActions({
                 <MoreHorizontal className="size-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsDetailsOpen(true);
+                }}
+              >
+                <Info className="size-3.5 mr-2" />
+                View Details
+              </DropdownMenuItem>
+
               {isOwner && (
                 <DropdownMenuItem
                   onClick={(e) => {
@@ -336,6 +353,19 @@ export function ItemRowActions({
           folderDeletePermanentlyMutation.isPending ||
           fileDeletePermanentlyMutation.isPending
         }
+      />
+
+      <DetailsDialog
+        open={isDetailsOpen}
+        onOpenChange={setIsDetailsOpen}
+        id={id}
+        type={type}
+        name={name}
+        sizeMb={sizeMb}
+        createdAt={createdAt}
+        starred={starred}
+        trashed={trashed}
+        url={url}
       />
     </>
   );

@@ -55,15 +55,16 @@ function DashboardNavbar({ className }: { className?: string }) {
       )}
     >
       <div className="flex items-center justify-between gap-4 px-4 py-2.5 sm:px-6 sm:py-4">
-        <div className="hidden md:block">
-          <BreadcrumbComponent items={breadcrumbItems} />
-          <DashboardNavbarSearch className="flex-1" />
+        <BreadcrumbComponent
+          className="max-w-sm hidden md:block"
+          items={breadcrumbItems}
+        />
+        <div className="md:hidden flex items-center gap-2 lock">
+          <Logo className="size-8" />
+          <h1 className="text-lg font-bold">Aset</h1>
         </div>
-        <div className="flex items-center justify-between gap-4 w-full md:max-w-xl">
-          <div className="flex items-center gap-2 lock md:hidden">
-            <Logo className="size-8" />
-            <h1 className="text-lg font-bold">Aset</h1>
-          </div>
+        <div className="flex items-center justify-between gap-4 w-fit md:w-full md:max-w-xl">
+          <DashboardNavbarSearch className="flex-1 hidden md:block" />
           <DashboardNavbarActions />
         </div>
       </div>

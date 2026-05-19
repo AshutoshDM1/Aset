@@ -11,6 +11,8 @@ type PdfFilePreviewProps = {
   starred?: boolean;
   trashed?: boolean;
   onRefetch?: () => void;
+  createdAt?: Date | string;
+  sizeMb?: number;
 };
 
 const PdfFilePreview = ({
@@ -20,6 +22,8 @@ const PdfFilePreview = ({
   starred,
   trashed,
   onRefetch,
+  createdAt,
+  sizeMb,
 }: PdfFilePreviewProps) => {
   const [open, setOpen] = useState(false);
   const [thumbnailErrored, setThumbnailErrored] = useState(false);
@@ -39,6 +43,8 @@ const PdfFilePreview = ({
           trashed={trashed}
           url={url}
           onRefetch={onRefetch}
+          sizeMb={sizeMb}
+          createdAt={createdAt}
         />
         <button
           type="button"

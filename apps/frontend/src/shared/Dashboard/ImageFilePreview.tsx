@@ -10,6 +10,8 @@ type ImageFilePreviewProps = {
   starred?: boolean;
   trashed?: boolean;
   onRefetch?: () => void;
+  createdAt?: Date | string;
+  sizeMb?: number;
 };
 
 const ImageFilePreview = ({
@@ -19,6 +21,8 @@ const ImageFilePreview = ({
   starred,
   trashed,
   onRefetch,
+  createdAt,
+  sizeMb,
 }: ImageFilePreviewProps) => {
   const [open, setOpen] = useState(false);
   const [errored, setErrored] = useState(false);
@@ -38,6 +42,8 @@ const ImageFilePreview = ({
           trashed={trashed}
           url={url}
           onRefetch={onRefetch}
+          sizeMb={sizeMb}
+          createdAt={createdAt}
         />
         <button
           type="button"
@@ -73,6 +79,11 @@ const ImageFilePreview = ({
         onOpenChange={setOpen}
         fileName={name}
         imageUrl={url}
+        fileId={fileId}
+        sizeMb={sizeMb}
+        createdAt={createdAt}
+        starred={starred}
+        trashed={trashed}
       />
     </>
   );
