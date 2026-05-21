@@ -174,7 +174,7 @@ export default function Sidebar({ className }: { className?: string }) {
   return (
     <aside
       className={cn(
-        'flex h-dvh w-[280px] shrink-0 flex-col justify-between border-r bg-sidebar text-sidebar-foreground select-none',
+        'flex h-dvh w-70 shrink-0 flex-col justify-between border-r bg-sidebar text-sidebar-foreground select-none',
         className,
       )}
     >

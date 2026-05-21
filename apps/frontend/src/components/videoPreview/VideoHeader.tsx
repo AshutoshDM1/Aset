@@ -20,7 +20,7 @@ export function VideoHeader({
     <motion.div
       animate={{ y: showControls ? 0 : -80 }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
-      className="absolute top-0 left-0 right-0 z-110 flex items-center justify-between p-4 md:p-6 bg-gradient-to-b from-black/80 to-transparent"
+      className="absolute top-0 left-0 right-0 z-110 flex items-center justify-between p-4 md:p-6 bg-linear-to-b from-black/80 to-transparent"
     >
       <div className="flex flex-col max-w-[70%]">
         <span className="text-white/60 text-[10px] font-bold tracking-wider uppercase">

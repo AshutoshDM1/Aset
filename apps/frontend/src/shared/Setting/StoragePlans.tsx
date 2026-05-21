@@ -110,7 +110,7 @@ export function StoragePlans() {
                 plan.upcoming
                   ? 'border-border/30 bg-muted/10 opacity-50 cursor-not-allowed'
                   : isActive
-                    ? 'border-primary/50 bg-primary/[0.04]'
+                    ? 'border-primary/50 bg-primary/4'
                     : 'border-border/50 bg-card/30 hover:border-border hover:bg-muted/20 cursor-pointer',
               )}
             >

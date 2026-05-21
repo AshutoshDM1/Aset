@@ -32,7 +32,7 @@ export function FileTypeBreakdown({ data }: FileTypeBreakdownProps) {
         </div>
       </div>
 
-      <ChartContainer config={chartConfig} className="mt-4 h-[260px] w-full">
+      <ChartContainer config={chartConfig} className="mt-4 h-65 w-full">
         <BarChart data={data} margin={{ left: 4, right: 8, top: 8 }}>
           <CartesianGrid vertical={false} strokeDasharray="3 3" />
           <XAxis

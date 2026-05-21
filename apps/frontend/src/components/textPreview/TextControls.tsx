@@ -24,7 +24,7 @@ export function TextControls({
       initial={{ y: 80 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
-      className="absolute bottom-0 left-0 right-0 z-110 flex items-center justify-center p-4 md:p-6 bg-gradient-to-t from-black via-black/80 to-transparent"
+      className="absolute bottom-0 left-0 right-0 z-110 flex items-center justify-center p-4 md:p-6 bg-linear-to-t from-black via-black/80 to-transparent"
     >
       <div className="flex items-center gap-2 md:gap-4 bg-white/5 border border-white/10 backdrop-blur-md rounded-2xl p-2 px-3 shadow-2xl">
         {/* Toggle Line Numbers */}

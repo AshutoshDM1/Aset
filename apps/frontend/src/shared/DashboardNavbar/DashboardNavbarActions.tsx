@@ -176,7 +176,7 @@ export function DashboardNavbarActions() {
                         {formatRelativeTime(item.createdAt)}
                       </span>
                     </div>
-                    <p className="text-[11px] text-muted-foreground mt-1 leading-normal break-words">
+                    <p className="text-[11px] text-muted-foreground mt-1 leading-normal wrap-break-word">
                       {item.message}
                     </p>
                   </div>

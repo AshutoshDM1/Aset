@@ -144,7 +144,7 @@ export function DetailsDialog({
               {fileExtension}
             </div>
             <div className="space-y-0.5">
-              <p className="text-sm font-medium text-foreground truncate max-w-[240px]">
+              <p className="text-sm font-medium text-foreground truncate max-w-60">
                 {name}
               </p>
               <p className="text-xs text-muted-foreground font-medium">

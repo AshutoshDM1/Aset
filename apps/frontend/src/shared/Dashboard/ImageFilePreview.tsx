@@ -66,7 +66,7 @@ const ImageFilePreview = ({
             )}
           </div>
           <p className="text-sm text-foreground text-center w-20">
-            <span className="truncate inline-block align-bottom max-w-[50px]">
+            <span className="truncate inline-block align-bottom max-w-12.5">
               {base.slice(0, 5)}
               {base.length > 5 ? '..' : ''}
             </span>
