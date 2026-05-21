@@ -15,7 +15,11 @@ import {
   RefreshCw,
   Maximize2,
   Minimize2,
+  Sparkles,
+  Loader2,
+  CheckCheck,
 } from 'lucide-react';
+import { useOptimizeImage } from './useOptimizeImage';
 import { DetailsDialog } from './DetailsDialog';
 import { cn } from '@/lib/utils';
 import { motion, useMotionValue } from 'motion/react';
@@ -49,6 +53,7 @@ export function ImagePreviewDialog({
   const [rotate, setRotate] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const { state: optimizeState, optimize } = useOptimizeImage();
 
   // Motion values for hardware-accelerated, zero-render dragging
   const x = useMotionValue(0);
@@ -269,6 +274,31 @@ export function ImagePreviewDialog({
               </div>
 
               <div className="flex items-center gap-1.5">
+                {/* Optimize Image — calls Optix microservice → downloads WebP */}
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="h-8 gap-1.5 rounded-lg px-3 font-medium text-xs shadow-sm"
+                  disabled={optimizeState === 'uploading'}
+                  onClick={() => optimize(imageUrl, fileName)}
+                  title="Send to Optix · compress & verify"
+                >
+                  {optimizeState === 'uploading' ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : optimizeState === 'done' ? (
+                    <CheckCheck className="size-3.5 text-emerald-500" />
+                  ) : (
+                    <Sparkles className="size-3.5" />
+                  )}
+                  <span>
+                    {optimizeState === 'uploading'
+                      ? 'Uploading…'
+                      : optimizeState === 'done'
+                        ? 'Received!'
+                        : 'Optimize'}
+                  </span>
+                </Button>
+
                 {fileId && (
                   <Button
                     variant="secondary"
@@ -277,7 +307,6 @@ export function ImagePreviewDialog({
                     onClick={() => setIsDetailsOpen(true)}
                   >
                     <Info className="size-3.5" />
-                    {/* <span>View Details</span> */}
                   </Button>
                 )}
                 <Button
@@ -386,6 +415,32 @@ export function ImagePreviewDialog({
                 </Button>
               )}
               <div className="h-4 w-px bg-white/15 mx-1" />
+
+              {/* Optimize — fullscreen toolbar */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-9 gap-1.5 text-white/80 hover:text-white hover:bg-white/10 rounded-xl px-3 text-xs font-semibold"
+                disabled={optimizeState === 'uploading'}
+                onClick={() => optimize(imageUrl, fileName)}
+                title="Send to Optix · compress & verify"
+              >
+                {optimizeState === 'uploading' ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : optimizeState === 'done' ? (
+                  <CheckCheck className="size-4 text-emerald-400" />
+                ) : (
+                  <Sparkles className="size-4" />
+                )}
+                <span>
+                  {optimizeState === 'uploading'
+                    ? 'Uploading…'
+                    : optimizeState === 'done'
+                      ? 'Received!'
+                      : 'Optimize'}
+                </span>
+              </Button>
+
               {fileId && (
                 <Button
                   variant="ghost"
@@ -394,7 +449,6 @@ export function ImagePreviewDialog({
                   onClick={() => setIsDetailsOpen(true)}
                 >
                   <Info className="size-4" />
-                  {/* <span>Details</span> */}
                 </Button>
               )}
               <Button
