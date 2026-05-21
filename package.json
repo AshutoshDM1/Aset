@@ -8,6 +8,7 @@
     "dev": "pnpm --parallel -r dev",
     "dev:frontend": "pnpm --filter aset-frontend dev",
     "dev:backend": "pnpm --filter aset-backend dev",
+    "push": "cd apps/backend && npx prisma db push && cd ../..",
     "optix": "air",
     "build": "pnpm -r build",
     "build:vercel": "pnpm --filter aset-backend exec prisma generate && pnpm --filter aset-frontend build",

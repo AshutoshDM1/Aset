@@ -1,15 +1,19 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   Copy,
-  Trash2,
   UserPlus,
   Globe,
-  User,
   Mail,
   Check,
   Loader2,
+  Shield,
+  Eye,
+  Edit2,
+  X,
+  Users,
+  Loader,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -22,7 +26,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { trpc } from '@/utils/trpc';
+import { cn } from '@/lib/utils';
 
 type ShareDialogProps = {
   id: string;
@@ -30,6 +44,34 @@ type ShareDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
+
+const AVATAR_COLORS = [
+  'from-indigo-500 to-purple-500',
+  'from-pink-500 to-rose-500',
+  'from-cyan-500 to-blue-500',
+  'from-emerald-500 to-teal-500',
+  'from-amber-500 to-orange-500',
+  'from-violet-500 to-fuchsia-500',
+];
+
+function getGradientForEmail(email: string) {
+  let hash = 0;
+  for (let i = 0; i < email.length; i++) {
+    hash = email.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % AVATAR_COLORS.length;
+  return AVATAR_COLORS[index];
+}
+
+function getInitials(email: string) {
+  const cleanEmail = email.trim();
+  if (!cleanEmail) return '??';
+  const parts = cleanEmail.split('@')[0].split(/[\._-]/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + (parts[1][0] || '')).toUpperCase();
+  }
+  return cleanEmail.slice(0, 2).toUpperCase();
+}
 
 export function ShareDialog({
   id,
@@ -39,7 +81,8 @@ export function ShareDialog({
 }: ShareDialogProps) {
   const queryClient = useQueryClient();
   const [emailInput, setEmailInput] = useState('');
-  const [isCopied, setIsCopied] = useState(false);
+  const [inviteRole, setInviteRole] = useState<'viewer' | 'editor'>('viewer');
+  const [copiedLink, setCopiedLink] = useState(false);
 
   // Fetch current share settings
   const {
@@ -150,25 +193,28 @@ export function ShareDialog({
     addShareMutation.mutate({
       folderId: id,
       email,
-      canUpload: false,
+      canUpload: inviteRole === 'editor',
     });
   };
 
   // Toggle specific user's upload role
-  const handleToggleUserUpload = (userEmail: string, canUpload: boolean) => {
+  const handleToggleUserUpload = (
+    userEmail: string,
+    role: 'viewer' | 'editor',
+  ) => {
     addShareMutation.mutate({
       folderId: id,
       email: userEmail,
-      canUpload,
+      canUpload: role === 'editor',
     });
   };
 
   const handleCopyLink = () => {
     const link = `${window.location.origin}/dashboard/folder/${id}`;
     void navigator.clipboard.writeText(link);
-    setIsCopied(true);
-    toast.success('Link copied to clipboard');
-    setTimeout(() => setIsCopied(false), 2000);
+    setCopiedLink(true);
+    toast.success('Public link copied to clipboard');
+    setTimeout(() => setCopiedLink(false), 2000);
   };
 
   const isPending =
@@ -176,205 +222,434 @@ export function ShareDialog({
     addShareMutation.isPending ||
     removeShareMutation.isPending;
 
+  const [isPendingDelay, setIsPendingDelay] = useState(isPending);
+
+  useEffect(() => {
+    if (isPending) {
+      setIsPendingDelay(true);
+    } else {
+      setTimeout(() => {
+        setIsPendingDelay(false);
+      }, 1000);
+    }
+  }, [isPending]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showCloseButton className="sm:max-w-md md:max-w-lg p-6">
+      <DialogContent
+        showCloseButton
+        className="sm:max-w-md md:max-w-lg p-6 rounded-3xl overflow-hidden"
+      >
+        {isPendingDelay && (
+          <div className="absolute z-10 inset-0 bg-black/15 backdrop-blur-sm flex justify-center items-center">
+            <Loader className="size-6 animate-spin text-primary shrink-0" />
+          </div>
+        )}
+
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold flex items-center gap-2">
-            Share "{folderName}"
+          <DialogTitle className="text-xl font-bold flex items-center justify-between gap-2">
+            <span className="truncate">Share "{folderName}"</span>
           </DialogTitle>
           <DialogDescription>
-            Configure who can view and upload files inside this folder.
+            Configure access settings and collaborate with others on this
+            folder.
           </DialogDescription>
         </DialogHeader>
 
         {isLoading || !settings ? (
-          <div className="flex flex-col items-center justify-center py-12 gap-3 text-muted-foreground text-sm">
+          <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground text-sm">
             <Loader2 className="size-8 animate-spin text-primary" />
-            Loading settings...
+            <span>Retrieving sharing configurations...</span>
           </div>
         ) : (
-          <div className="relative space-y-6 pt-4">
-            {isPending && (
-              <div className="absolute inset-0 bg-background/65 backdrop-blur-[1px] z-50 flex flex-col items-center justify-center gap-2 text-sm font-semibold text-muted-foreground select-none">
-                <Loader2 className="size-7 animate-spin text-primary" />
-                <span>Updating settings...</span>
-              </div>
-            )}
-            {/* Public Link Section */}
-            <div className="rounded-xl border border-border/80 bg-muted/20 p-4 space-y-4">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex gap-3">
-                  <div className="rounded-lg p-2 bg-primary/10 text-primary">
-                    <Globe className="size-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-sm">
-                      Public link sharing
-                    </h4>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Anyone on the internet with the link can view.
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  checked={settings.isPublic}
-                  onCheckedChange={handleTogglePublic}
-                  disabled={isPending}
-                />
-              </div>
-
-              {settings.isPublic && (
-                <div className="pt-2 border-t border-border/40 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label
-                      htmlFor="public-upload"
-                      className="text-xs font-medium text-muted-foreground cursor-pointer"
-                    >
-                      Allow public uploads
-                    </Label>
-                    <Switch
-                      id="public-upload"
-                      size="sm"
-                      checked={settings.publicCanUpload}
-                      onCheckedChange={handleTogglePublicUpload}
-                      disabled={isPending}
-                    />
-                  </div>
-
-                  <div className="flex gap-2 items-center mt-2">
-                    <Input
-                      readOnly
-                      className="text-xs bg-muted border-border/80 h-9"
-                      value={`${window.location.origin}/dashboard/folder/${id}`}
-                    />
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      className="size-9 shrink-0"
-                      onClick={handleCopyLink}
-                    >
-                      {isCopied ? (
-                        <Check className="size-4 text-emerald-500" />
-                      ) : (
-                        <Copy className="size-4" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Owner Identity Settings */}
-            <div className="rounded-xl border border-border/80 bg-muted/20 p-4 space-y-3">
-              <h4 className="text-sm font-semibold ">Identity privacy</h4>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs text-foreground">
-                  <User className="size-4 text-muted-foreground" />
-                  Show my name to other people
-                </div>
-                <Switch
-                  size="sm"
-                  checked={settings.showOwnerName}
-                  onCheckedChange={handleToggleOwnerName}
-                  disabled={isPending}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs text-foreground">
-                  <Mail className="size-4 text-muted-foreground" />
-                  Show my email to other people
-                </div>
-                <Switch
-                  size="sm"
-                  checked={settings.showOwnerEmail}
-                  onCheckedChange={handleToggleOwnerEmail}
-                  disabled={isPending}
-                />
-              </div>
-            </div>
-
-            {/* Specific User Invite Form */}
-            <form onSubmit={handleAddShare} className="space-y-3">
-              <h4 className="text-sm font-semibold">Invite people</h4>
-              <div className="flex gap-2">
-                <Input
-                  type="email"
-                  required
-                  placeholder="Enter email address"
-                  className="h-9 text-sm flex-1"
-                  value={emailInput}
-                  onChange={(e) => setEmailInput(e.target.value)}
-                  disabled={isPending}
-                />
-                <Button
-                  type="submit"
-                  size="sm"
-                  className="h-9 shrink-0 gap-1.5"
-                  disabled={isPending || !emailInput.trim()}
+          <div className="relative pt-2">
+            <Tabs defaultValue="people" className="w-full">
+              <TabsList className="w-full grid grid-cols-2 mb-6">
+                <TabsTrigger
+                  value="people"
+                  className="flex items-center justify-center"
                 >
-                  <UserPlus className="size-4" />
-                  Invite
-                </Button>
-              </div>
-            </form>
+                  <Users className="size-4 mr-2" />
+                  People & Access
+                </TabsTrigger>
+                <TabsTrigger
+                  value="link"
+                  className="flex items-center justify-center"
+                >
+                  <Globe className="size-4 mr-2" />
+                  Link & Privacy
+                </TabsTrigger>
+              </TabsList>
 
-            {/* List of Shares */}
-            <div className="space-y-2">
-              <h4 className="text-sm font-semibold">People with access</h4>
-              {settings.shares.length === 0 ? (
-                <p className="text-xs text-muted-foreground py-2">
-                  Not shared with anyone specifically yet.
-                </p>
-              ) : (
-                <div className="max-h-44 overflow-y-auto divide-y divide-border/40 rounded-lg border border-border/60 bg-background">
-                  {settings.shares.map((share) => (
-                    <div
-                      key={share.id}
-                      className="flex items-center justify-between p-3 gap-4"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-foreground truncate">
-                          {share.email}
+              {/* TAB 1: PEOPLE & DIRECT ACCESS */}
+              <TabsContent
+                value="people"
+                className="space-y-5 focus:outline-hidden"
+              >
+                {/* Invite Section */}
+                <form onSubmit={handleAddShare} className="space-y-3">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <div className="relative flex-1">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                      <Input
+                        type="email"
+                        required
+                        placeholder="Enter collaborator's email..."
+                        className="pl-9 h-10 text-sm w-full rounded-xl bg-input/20 border-border/80 focus-visible:ring-primary/30"
+                        value={emailInput}
+                        onChange={(e) => setEmailInput(e.target.value)}
+                        disabled={isPending}
+                      />
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      <Select
+                        value={inviteRole}
+                        onValueChange={(val) =>
+                          setInviteRole(val as 'viewer' | 'editor')
+                        }
+                        disabled={isPending}
+                      >
+                        <SelectTrigger
+                          size="default"
+                          className="h-10 w-28 rounded-xl bg-input/20 border-border/80 text-xs px-3"
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="viewer">
+                            <span className="flex items-center gap-1.5">
+                              <Eye className="size-3.5 text-muted-foreground" />
+                              Viewer
+                            </span>
+                          </SelectItem>
+                          <SelectItem value="editor">
+                            <span className="flex items-center gap-1.5">
+                              <Edit2 className="size-3.5 text-primary" />
+                              Editor
+                            </span>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+
+                      <Button
+                        type="submit"
+                        className="h-10 rounded-xl px-4 font-semibold shadow-xs hover:scale-[1.01] active:scale-[0.99] transition-all gap-1.5 shrink-0"
+                        disabled={isPending || !emailInput.trim()}
+                      >
+                        <UserPlus className="size-4" />
+                        Invite
+                      </Button>
+                    </div>
+                  </div>
+                </form>
+
+                {/* People List */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      People with Access
+                    </h4>
+                    <span className="text-[10px] bg-muted text-muted-foreground px-2 py-0.5 rounded-full font-semibold">
+                      {settings.shares.length + 1}{' '}
+                      {settings.shares.length + 1 === 1 ? 'person' : 'people'}
+                    </span>
+                  </div>
+
+                  <div className="max-h-56 overflow-y-auto divide-y divide-border/40 rounded-xl border border-border/80 bg-background shadow-inner">
+                    {/* Owner Row */}
+                    <div className="flex items-center justify-between p-3 gap-4 hover:bg-muted/5 transition-colors">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Avatar
+                          size="default"
+                          className="border shadow-xs shrink-0"
+                        >
+                          <AvatarFallback className="bg-linear-to-br from-indigo-500 to-purple-500 text-white font-bold text-xs uppercase select-none">
+                            OW
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                            Workspace Owner
+                            <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-semibold select-none">
+                              Owner
+                            </span>
+                          </p>
+                          <p className="text-[11px] text-muted-foreground truncate leading-normal">
+                            Full root workspace permissions
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-xs text-muted-foreground font-semibold bg-muted px-2.5 py-1 rounded-xl select-none">
+                        Owner
+                      </span>
+                    </div>
+
+                    {/* Shared Collaborators */}
+                    {settings.shares.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+                        <p className="text-xs text-muted-foreground font-medium">
+                          No direct collaborators yet
+                        </p>
+                        <p className="text-[10px] text-muted-foreground/80 mt-0.5">
+                          Invite people by email to collaborate securely.
                         </p>
                       </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer select-none">
-                          <input
-                            type="checkbox"
-                            checked={share.canUpload}
-                            onChange={(e) =>
-                              handleToggleUserUpload(
-                                share.email,
-                                e.target.checked,
-                              )
-                            }
-                            className="rounded border-border text-primary focus:ring-primary size-3.5 cursor-pointer"
-                            disabled={isPending}
-                          />
-                          Can Upload
-                        </label>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="size-7 text-destructive hover:bg-destructive/10 rounded-full"
-                          onClick={() =>
-                            removeShareMutation.mutate({
-                              folderId: id,
-                              shareId: share.id,
-                            })
+                    ) : (
+                      settings.shares.map((share) => {
+                        const initials = getInitials(share.email);
+                        const gradient = getGradientForEmail(share.email);
+
+                        return (
+                          <div
+                            key={share.id}
+                            className="flex items-center justify-between p-3 gap-4 hover:bg-muted/5 transition-colors"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <Avatar
+                                size="default"
+                                className="border shadow-2xs shrink-0 select-none"
+                              >
+                                <AvatarFallback
+                                  className={cn(
+                                    'text-white font-bold text-xs uppercase bg-linear-to-br',
+                                    gradient,
+                                  )}
+                                >
+                                  {initials}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="min-w-0">
+                                <p className="text-sm font-semibold text-foreground truncate">
+                                  {share.email}
+                                </p>
+                                <p className="text-[11px] text-muted-foreground leading-normal">
+                                  Shared collaborator
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 shrink-0">
+                              <Select
+                                value={share.canUpload ? 'editor' : 'viewer'}
+                                onValueChange={(val) =>
+                                  handleToggleUserUpload(
+                                    share.email,
+                                    val as 'viewer' | 'editor',
+                                  )
+                                }
+                                disabled={isPending}
+                              >
+                                <SelectTrigger
+                                  size="sm"
+                                  className="h-8 w-24 rounded-xl bg-muted/40 border-muted text-xs px-2"
+                                >
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="viewer">
+                                    <span className="flex items-center gap-1.5">
+                                      <Eye className="size-3 text-muted-foreground" />
+                                      Viewer
+                                    </span>
+                                  </SelectItem>
+                                  <SelectItem value="editor">
+                                    <span className="flex items-center gap-1.5">
+                                      <Edit2 className="size-3 text-primary" />
+                                      Editor
+                                    </span>
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon-sm"
+                                className="size-8 text-destructive hover:bg-destructive/10 hover:text-destructive rounded-full transition-colors"
+                                onClick={() =>
+                                  removeShareMutation.mutate({
+                                    folderId: id,
+                                    shareId: share.id,
+                                  })
+                                }
+                                disabled={isPending}
+                              >
+                                <X className="size-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* TAB 2: LINK SHARING & PRIVACY */}
+              <TabsContent
+                value="link"
+                className="space-y-4 focus:outline-hidden"
+              >
+                {/* Public Access Card */}
+                <div className="rounded-xl border border-border/80 bg-muted/20 p-4 space-y-4 relative overflow-hidden group">
+                  <div className="absolute -inset-px bg-linear-to-r from-primary/5 via-primary/0 to-primary/5 opacity-50 rounded-xl pointer-events-none" />
+
+                  <div className="flex items-start justify-between gap-4 relative">
+                    <div className="flex gap-3">
+                      <div
+                        className={cn(
+                          'rounded-lg transition-all duration-300 mt-1',
+                          settings.isPublic
+                            ? 'text-primary'
+                            : 'text-muted-foreground',
+                        )}
+                      >
+                        <Globe className="size-5" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-sm">
+                          Public link sharing
+                        </h4>
+                        <p className="text-xs text-muted-foreground mt-0.5 leading-normal max-w-xs">
+                          Anyone with this unique link can view and download
+                          files inside this folder.
+                        </p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={settings.isPublic}
+                      onCheckedChange={handleTogglePublic}
+                      disabled={isPending}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  {settings.isPublic && (
+                    <div className="pt-4 border-t border-border/40 space-y-4 relative animate-in fade-in slide-in-from-top-3 duration-300">
+                      {/* Public Role Option */}
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <Label
+                          htmlFor="public-upload"
+                          className="text-xs font-semibold text-muted-foreground cursor-pointer"
+                        >
+                          Public Access Rights
+                        </Label>
+                        <Select
+                          value={settings.publicCanUpload ? 'upload' : 'view'}
+                          onValueChange={(val) =>
+                            handleTogglePublicUpload(val === 'upload')
                           }
                           disabled={isPending}
                         >
-                          <Trash2 className="size-3.5" />
+                          <SelectTrigger
+                            size="sm"
+                            className="h-8 w-48 rounded-xl bg-background border-border text-xs px-2.5"
+                          >
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="view">
+                              <span className="flex items-center gap-1.5">
+                                <Eye className="size-3 text-muted-foreground" />
+                                Anyone can view/download
+                              </span>
+                            </SelectItem>
+                            <SelectItem value="upload">
+                              <span className="flex items-center gap-1.5">
+                                <UserPlus className="size-3 text-primary" />
+                                Anyone can view & upload
+                              </span>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Copy Link Input block */}
+                      <div className="flex items-center gap-2 mt-2 bg-background border border-border/80 rounded-xl p-1.5 shadow-xs">
+                        <Input
+                          readOnly
+                          className="text-xs bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-8 font-mono select-all flex-1 text-muted-foreground"
+                          value={`${window.location.origin}/dashboard/folder/${id}`}
+                        />
+                        <Button
+                          size="sm"
+                          onClick={handleCopyLink}
+                          className={cn(
+                            'h-8 px-4 rounded-lg transition-all duration-300 font-semibold text-xs shrink-0',
+                            copiedLink
+                              ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border border-emerald-500/30'
+                              : 'bg-primary text-primary-foreground hover:scale-[1.02] shadow-xs',
+                          )}
+                        >
+                          {copiedLink ? (
+                            <span className="flex items-center gap-1.5 animate-in fade-in zoom-in-95 duration-200">
+                              <Check className="size-3 text-emerald-500 stroke-3" />
+                              Copied!
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1.5">
+                              <Copy className="size-3" />
+                              Copy Link
+                            </span>
+                          )}
                         </Button>
                       </div>
                     </div>
-                  ))}
+                  )}
                 </div>
-              )}
-            </div>
+
+                {/* Identity Settings */}
+                <div className="rounded-xl border border-border/80 bg-muted/20 p-4 space-y-3.5 relative overflow-hidden">
+                  <div className="flex items-center gap-2">
+                    <Shield className="size-4 text-muted-foreground" />
+                    <h4 className="text-sm font-semibold">
+                      Identity Privacy Settings
+                    </h4>
+                  </div>
+
+                  <p className="text-xs text-muted-foreground leading-normal">
+                    Control what profile information is displayed to external
+                    users accessing this folder via public links.
+                  </p>
+
+                  <div className="space-y-3 pt-2 border-t border-border/40">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label className="text-xs font-semibold flex items-center gap-1.5">
+                          Display my full name
+                        </Label>
+                        <p className="text-[10px] text-muted-foreground leading-none">
+                          Allows other users to see your real profile name.
+                        </p>
+                      </div>
+                      <Switch
+                        size="sm"
+                        checked={settings.showOwnerName}
+                        onCheckedChange={handleToggleOwnerName}
+                        disabled={isPending}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label className="text-xs font-semibold flex items-center gap-1.5">
+                          Display my email address
+                        </Label>
+                        <p className="text-[10px] text-muted-foreground leading-none">
+                          Allows other users to contact you directly.
+                        </p>
+                      </div>
+                      <Switch
+                        size="sm"
+                        checked={settings.showOwnerEmail}
+                        onCheckedChange={handleToggleOwnerEmail}
+                        disabled={isPending}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         )}
       </DialogContent>

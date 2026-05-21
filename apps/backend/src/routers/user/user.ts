@@ -1,4 +1,5 @@
 import { TRPCError } from '@trpc/server';
+import { z } from 'zod';
 import { router, protectedProcedure } from '../../trpc';
 
 export const userRouter = router({
@@ -17,4 +18,19 @@ export const userRouter = router({
 
     return user;
   }),
+
+  updateStorageLimit: protectedProcedure
+    .input(z.object({ limitMb: z.number().positive() }))
+    .mutation(async ({ ctx, input }) => {
+      const storage = await ctx.db.userStorage.upsert({
+        where: { userId: ctx.auth.userId },
+        update: { totalStorage: input.limitMb },
+        create: {
+          userId: ctx.auth.userId,
+          totalStorage: input.limitMb,
+          usedStorage: 0,
+        },
+      });
+      return storage;
+    }),
 });

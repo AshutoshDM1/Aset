@@ -58,6 +58,8 @@ function SidebarNavItem({ item }: { item: SidebarItem }) {
   );
 }
 
+import { useSettingStore } from '@/shared/Setting/settingStore';
+
 const MB_PER_GB = 1024;
 
 function mbToGb(valueMb: number) {
@@ -66,6 +68,7 @@ function mbToGb(valueMb: number) {
 
 function SidebarStorageCard() {
   const { data, isPending } = useQuery(trpc.user.me.queryOptions());
+  const openSettings = useSettingStore((state) => state.openDialog);
 
   const storage = data?.storage;
   const totalMb = storage?.totalStorage ?? 0;
@@ -105,7 +108,12 @@ function SidebarStorageCard() {
         </p>
       </CardContent>
       <CardFooter className="pt-0">
-        <Button className="w-full" variant="secondary" size="sm">
+        <Button
+          className="w-full cursor-pointer"
+          variant="secondary"
+          size="sm"
+          onClick={openSettings}
+        >
           Upgrade Plan
         </Button>
       </CardFooter>

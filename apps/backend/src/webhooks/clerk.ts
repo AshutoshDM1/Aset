@@ -70,7 +70,7 @@ export async function clerkWebhookHandler(req: Request, res: Response) {
     switch (evt.type) {
       case 'user.created': {
         const data = evt.data as ClerkUserData;
-        const email = primaryEmail(data);
+        const email = primaryEmail(data)?.toLowerCase().trim();
         if (!email) {
           return res.status(400).json({ error: 'No email on Clerk user' });
         }
@@ -93,7 +93,7 @@ export async function clerkWebhookHandler(req: Request, res: Response) {
       }
       case 'user.updated': {
         const data = evt.data as ClerkUserData;
-        const email = primaryEmail(data);
+        const email = primaryEmail(data)?.toLowerCase().trim();
         await db.user.update({
           where: { id: data.id },
           data: {

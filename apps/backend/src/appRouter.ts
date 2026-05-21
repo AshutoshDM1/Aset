@@ -4,6 +4,7 @@ import { userRouter } from './routers/user/user';
 import { folderRouter } from './routers/folder/folder.route';
 import { fileRouter } from './routers/file/file.route';
 import { statsRouter } from './routers/stats/stats.route';
+import { notificationRouter } from './routers/notification/notification.route';
 
 export const appRouter = router({
   health: healthRouter,
@@ -11,6 +12,7 @@ export const appRouter = router({
   folder: folderRouter,
   file: fileRouter,
   stats: statsRouter,
+  notification: notificationRouter,
 });
 
 export type AppRouter = typeof appRouter;
