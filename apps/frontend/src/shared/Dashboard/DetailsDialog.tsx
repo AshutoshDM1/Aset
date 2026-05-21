@@ -19,11 +19,14 @@ import {
   Check,
   Tag,
   Eye,
+  Loader2,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { trpc } from '@/utils/trpc';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
 
 interface DetailsDialogProps {
   open: boolean;
@@ -36,6 +39,7 @@ interface DetailsDialogProps {
   starred?: boolean;
   trashed?: boolean;
   url?: string;
+  onRefetch?: () => void;
 }
 
 export function DetailsDialog({
@@ -49,9 +53,42 @@ export function DetailsDialog({
   starred = false,
   trashed = false,
   url,
+  onRefetch,
 }: DetailsDialogProps) {
+  const queryClient = useQueryClient();
   const [copiedId, setCopiedId] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
+
+  const folderStarMutation = useMutation({
+    ...trpc.folder.toggleStar.mutationOptions(),
+    onSuccess: () => {
+      void queryClient.invalidateQueries(trpc.folder.list.queryFilter());
+      void queryClient.invalidateQueries(trpc.folder.getStarred.queryFilter());
+      onRefetch?.();
+    },
+  });
+
+  const fileStarMutation = useMutation({
+    ...trpc.file.toggleStar.mutationOptions(),
+    onSuccess: () => {
+      void queryClient.invalidateQueries(trpc.file.getRecent.queryFilter());
+      void queryClient.invalidateQueries(trpc.file.getStarred.queryFilter());
+      onRefetch?.();
+    },
+  });
+
+  const isStarPending =
+    type === 'folder'
+      ? folderStarMutation.isPending
+      : fileStarMutation.isPending;
+
+  const handleStarToggle = () => {
+    if (type === 'folder') {
+      folderStarMutation.mutate({ id, starred: !starred });
+    } else {
+      fileStarMutation.mutate({ id, starred: !starred });
+    }
+  };
 
   const formattedDate = createdAt
     ? format(new Date(createdAt), 'PPP p')
@@ -146,16 +183,31 @@ export function DetailsDialog({
                 <Star className="size-4 shrink-0" />
                 Starred
               </span>
-              <span
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={isStarPending}
+                onClick={handleStarToggle}
                 className={cn(
-                  'px-2 py-0.5 rounded-full text-xs font-semibold',
+                  'h-7 px-2.5 rounded-full text-xs font-semibold select-none transition-all flex items-center gap-1.5 border',
                   starred
-                    ? 'bg-yellow-500/15 text-yellow-600 dark:text-yellow-400 border border-yellow-500/25'
-                    : 'bg-muted text-muted-foreground border border-transparent',
+                    ? 'bg-yellow-500/15 text-yellow-600 dark:text-yellow-400 border-yellow-500/25 hover:bg-yellow-500/25'
+                    : 'bg-muted/50 text-muted-foreground border-transparent hover:bg-muted',
                 )}
               >
+                {isStarPending ? (
+                  <Loader2 className="size-3 animate-spin text-primary" />
+                ) : (
+                  <Star
+                    className={cn(
+                      'size-3 shrink-0',
+                      starred &&
+                        'fill-current text-yellow-500 dark:text-yellow-400',
+                    )}
+                  />
+                )}
                 {starred ? 'Yes' : 'No'}
-              </span>
+              </Button>
             </div>
 
             {/* Trashed Status Row */}

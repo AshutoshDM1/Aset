@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { FileIcon, ImageIcon, FileText } from 'lucide-react';
+import { FileIcon, ImageIcon, FileText, Video } from 'lucide-react';
 import { Document, Page } from 'react-pdf';
 import {
   Table,
@@ -13,11 +13,15 @@ import {
   formatFileSize,
   isImageFileName,
   isPdfFileName,
+  isVideoFileName,
+  isTextCodeFileName,
 } from '@/utils/file/file-utils';
 import { useState } from 'react';
 import { ItemRowActions } from './ItemRowActions';
 import { ImagePreviewDialog } from './ImagePreviewDialog';
 import { PdfPreviewDialog } from './PdfPreviewDialog';
+import { VideoPreview } from '@/components/videoPreview';
+import { TextPreview } from '@/components/textPreview';
 
 type FileItem = {
   id: string;
@@ -39,7 +43,12 @@ export function FileTable({ files, onRefetch }: FileTableProps) {
 
   const handleFileClick = (file: FileItem) => {
     if (file.url) {
-      if (isImageFileName(file.name) || isPdfFileName(file.name)) {
+      if (
+        isImageFileName(file.name) ||
+        isPdfFileName(file.name) ||
+        isVideoFileName(file.name) ||
+        isTextCodeFileName(file.name)
+      ) {
         setPreview(file);
       }
     }
@@ -51,7 +60,7 @@ export function FileTable({ files, onRefetch }: FileTableProps) {
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
-              <TableHead className="w-[400px]">Name</TableHead>
+              <TableHead className="w-100">Name</TableHead>
               <TableHead>Size</TableHead>
               <TableHead>Created At</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -91,6 +100,18 @@ export function FileTable({ files, onRefetch }: FileTableProps) {
                         </Document>
                       ) : isPdfFileName(file.name) ? (
                         <FileText className="size-5 text-red-500" />
+                      ) : isVideoFileName(file.name) && file.url ? (
+                        <video
+                          src={`${file.url}#t=0.1`}
+                          preload="metadata"
+                          muted
+                          playsInline
+                          className="size-full object-cover"
+                        />
+                      ) : isVideoFileName(file.name) ? (
+                        <Video className="size-5 text-indigo-500" />
+                      ) : isTextCodeFileName(file.name) ? (
+                        <FileText className="size-5 text-amber-500" />
                       ) : (
                         <FileIcon className="size-5" />
                       )}
@@ -135,6 +156,7 @@ export function FileTable({ files, onRefetch }: FileTableProps) {
         createdAt={preview?.createdAt}
         starred={preview?.starred}
         trashed={preview?.trashed}
+        onRefetch={onRefetch}
       />
       <PdfPreviewDialog
         open={!!preview && isPdfFileName(preview.name)}
@@ -142,6 +164,20 @@ export function FileTable({ files, onRefetch }: FileTableProps) {
         fileName={preview?.name ?? ''}
         fileUrl={preview?.url ?? ''}
         fileId={preview?.id ?? ''}
+      />
+      <VideoPreview
+        open={!!preview && isVideoFileName(preview.name)}
+        onClose={() => setPreview(null)}
+        fileName={preview?.name ?? ''}
+        fileUrl={preview?.url ?? ''}
+        fileId={preview?.id}
+      />
+      <TextPreview
+        open={!!preview && isTextCodeFileName(preview.name)}
+        onClose={() => setPreview(null)}
+        fileName={preview?.name ?? ''}
+        fileUrl={preview?.url ?? ''}
+        fileId={preview?.id}
       />
     </>
   );

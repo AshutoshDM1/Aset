@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { FileIcon, Folder, ImageIcon, FileText } from 'lucide-react';
+import { FileIcon, Folder, ImageIcon, FileText, Video } from 'lucide-react';
 import { Document, Page } from 'react-pdf';
 import {
   Table,
@@ -9,13 +9,20 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { formatFileSize, isImageFileName } from '@/utils/file/file-utils';
+import {
+  formatFileSize,
+  isImageFileName,
+  isPdfFileName,
+  isVideoFileName,
+  isTextCodeFileName,
+} from '@/utils/file/file-utils';
 import { Link } from 'react-router';
 import { useState } from 'react';
 import { ItemRowActions } from './ItemRowActions';
 import { ImagePreviewDialog } from './ImagePreviewDialog';
 import { PdfPreviewDialog } from './PdfPreviewDialog';
-import { isPdfFileName } from '@/utils/file/file-utils';
+import { VideoPreview } from '@/components/videoPreview';
+import { TextPreview } from '@/components/textPreview';
 
 export type UnifiedItem = {
   id: string;
@@ -38,7 +45,12 @@ export function UnifiedTable({ items, onRefetch }: UnifiedTableProps) {
 
   const handleFileClick = (item: UnifiedItem) => {
     if (item.type === 'file' && item.url) {
-      if (isImageFileName(item.name) || isPdfFileName(item.name)) {
+      if (
+        isImageFileName(item.name) ||
+        isPdfFileName(item.name) ||
+        isVideoFileName(item.name) ||
+        isTextCodeFileName(item.name)
+      ) {
         setPreview(item);
       }
     }
@@ -103,6 +115,18 @@ export function UnifiedTable({ items, onRefetch }: UnifiedTableProps) {
                           </Document>
                         ) : isPdfFileName(item.name) ? (
                           <FileText className="size-5 text-red-500" />
+                        ) : isVideoFileName(item.name) && item.url ? (
+                          <video
+                            src={`${item.url}#t=0.1`}
+                            preload="metadata"
+                            muted
+                            playsInline
+                            className="size-full object-cover"
+                          />
+                        ) : isVideoFileName(item.name) ? (
+                          <Video className="size-5 text-indigo-500" />
+                        ) : isTextCodeFileName(item.name) ? (
+                          <FileText className="size-5 text-amber-500" />
                         ) : (
                           <FileIcon className="size-5" />
                         )}
@@ -150,6 +174,7 @@ export function UnifiedTable({ items, onRefetch }: UnifiedTableProps) {
         createdAt={preview?.createdAt}
         starred={preview?.starred}
         trashed={preview?.trashed}
+        onRefetch={onRefetch}
       />
       <PdfPreviewDialog
         open={!!preview && isPdfFileName(preview.name)}
@@ -157,6 +182,20 @@ export function UnifiedTable({ items, onRefetch }: UnifiedTableProps) {
         fileName={preview?.name || ''}
         fileUrl={preview?.url || ''}
         fileId={preview?.id || ''}
+      />
+      <VideoPreview
+        open={!!preview && isVideoFileName(preview.name)}
+        onClose={() => setPreview(null)}
+        fileName={preview?.name ?? ''}
+        fileUrl={preview?.url ?? ''}
+        fileId={preview?.id}
+      />
+      <TextPreview
+        open={!!preview && isTextCodeFileName(preview.name)}
+        onClose={() => setPreview(null)}
+        fileName={preview?.name ?? ''}
+        fileUrl={preview?.url ?? ''}
+        fileId={preview?.id}
       />
     </>
   );

@@ -7,9 +7,16 @@ import {
   UnifiedTable,
   type UnifiedItem,
 } from '@/shared/Dashboard/UnifiedTable';
-import { isImageFileName, isPdfFileName } from '@/utils/file/file-utils';
+import {
+  isImageFileName,
+  isPdfFileName,
+  isVideoFileName,
+  isTextCodeFileName,
+} from '@/utils/file/file-utils';
 import { OtherFileTile } from '@/shared/Dashboard/OtherFileTile';
 import PdfFilePreview from '@/shared/Dashboard/PdfFilePreview';
+import VideoFilePreview from '@/shared/Dashboard/VideoFilePreview';
+import TextFilePreview from '@/shared/Dashboard/TextFilePreview';
 
 const COLOR_CYCLE: FolderColor[] = ['cyan', 'yellow', 'pink', 'black'];
 
@@ -47,8 +54,14 @@ export function FolderContents({
   const { viewMode } = useViewMode();
   const imageFiles = files.filter((f) => isImageFileName(f.name));
   const pdfFiles = files.filter((f) => isPdfFileName(f.name));
+  const videoFiles = files.filter((f) => isVideoFileName(f.name));
+  const textFiles = files.filter((f) => isTextCodeFileName(f.name));
   const otherFiles = files.filter(
-    (f) => !isImageFileName(f.name) && !isPdfFileName(f.name),
+    (f) =>
+      !isImageFileName(f.name) &&
+      !isPdfFileName(f.name) &&
+      !isVideoFileName(f.name) &&
+      !isTextCodeFileName(f.name),
   );
 
   if (folders.length === 0 && files.length === 0) {
@@ -68,7 +81,7 @@ export function FolderContents({
   }
 
   return (
-    <ul className="grid gap-4 grid-cols-3 md:grid-cols-4 lg:grid-cols-10">
+    <ul className="flex gap-5">
       {folders.map((item, index) => (
         <li key={`f-${item.id}`}>
           <FolderComponent
@@ -96,6 +109,30 @@ export function FolderContents({
       {pdfFiles.map((item) => (
         <li key={`file-${item.id}`} className="flex items-start justify-center">
           <PdfFilePreview
+            fileId={item.id}
+            name={item.name}
+            url={item.url}
+            starred={item.starred}
+            trashed={item.trashed}
+            onRefetch={onRefetch}
+          />
+        </li>
+      ))}
+      {videoFiles.map((item) => (
+        <li key={`file-${item.id}`} className="flex items-start justify-center">
+          <VideoFilePreview
+            fileId={item.id}
+            name={item.name}
+            url={item.url}
+            starred={item.starred}
+            trashed={item.trashed}
+            onRefetch={onRefetch}
+          />
+        </li>
+      ))}
+      {textFiles.map((item) => (
+        <li key={`file-${item.id}`} className="flex items-start justify-center">
+          <TextFilePreview
             fileId={item.id}
             name={item.name}
             url={item.url}

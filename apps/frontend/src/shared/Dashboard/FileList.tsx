@@ -3,9 +3,16 @@ import { trpc } from '@/utils/trpc';
 import Loader from '@/shared/PageLoader/Loader';
 import ImageFilePreview from './ImageFilePreview';
 import PdfFilePreview from './PdfFilePreview';
+import VideoFilePreview from './VideoFilePreview';
+import TextFilePreview from './TextFilePreview';
 import { useViewMode } from '@/context/ViewModeContext';
 import { FileTable } from './FileTable';
-import { isImageFileName, isPdfFileName } from '@/utils/file/file-utils';
+import {
+  isImageFileName,
+  isPdfFileName,
+  isVideoFileName,
+  isTextCodeFileName,
+} from '@/utils/file/file-utils';
 import { OtherFileTile } from './OtherFileTile';
 
 export type FileListMode = 'recent' | 'starred' | 'trash';
@@ -82,7 +89,7 @@ export function FileList({ mode = 'recent' }: FileListProps) {
   }
 
   return (
-    <ul className="grid gap-4 grid-cols-3 md:grid-cols-4 lg:grid-cols-10">
+    <ul className="flex gap-5">
       {files.map((file) => (
         <li key={file.id} className="flex items-start justify-center">
           {isImageFileName(file.name) ? (
@@ -98,6 +105,28 @@ export function FileList({ mode = 'recent' }: FileListProps) {
             />
           ) : isPdfFileName(file.name) ? (
             <PdfFilePreview
+              fileId={file.id}
+              name={file.name}
+              url={file.url}
+              starred={file.starred}
+              trashed={file.trashed}
+              onRefetch={refetch}
+              createdAt={file.createdAt}
+              sizeMb={file.sizeMb}
+            />
+          ) : isVideoFileName(file.name) ? (
+            <VideoFilePreview
+              fileId={file.id}
+              name={file.name}
+              url={file.url}
+              starred={file.starred}
+              trashed={file.trashed}
+              onRefetch={refetch}
+              createdAt={file.createdAt}
+              sizeMb={file.sizeMb}
+            />
+          ) : isTextCodeFileName(file.name) ? (
+            <TextFilePreview
               fileId={file.id}
               name={file.name}
               url={file.url}

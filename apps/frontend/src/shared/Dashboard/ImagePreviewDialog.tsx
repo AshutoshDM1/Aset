@@ -30,6 +30,7 @@ type ImagePreviewDialogProps = {
   createdAt?: Date | string;
   starred?: boolean;
   trashed?: boolean;
+  onRefetch?: () => void;
 };
 
 export function ImagePreviewDialog({
@@ -42,6 +43,7 @@ export function ImagePreviewDialog({
   createdAt,
   starred,
   trashed,
+  onRefetch,
 }: ImagePreviewDialogProps) {
   const [scale, setScale] = useState(1);
   const [rotate, setRotate] = useState(0);
@@ -180,8 +182,8 @@ export function ImagePreviewDialog({
           className={cn(
             'flex flex-col gap-4 overflow-hidden p-6 transition-all duration-300',
             isFullscreen
-              ? '!fixed !inset-0 !z-50 !w-screen !h-screen !max-w-none !max-h-none !p-0 !rounded-none !border-none !translate-x-0 !translate-y-0 !top-0 !left-0 flex flex-col gap-0 bg-black'
-              : 'w-full max-w-[calc(100vw-2rem)] sm:max-w-[calc(100vw-2rem)] md:max-w-[80vw] lg:max-w-[64rem] max-h-[calc(100dvh-2rem)] rounded-2xl h-[85dvh]',
+              ? 'fixed! inset-0! z-50! w-screen! h-screen! max-w-none! max-h-none! p-0! rounded-none! border-none! translate-x-0! translate-y-0! top-0! left-0 flex flex-col gap-0 bg-black'
+              : 'w-full max-w-[calc(100vw-2rem)] sm:max-w-[calc(100vw-2rem)] md:max-w-[80vw] lg:max-w-5xl max-h-[calc(100dvh-2rem)] rounded-2xl h-[85dvh]',
           )}
           style={
             isFullscreen
@@ -421,6 +423,7 @@ export function ImagePreviewDialog({
           starred={starred}
           trashed={trashed}
           url={imageUrl}
+          onRefetch={onRefetch}
         />
       )}
     </>

@@ -13,7 +13,7 @@ export function PdfVerticalView({
   rotate,
 }: PdfVerticalViewProps) {
   return (
-    <div className="flex flex-col gap-6 items-center w-full py-4 pb-60">
+    <div className="flex flex-col gap-6 items-center w-full py-4 pb-60 ">
       {Array.from({ length: numPages || 0 }, (_, index) => (
         <div
           key={index}

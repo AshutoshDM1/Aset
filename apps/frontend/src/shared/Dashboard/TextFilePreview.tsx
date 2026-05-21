@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { FileText } from 'lucide-react';
-import { Document, Page } from 'react-pdf';
-import { PdfPreviewDialog } from './PdfPreviewDialog';
+import { TextPreview } from '@/components/textPreview';
 import { ItemGridActions } from './ItemGridActions';
 
-type PdfFilePreviewProps = {
+type TextFilePreviewProps = {
   fileId: string;
   name: string;
   url: string;
@@ -15,7 +14,7 @@ type PdfFilePreviewProps = {
   sizeMb?: number;
 };
 
-const PdfFilePreview = ({
+const TextFilePreview = ({
   fileId,
   name,
   url,
@@ -24,9 +23,8 @@ const PdfFilePreview = ({
   onRefetch,
   createdAt,
   sizeMb,
-}: PdfFilePreviewProps) => {
+}: TextFilePreviewProps) => {
   const [open, setOpen] = useState(false);
-  const [thumbnailErrored, setThumbnailErrored] = useState(false);
 
   const dot = name.lastIndexOf('.');
   const base = dot > 0 ? name.slice(0, dot) : name;
@@ -49,30 +47,12 @@ const PdfFilePreview = ({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          aria-label={`Preview ${name}`}
+          aria-label={`Preview text file ${name}`}
           title={name}
           className="flex flex-col items-center rounded-2xl p-2 transition-transform duration-200 group-hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer"
         >
-          <div className="flex size-20 items-center justify-center overflow-hidden rounded-2xl bg-muted/40 ring-1 ring-border/60">
-            {url && !thumbnailErrored ? (
-              <Document
-                file={url}
-                onLoadError={() => setThumbnailErrored(true)}
-                loading={
-                  <FileText className="size-8 text-red-500/50 animate-pulse" />
-                }
-              >
-                <Page
-                  pageNumber={1}
-                  width={80}
-                  renderTextLayer={false}
-                  renderAnnotationLayer={false}
-                  loading={null}
-                />
-              </Document>
-            ) : (
-              <FileText className="size-8 text-red-500" aria-hidden />
-            )}
+          <div className="flex size-20 items-center justify-center overflow-hidden rounded-2xl bg-muted/40 ring-1 ring-border/60 relative">
+            <FileText className="size-8 text-amber-500" aria-hidden />
           </div>
           <p className="text-sm text-foreground text-center w-20">
             <span className="truncate inline-block align-bottom max-w-12.5">
@@ -83,9 +63,10 @@ const PdfFilePreview = ({
           </p>
         </button>
       </div>
-      <PdfPreviewDialog
+
+      <TextPreview
         open={open}
-        onOpenChange={setOpen}
+        onClose={() => setOpen(false)}
         fileName={name}
         fileUrl={url}
         fileId={fileId}
@@ -94,4 +75,4 @@ const PdfFilePreview = ({
   );
 };
 
-export default PdfFilePreview;
+export default TextFilePreview;

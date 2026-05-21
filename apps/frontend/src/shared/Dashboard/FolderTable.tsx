@@ -39,7 +39,7 @@ export function FolderTable({
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead className="w-[300px]">Name</TableHead>
+            <TableHead className="w-75">Name</TableHead>
             {!isOwner && <TableHead>Shared By</TableHead>}
             <TableHead>Size</TableHead>
             <TableHead>Created At</TableHead>

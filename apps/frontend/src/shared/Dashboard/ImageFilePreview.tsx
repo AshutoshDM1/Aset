@@ -84,6 +84,7 @@ const ImageFilePreview = ({
         createdAt={createdAt}
         starred={starred}
         trashed={trashed}
+        onRefetch={onRefetch}
       />
     </>
   );

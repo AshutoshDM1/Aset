@@ -61,6 +61,8 @@ export const fileRouter = router({
           createdAt: true,
           s3Url: true,
           sizeMb: true,
+          starred: true,
+          trashed: true,
         },
       });
       return rows.map((f) => ({
@@ -68,6 +70,8 @@ export const fileRouter = router({
         name: f.name,
         createdAt: f.createdAt,
         sizeMb: f.sizeMb,
+        starred: f.starred,
+        trashed: f.trashed,
         url: resolvePublicFileUrl(f.s3Url),
       }));
     }),

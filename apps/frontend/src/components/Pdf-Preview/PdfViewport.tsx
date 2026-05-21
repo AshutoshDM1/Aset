@@ -212,7 +212,7 @@ export function PdfViewport({ state, fileUrl }: PdfViewportProps) {
     <div
       ref={containerCallbackRef}
       className={cn(
-        'flex-1 min-h-0 w-full flex relative group/viewport select-none rounded-2xl bg-black/5 dark:bg-black/20 border border-border/60',
+        'flex-1 min-h-0 w-full flex relative group/viewport select-none rounded-2xl bg-black/5 dark:bg-black/20 border border-border/60 custom-scrollbar',
         isFullscreen && 'bg-black w-screen h-screen border-none rounded-none',
         viewMode === 'vertical'
           ? 'overflow-y-auto p-4 flex-col '
@@ -257,7 +257,7 @@ export function PdfViewport({ state, fileUrl }: PdfViewportProps) {
       )}
 
       {/* Interactive zoom badge */}
-      <span className="absolute bottom-4 right-4 px-2.5 py-1 rounded bg-black/60 text-white text-[11px] font-mono pointer-events-none opacity-0 group-hover/viewport:opacity-100 transition-opacity z-10">
+      <span className="fixed bottom-4 right-4 px-2.5 py-1 rounded bg-black/60 text-white text-[11px] font-mono pointer-events-none opacity-0 group-hover/viewport:opacity-100 transition-opacity z-10">
         {Math.round(scale * 100)}%
       </span>
     </div>

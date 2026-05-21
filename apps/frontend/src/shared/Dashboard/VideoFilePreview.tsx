@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { FileText } from 'lucide-react';
-import { Document, Page } from 'react-pdf';
-import { PdfPreviewDialog } from './PdfPreviewDialog';
+import { Video, Play } from 'lucide-react';
+import { VideoPreview } from '@/components/videoPreview';
 import { ItemGridActions } from './ItemGridActions';
+import { motion } from 'motion/react';
 
-type PdfFilePreviewProps = {
+type VideoFilePreviewProps = {
   fileId: string;
   name: string;
   url: string;
@@ -15,7 +15,7 @@ type PdfFilePreviewProps = {
   sizeMb?: number;
 };
 
-const PdfFilePreview = ({
+const VideoFilePreview = ({
   fileId,
   name,
   url,
@@ -24,7 +24,7 @@ const PdfFilePreview = ({
   onRefetch,
   createdAt,
   sizeMb,
-}: PdfFilePreviewProps) => {
+}: VideoFilePreviewProps) => {
   const [open, setOpen] = useState(false);
   const [thumbnailErrored, setThumbnailErrored] = useState(false);
 
@@ -49,29 +49,33 @@ const PdfFilePreview = ({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          aria-label={`Preview ${name}`}
+          aria-label={`Preview video ${name}`}
           title={name}
           className="flex flex-col items-center rounded-2xl p-2 transition-transform duration-200 group-hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer"
         >
-          <div className="flex size-20 items-center justify-center overflow-hidden rounded-2xl bg-muted/40 ring-1 ring-border/60">
+          <div className="flex size-20 items-center justify-center overflow-hidden rounded-2xl bg-muted/40 ring-1 ring-border/60 relative">
             {url && !thumbnailErrored ? (
-              <Document
-                file={url}
-                onLoadError={() => setThumbnailErrored(true)}
-                loading={
-                  <FileText className="size-8 text-red-500/50 animate-pulse" />
-                }
-              >
-                <Page
-                  pageNumber={1}
-                  width={80}
-                  renderTextLayer={false}
-                  renderAnnotationLayer={false}
-                  loading={null}
+              <>
+                <video
+                  src={`${url}#t=0.1`}
+                  preload="metadata"
+                  muted
+                  playsInline
+                  className="size-full object-cover opacity-80 group-hover:opacity-100 transition-opacity pointer-events-none"
+                  onError={() => setThumbnailErrored(true)}
                 />
-              </Document>
+                {/* Immersive Play overlay on card hover */}
+                <div className="absolute inset-0 bg-black/25 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <motion.div
+                    initial={{ scale: 1 }}
+                    className="size-9 rounded-full bg-white/20 backdrop-blur-xs border border-white/30 flex items-center justify-center text-white"
+                  >
+                    <Play className="size-3.5 fill-current translate-x-0.5" />
+                  </motion.div>
+                </div>
+              </>
             ) : (
-              <FileText className="size-8 text-red-500" aria-hidden />
+              <Video className="size-8 text-indigo-500" aria-hidden />
             )}
           </div>
           <p className="text-sm text-foreground text-center w-20">
@@ -83,9 +87,10 @@ const PdfFilePreview = ({
           </p>
         </button>
       </div>
-      <PdfPreviewDialog
+
+      <VideoPreview
         open={open}
-        onOpenChange={setOpen}
+        onClose={() => setOpen(false)}
         fileName={name}
         fileUrl={url}
         fileId={fileId}
@@ -94,4 +99,4 @@ const PdfFilePreview = ({
   );
 };
 
-export default PdfFilePreview;
+export default VideoFilePreview;

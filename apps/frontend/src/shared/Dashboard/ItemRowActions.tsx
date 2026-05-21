@@ -7,6 +7,7 @@ import {
   MoreHorizontal,
   Pencil,
   Info,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { trpc } from '@/utils/trpc';
@@ -129,10 +130,24 @@ export function ItemRowActions({
     },
   });
 
+  const isStarPending =
+    type === 'folder'
+      ? folderStarMutation.isPending
+      : fileStarMutation.isPending;
+  const isTrashPending =
+    type === 'folder'
+      ? folderTrashMutation.isPending
+      : fileTrashMutation.isPending;
+  const isDeletePending =
+    type === 'folder'
+      ? folderDeletePermanentlyMutation.isPending
+      : fileDeletePermanentlyMutation.isPending;
+  const isAnyPending = isStarPending || isTrashPending || isDeletePending;
+
   const { download } = useFileDownload();
 
-  const handleStar = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleStar = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     if (type === 'folder') {
       folderStarMutation.mutate({ id, starred: !starred });
     } else {
@@ -140,8 +155,8 @@ export function ItemRowActions({
     }
   };
 
-  const handleTrash = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleTrash = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     if (type === 'folder') {
       folderTrashMutation.mutate({ id, trashed: !trashed });
     } else {
@@ -149,13 +164,8 @@ export function ItemRowActions({
     }
   };
 
-  const handleDownload = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    await download(id, name, url);
-  };
-
-  const handleDeletePermanently = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleDeletePermanently = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     setIsDeleteConfirmOpen(true);
   };
 
@@ -176,6 +186,7 @@ export function ItemRowActions({
           <Button
             variant="ghost"
             size="icon"
+            disabled={isStarPending}
             className={
               starred
                 ? 'text-yellow-400 hover:text-yellow-500 hover:bg-yellow-400/10 animate-in fade-in duration-200'
@@ -184,7 +195,11 @@ export function ItemRowActions({
             onClick={handleStar}
             title={starred ? 'Unstar' : 'Star'}
           >
-            <Star className={starred ? 'fill-current size-4' : 'size-4'} />
+            {isStarPending ? (
+              <Loader2 className="size-4 animate-spin text-primary" />
+            ) : (
+              <Star className={starred ? 'fill-current size-4' : 'size-4'} />
+            )}
           </Button>
         )}
 
@@ -193,11 +208,14 @@ export function ItemRowActions({
             <Button
               variant="ghost"
               size="icon"
+              disabled={isTrashPending}
               className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
               onClick={handleTrash}
               title={trashed ? 'Restore' : 'Move to Trash'}
             >
-              {trashed ? (
+              {isTrashPending ? (
+                <Loader2 className="size-4 animate-spin text-primary" />
+              ) : trashed ? (
                 <RotateCcw className="size-4" />
               ) : (
                 <Trash2 className="size-4" />
@@ -207,11 +225,16 @@ export function ItemRowActions({
               <Button
                 variant="ghost"
                 size="icon"
+                disabled={isDeletePending}
                 className="text-destructive hover:bg-destructive/10 transition-colors"
                 onClick={handleDeletePermanently}
                 title="Delete Permanently"
               >
-                <Trash2 className="size-4" />
+                {isDeletePending ? (
+                  <Loader2 className="size-4 animate-spin text-primary" />
+                ) : (
+                  <Trash2 className="size-4" />
+                )}
               </Button>
             )}
           </>
@@ -222,7 +245,10 @@ export function ItemRowActions({
             variant="ghost"
             size="icon"
             className="text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
-            onClick={handleDownload}
+            onClick={async (e) => {
+              e.stopPropagation();
+              await download(id, name, url);
+            }}
             title="Download"
           >
             <Download className="size-4" />
@@ -235,19 +261,26 @@ export function ItemRowActions({
               <Button
                 variant="ghost"
                 size="icon"
+                disabled={isAnyPending}
                 className="text-muted-foreground hover:bg-muted"
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
               >
-                <MoreHorizontal className="size-4" />
+                {isAnyPending ? (
+                  <Loader2 className="size-4 animate-spin text-primary" />
+                ) : (
+                  <MoreHorizontal className="size-4" />
+                )}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-44">
               <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsDetailsOpen(true);
+                onSelect={(e) => {
+                  e.preventDefault();
+                  setTimeout(() => {
+                    setIsDetailsOpen(true);
+                  }, 100);
                 }}
               >
                 <Info className="size-3.5 mr-2" />
@@ -256,9 +289,11 @@ export function ItemRowActions({
 
               {isOwner && (
                 <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsRenameOpen(true);
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    setTimeout(() => {
+                      setIsRenameOpen(true);
+                    }, 100);
                   }}
                 >
                   <Pencil className="size-3.5 mr-2" />
@@ -267,9 +302,11 @@ export function ItemRowActions({
               )}
               {type === 'folder' && isOwner && (
                 <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsShareOpen(true);
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    setTimeout(() => {
+                      setIsShareOpen(true);
+                    }, 100);
                   }}
                 >
                   <Share2 className="size-3.5 mr-2" />
@@ -277,28 +314,42 @@ export function ItemRowActions({
                 </DropdownMenuItem>
               )}
               {!trashed && (type === 'file' || isOwner) && (
-                <DropdownMenuItem onClick={handleStar}>
-                  <Star
-                    className={cn(
-                      'size-3.5 mr-2',
-                      starred && 'fill-current text-yellow-400',
-                    )}
-                  />
+                <DropdownMenuItem
+                  disabled={isStarPending}
+                  onSelect={() => handleStar()}
+                >
+                  {isStarPending ? (
+                    <Loader2 className="size-3.5 mr-2 animate-spin text-primary" />
+                  ) : (
+                    <Star
+                      className={cn(
+                        'size-3.5 mr-2',
+                        starred && 'fill-current text-yellow-400',
+                      )}
+                    />
+                  )}
                   {starred ? 'Unstar' : 'Star'}
                 </DropdownMenuItem>
               )}
               {type === 'file' && url && !trashed && (
-                <DropdownMenuItem onClick={handleDownload}>
+                <DropdownMenuItem
+                  onSelect={() => {
+                    void download(id, name, url);
+                  }}
+                >
                   <Download className="size-3.5 mr-2" />
                   Download
                 </DropdownMenuItem>
               )}
               {isOwner && (
                 <DropdownMenuItem
-                  onClick={handleTrash}
+                  disabled={isTrashPending}
+                  onSelect={() => handleTrash()}
                   className={cn(!trashed && 'text-destructive')}
                 >
-                  {trashed ? (
+                  {isTrashPending ? (
+                    <Loader2 className="size-3.5 mr-2 animate-spin text-primary" />
+                  ) : trashed ? (
                     <>
                       <RotateCcw className="size-3.5 mr-2" />
                       Restore
@@ -313,10 +364,20 @@ export function ItemRowActions({
               )}
               {isOwner && trashed && (
                 <DropdownMenuItem
-                  onClick={handleDeletePermanently}
+                  disabled={isDeletePending}
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    setTimeout(() => {
+                      setIsDeleteConfirmOpen(true);
+                    }, 100);
+                  }}
                   className="text-destructive font-medium"
                 >
-                  <Trash2 className="size-3.5 mr-2" />
+                  {isDeletePending ? (
+                    <Loader2 className="size-3.5 mr-2 animate-spin text-primary" />
+                  ) : (
+                    <Trash2 className="size-3.5 mr-2" />
+                  )}
                   Delete Permanently
                 </DropdownMenuItem>
               )}
@@ -366,6 +427,7 @@ export function ItemRowActions({
         starred={starred}
         trashed={trashed}
         url={url}
+        onRefetch={onRefetch}
       />
     </>
   );
