@@ -14,6 +14,8 @@ import type { PdfPreviewDialogProps, PdfState, PdfViewMode } from './types';
 import { PdfToolbar } from './PdfToolbar';
 import { PdfFloatingToolbar } from './PdfFloatingToolbar';
 import { PdfViewport } from './PdfViewport';
+import { useIsMobile } from '@/hooks/isMobile';
+import { useFileDownload } from '@/hooks/useFileDownload';
 import {
   Select,
   SelectContent,
@@ -21,14 +23,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { toast } from 'sonner';
 
 export function PdfPreviewDialog({
   open,
   onOpenChange,
   fileName,
   fileUrl,
+  fileId,
 }: PdfPreviewDialogProps) {
-  const [scale, setScale] = useState<number>(0.8);
+  const isMobile = useIsMobile();
+  const defaultScale = isMobile ? 0.25 : 0.45;
+  const { download, isDownloading } = useFileDownload();
+
+  const [scale, setScale] = useState<number>(defaultScale);
   const [rotate, setRotate] = useState<number>(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [pageNumber, setPageNumber] = useState<number>(1);
@@ -36,12 +44,20 @@ export function PdfPreviewDialog({
   const [viewMode, setViewMode] = useState<PdfViewMode>('single');
   const [showControls, setShowControls] = useState<boolean>(true);
 
+  const handleDownload = () => {
+    if (fileId) {
+      download(fileId, fileName, fileUrl);
+    } else {
+      toast.error('Please provide a fileId for download');
+    }
+  };
+
   // Drag coordinates managed as high-performance MotionValues
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
   const handleReset = () => {
-    setScale(0.8);
+    setScale(defaultScale);
     setRotate(0);
     x.set(0);
     y.set(0);
@@ -56,11 +72,11 @@ export function PdfPreviewDialog({
 
   // Reset coordinates if scale/rotate is reset
   useEffect(() => {
-    if (scale === 0.8 && rotate === 0) {
+    if (scale === defaultScale && rotate === 0) {
       x.set(0);
       y.set(0);
     }
-  }, [scale, rotate, x, y]);
+  }, [scale, rotate, defaultScale, x, y]);
 
   // Reset view on dialog state change
   useEffect(() => {
@@ -69,8 +85,9 @@ export function PdfPreviewDialog({
     } else {
       setPageNumber(1);
       setShowControls(true);
+      setScale(defaultScale);
     }
-  }, [open]);
+  }, [open, defaultScale]);
 
   // Reset controls visibility when leaving fullscreen
   useEffect(() => {
@@ -98,6 +115,8 @@ export function PdfPreviewDialog({
     x,
     y,
     handleReset,
+    handleDownload,
+    isDownloading,
   };
 
   const previousPage = () => {
@@ -203,13 +222,13 @@ export function PdfPreviewDialog({
             >
               <SelectTrigger
                 size="sm"
-                className="h-8 min-w-[120px] text-xs font-semibold rounded-lg bg-background border-border/40 px-3 py-1 gap-1 shadow-xs"
+                className="h-8 min-w-30 text-xs font-semibold rounded-lg bg-background border-border/40 px-3 py-1 gap-1 shadow-xs"
               >
                 <SelectValue placeholder="Page" />
               </SelectTrigger>
               <SelectContent
                 position="popper"
-                className="z-150 rounded-xl max-h-[250px]"
+                className="z-150 rounded-xl max-h-62.5"
               >
                 {Array.from(new Array(numPages), (_, i) => {
                   const pNum = i + 1;

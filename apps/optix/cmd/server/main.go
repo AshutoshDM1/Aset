@@ -1,15 +1,24 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"optix/handlers"
+
+	"os"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "5001"
+	}
+
 	app := gin.Default()
+	app.SetTrustedProxies(nil) // Trust no external proxy headers
 
 	app.GET("/", handlers.Hello)
 	app.POST("/compress", handlers.CompressImage)
 
-	app.Run(":5001")
+	app.Run(":" + port)
 }

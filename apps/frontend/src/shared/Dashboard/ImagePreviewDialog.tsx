@@ -275,7 +275,7 @@ export function ImagePreviewDialog({
                     onClick={() => setIsDetailsOpen(true)}
                   >
                     <Info className="size-3.5" />
-                    <span>View Details</span>
+                    {/* <span>View Details</span> */}
                   </Button>
                 )}
                 <Button
@@ -392,7 +392,7 @@ export function ImagePreviewDialog({
                   onClick={() => setIsDetailsOpen(true)}
                 >
                   <Info className="size-4" />
-                  <span>Details</span>
+                  {/* <span>Details</span> */}
                 </Button>
               )}
               <Button

@@ -7,6 +7,7 @@ export interface PdfPreviewDialogProps {
   onOpenChange: (open: boolean) => void;
   fileName: string;
   fileUrl: string;
+  fileId?: string;
 }
 
 export interface PdfState {
@@ -27,4 +28,6 @@ export interface PdfState {
   x: MotionValue<number>;
   y: MotionValue<number>;
   handleReset: () => void;
+  handleDownload: () => void;
+  isDownloading: boolean;
 }

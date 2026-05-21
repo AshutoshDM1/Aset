@@ -141,6 +141,7 @@ export function FileTable({ files, onRefetch }: FileTableProps) {
         onOpenChange={(open) => !open && setPreview(null)}
         fileName={preview?.name ?? ''}
         fileUrl={preview?.url ?? ''}
+        fileId={preview?.id ?? ''}
       />
     </>
   );

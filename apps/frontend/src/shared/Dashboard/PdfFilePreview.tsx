@@ -88,6 +88,7 @@ const PdfFilePreview = ({
         onOpenChange={setOpen}
         fileName={name}
         fileUrl={url}
+        fileId={fileId}
       />
     </>
   );

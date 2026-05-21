@@ -16,7 +16,7 @@ interface PdfToolbarProps {
   fileUrl: string;
 }
 
-export function PdfToolbar({ state, fileName, fileUrl }: PdfToolbarProps) {
+export function PdfToolbar({ state }: PdfToolbarProps) {
   const {
     scale,
     setScale,
@@ -28,21 +28,13 @@ export function PdfToolbar({ state, fileName, fileUrl }: PdfToolbarProps) {
     x,
     y,
     handleReset,
+    handleDownload,
+    isDownloading,
   } = state;
 
   const handleZoomIn = () => setScale((s) => Math.min(s + 0.25, 4));
   const handleZoomOut = () => setScale((s) => Math.max(s - 0.25, 0.25));
   const handleRotate = () => setRotate((r) => (r + 90) % 360);
-
-  const handleDownload = () => {
-    if (!fileUrl) return;
-    const a = document.createElement('a');
-    a.href = fileUrl;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  };
 
   const hasModifications =
     scale !== 1 || rotate !== 0 || x.get() !== 0 || y.get() !== 0;
@@ -99,11 +91,16 @@ export function PdfToolbar({ state, fileName, fileUrl }: PdfToolbarProps) {
         <Button
           variant="secondary"
           size="icon"
-          className="size-8 rounded-lg shadow-xs"
+          className="size-8 rounded-lg shadow-xs disabled:opacity-50"
           onClick={handleDownload}
-          title="Download PDF"
+          disabled={isDownloading}
+          title={isDownloading ? 'Downloading...' : 'Download PDF'}
         >
-          <Download className="size-4" />
+          {isDownloading ? (
+            <div className="size-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
+          ) : (
+            <Download className="size-4" />
+          )}
         </Button>
 
         <Button

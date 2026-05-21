@@ -5,8 +5,11 @@ interface PdfPreviewDialogProps {
   onOpenChange: (open: boolean) => void;
   fileName: string;
   fileUrl: string;
+  fileId: string;
 }
 
 export function PdfPreviewDialog(props: PdfPreviewDialogProps) {
+  console.log('fileId', props.fileId);
+  // console.log('PdfPreviewDialog Wrapper props:', props);
   return <ModularPdfPreviewDialog {...props} />;
 }

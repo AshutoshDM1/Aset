@@ -44,13 +44,15 @@ export function UnifiedTable({ items, onRefetch }: UnifiedTableProps) {
     }
   };
 
+  console.log(preview);
+
   return (
     <>
       <div className="rounded-md border border-border bg-background">
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
-              <TableHead className="w-[400px]">Name</TableHead>
+              <TableHead className="w-100">Name</TableHead>
               <TableHead>Size</TableHead>
               <TableHead>Created At</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -152,8 +154,9 @@ export function UnifiedTable({ items, onRefetch }: UnifiedTableProps) {
       <PdfPreviewDialog
         open={!!preview && isPdfFileName(preview.name)}
         onOpenChange={(open) => !open && setPreview(null)}
-        fileName={preview?.name ?? ''}
-        fileUrl={preview?.url ?? ''}
+        fileName={preview?.name || ''}
+        fileUrl={preview?.url || ''}
+        fileId={preview?.id || ''}
       />
     </>
   );

@@ -267,11 +267,9 @@ export function ShareDialog({
 
             {/* Owner Identity Settings */}
             <div className="rounded-xl border border-border/80 bg-muted/20 p-4 space-y-3">
-              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Identity privacy
-              </h4>
+              <h4 className="text-sm font-semibold ">Identity privacy</h4>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-foreground">
+                <div className="flex items-center gap-2 text-xs text-foreground">
                   <User className="size-4 text-muted-foreground" />
                   Show my name to other people
                 </div>
@@ -283,7 +281,7 @@ export function ShareDialog({
                 />
               </div>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-foreground">
+                <div className="flex items-center gap-2 text-xs text-foreground">
                   <Mail className="size-4 text-muted-foreground" />
                   Show my email to other people
                 </div>
@@ -298,9 +296,7 @@ export function ShareDialog({
 
             {/* Specific User Invite Form */}
             <form onSubmit={handleAddShare} className="space-y-3">
-              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Invite people
-              </h4>
+              <h4 className="text-sm font-semibold">Invite people</h4>
               <div className="flex gap-2">
                 <Input
                   type="email"
@@ -325,11 +321,9 @@ export function ShareDialog({
 
             {/* List of Shares */}
             <div className="space-y-2">
-              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                People with access
-              </h4>
+              <h4 className="text-sm font-semibold">People with access</h4>
               {settings.shares.length === 0 ? (
-                <p className="text-xs text-muted-foreground italic py-2">
+                <p className="text-xs text-muted-foreground py-2">
                   Not shared with anyone specifically yet.
                 </p>
               ) : (
