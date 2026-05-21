@@ -56,8 +56,6 @@ export function UnifiedTable({ items, onRefetch }: UnifiedTableProps) {
     }
   };
 
-  console.log(preview);
-
   return (
     <>
       <div className="rounded-md border border-border bg-background">

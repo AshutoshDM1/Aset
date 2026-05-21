@@ -9,7 +9,5 @@ interface PdfPreviewDialogProps {
 }
 
 export function PdfPreviewDialog(props: PdfPreviewDialogProps) {
-  console.log('fileId', props.fileId);
-  // console.log('PdfPreviewDialog Wrapper props:', props);
   return <ModularPdfPreviewDialog {...props} />;
 }

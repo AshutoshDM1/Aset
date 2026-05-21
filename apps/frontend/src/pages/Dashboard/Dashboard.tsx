@@ -10,7 +10,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-dvh bg-background flex flex-col lg:flex-row">
       <Sidebar className="hidden lg:flex fixed inset-y-0 left-0" />
-      <main className="flex-1 min-h-dvh min-w-0 lg:pl-[280px] pb-16 lg:pb-0">
+      <main className="flex-1 min-h-dvh min-w-0 lg:pl-70 pb-16 lg:pb-0">
         <div className="min-h-dvh flex flex-col">
           <DashboardNavbar />
           <div className="block sm:hidden text-sm px-4 pt-4">

@@ -89,6 +89,20 @@ model File {
   starred Boolean @default(false)
   trashed Boolean @default(false)
 
+  downloads FileDownload[]
+
   @@index([ownerId])
   @@index([folderId])
 }
+
+model FileDownload {
+  id           String   @id @default(uuid())
+  fileId       String
+  file         File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  userId       String
+  downloadedAt DateTime @default(now())
+
+  @@index([fileId])
+  @@index([userId])
+}
+

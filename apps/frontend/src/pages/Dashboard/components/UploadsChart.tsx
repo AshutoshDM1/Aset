@@ -7,7 +7,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart';
-import { uploadsMock } from './mockData';
+import type { UploadsPoint } from './mockData';
 
 const chartConfig = {
   uploads: {
@@ -20,9 +20,13 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function UploadsChart() {
+type UploadsChartProps = {
+  data: UploadsPoint[];
+};
+
+export function UploadsChart({ data }: UploadsChartProps) {
   return (
-    <div className="rounded-lg bg-background p-5 shadow-sm ring-1 ring-border/60">
+    <div className="h-full rounded-lg bg-background p-5 shadow-sm ring-1 ring-border/60">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold">Activity</h2>
@@ -32,8 +36,8 @@ export function UploadsChart() {
         </div>
       </div>
 
-      <ChartContainer config={chartConfig} className="mt-4 h-[260px] w-full">
-        <AreaChart data={uploadsMock} margin={{ left: 4, right: 8, top: 8 }}>
+      <ChartContainer config={chartConfig} className="mt-4 h-65 w-full">
+        <AreaChart data={data} margin={{ left: 4, right: 8, top: 8 }}>
           <defs>
             <linearGradient id="fillUploads" x1="0" y1="0" x2="0" y2="1">
               <stop

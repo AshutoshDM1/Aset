@@ -6,7 +6,7 @@ import {
   StarIcon,
 } from '@hugeicons/core-free-icons';
 import { StatCard } from './StatCard';
-import { statsMock } from './mockData';
+import type { StatItem } from './mockData';
 
 const iconById: Record<string, typeof File01Icon> = {
   files: File01Icon,
@@ -15,13 +15,17 @@ const iconById: Record<string, typeof File01Icon> = {
   starred: StarIcon,
 };
 
-export function StatsOverview() {
+type StatsOverviewProps = {
+  overview: StatItem[];
+};
+
+export function StatsOverview({ overview }: StatsOverviewProps) {
   return (
     <section
       aria-label="Overview stats"
       className="grid gap-4 grid-cols-2 xl:grid-cols-4"
     >
-      {statsMock.map((stat) => {
+      {overview.map((stat) => {
         const Icon = iconById[stat.id];
         return (
           <StatCard

@@ -1,3 +1,6 @@
+import { useQuery } from '@tanstack/react-query';
+import { trpc } from '@/utils/trpc';
+import Loader from '@/shared/PageLoader/Loader';
 import { StatsOverview } from './components/StatsOverview';
 import { StorageUsage } from './components/StorageUsage';
 import { UploadsChart } from './components/UploadsChart';
@@ -5,6 +8,14 @@ import { FileTypeBreakdown } from './components/FileTypeBreakdown';
 import { RecentActivity } from './components/RecentActivity';
 
 export default function DashboardStats() {
+  const { data, isLoading } = useQuery(
+    trpc.stats.getDashboardStats.queryOptions(),
+  );
+
+  if (isLoading || !data) {
+    return <Loader />;
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <header>
@@ -14,20 +25,24 @@ export default function DashboardStats() {
         </p>
       </header>
 
-      <StatsOverview />
+      <StatsOverview overview={data.overview} />
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <UploadsChart />
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 items-stretch">
+        <div className="lg:col-span-2 flex flex-col h-full">
+          <UploadsChart data={data.uploadsChart} />
         </div>
-        <FileTypeBreakdown />
+        <div className="flex flex-col h-full">
+          <FileTypeBreakdown data={data.fileTypes} />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <StorageUsage />
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 items-stretch">
+        <div className="lg:col-span-2 flex flex-col h-full">
+          <StorageUsage storage={data.storage} />
         </div>
-        <RecentActivity />
+        <div className="flex flex-col h-full">
+          <RecentActivity activities={data.activities} />
+        </div>
       </div>
     </div>
   );

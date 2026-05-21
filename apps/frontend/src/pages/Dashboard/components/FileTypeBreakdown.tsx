@@ -5,7 +5,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart';
-import { fileTypesMock } from './mockData';
+import type { FileTypePoint } from './mockData';
 
 const chartConfig = {
   count: {
@@ -14,11 +14,15 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function FileTypeBreakdown() {
-  const total = fileTypesMock.reduce((acc, f) => acc + f.count, 0);
+type FileTypeBreakdownProps = {
+  data: FileTypePoint[];
+};
+
+export function FileTypeBreakdown({ data }: FileTypeBreakdownProps) {
+  const total = data.reduce((acc, f) => acc + f.count, 0);
 
   return (
-    <div className="rounded-lg bg-background p-5 shadow-sm ring-1 ring-border/60">
+    <div className="h-full rounded-lg bg-background p-5 shadow-sm ring-1 ring-border/60">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold">By file type</h2>
@@ -29,7 +33,7 @@ export function FileTypeBreakdown() {
       </div>
 
       <ChartContainer config={chartConfig} className="mt-4 h-[260px] w-full">
-        <BarChart data={fileTypesMock} margin={{ left: 4, right: 8, top: 8 }}>
+        <BarChart data={data} margin={{ left: 4, right: 8, top: 8 }}>
           <CartesianGrid vertical={false} strokeDasharray="3 3" />
           <XAxis
             dataKey="type"

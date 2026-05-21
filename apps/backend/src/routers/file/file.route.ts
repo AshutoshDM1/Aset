@@ -405,6 +405,14 @@ export const fileRouter = router({
 
       const objectKey = extractObjectKey(file.s3Url);
       const downloadUrl = await presignGet(objectKey, file.name);
+
+      await ctx.db.fileDownload.create({
+        data: {
+          fileId: file.id,
+          userId: ctx.auth.userId,
+        },
+      });
+
       return { downloadUrl };
     }),
 
