@@ -26,7 +26,17 @@ jobs:
           port: ${{ secrets.SSH_PORT || '22' }}
           script_stop: true # Stop execution if any command fails
           script: |
+            # Load environment paths for non-interactive shells
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            export PNPM_HOME="$HOME/.local/share/pnpm"
+            export PATH="$PNPM_HOME:$PATH"
+
             echo "🚀 Starting Deployment..."
+            echo "🔍 Environment verification:"
+            echo "Node version: $(node -v 2>&1)"
+            echo "pnpm version: $(pnpm -v 2>&1)"
+            echo "PM2 version: $(pm2 -v 2>&1)"
 
             # Navigate to the project root
             cd ~/Aset
