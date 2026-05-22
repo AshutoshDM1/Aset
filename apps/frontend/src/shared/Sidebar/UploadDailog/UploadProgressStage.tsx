@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { FileIcon, CheckCircle2, AlertCircle } from 'lucide-react';
 
 export default function UploadProgressStage() {
-  const { files } = useUploadStore();
+  const { files, persistStructure } = useUploadStore();
 
   const successCount = files.filter((f) => f.status === 'success').length;
 
@@ -19,12 +19,20 @@ export default function UploadProgressStage() {
         </span>
       </div>
 
-      <div className="space-y-3.5 max-h-[300px] overflow-y-auto pr-1">
+      <div className="space-y-3.5 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
         {files.map((file) => {
           const isPending = file.status === 'idle';
           const isActive = file.status === 'uploading';
           const isSuccess = file.status === 'success';
           const isError = file.status === 'error';
+          const hasSubPath =
+            file.filepath &&
+            file.filepath.includes('/') &&
+            file.filepath.lastIndexOf('/') > 0;
+          const dirPath =
+            hasSubPath && file.filepath
+              ? file.filepath.substring(0, file.filepath.lastIndexOf('/'))
+              : '';
 
           return (
             <div
@@ -47,9 +55,16 @@ export default function UploadProgressStage() {
                       isPending && 'text-muted-foreground',
                     )}
                   />
-                  <span className="truncate text-foreground font-medium">
-                    {file.name}
-                  </span>
+                  <div className="flex flex-col truncate">
+                    <span className="truncate text-foreground font-medium">
+                      {file.name}
+                    </span>
+                    {persistStructure && dirPath && (
+                      <span className="text-[9px] text-muted-foreground truncate font-mono mt-0.5">
+                        {dirPath}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {isSuccess && (

@@ -7,6 +7,7 @@ export interface UploadFileState {
   progress: number;
   status: 'idle' | 'uploading' | 'success' | 'error';
   errorMsg?: string;
+  filepath?: string;
 }
 
 interface UploadStore {
@@ -15,6 +16,7 @@ interface UploadStore {
   folderId: string | null;
   files: UploadFileState[];
   isUploading: boolean;
+  persistStructure: boolean;
 
   openDialog: (initialFolderId?: string | null) => void;
   closeDialog: () => void;
@@ -29,6 +31,7 @@ interface UploadStore {
     errorMsg?: string,
   ) => void;
   setIsUploading: (isUploading: boolean) => void;
+  setPersistStructure: (persistStructure: boolean) => void;
   reset: () => void;
 }
 
@@ -38,6 +41,7 @@ export const useUploadStore = create<UploadStore>((set) => ({
   folderId: null,
   files: [],
   isUploading: false,
+  persistStructure: true,
 
   openDialog: (initialFolderId = null) =>
     set({ isOpen: true, isMinimized: false, folderId: initialFolderId }),
@@ -57,6 +61,7 @@ export const useUploadStore = create<UploadStore>((set) => ({
       ),
     })),
   setIsUploading: (isUploading) => set({ isUploading }),
+  setPersistStructure: (persistStructure) => set({ persistStructure }),
   reset: () =>
     set({
       isOpen: false,
@@ -64,6 +69,7 @@ export const useUploadStore = create<UploadStore>((set) => ({
       folderId: null,
       files: [],
       isUploading: false,
+      persistStructure: true,
     }),
 }));
 

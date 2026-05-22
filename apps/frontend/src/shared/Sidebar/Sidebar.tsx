@@ -11,7 +11,16 @@ import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import Logo from '@/shared/Navbar/Logo';
 import { trpc } from '@/utils/trpc';
-import { Clock3, Folder, Home, Plus, Star, Trash2, Users } from 'lucide-react';
+import {
+  ChevronDown,
+  Clock3,
+  Folder,
+  Home,
+  Plus,
+  Star,
+  Trash2,
+  Users,
+} from 'lucide-react';
 import * as React from 'react';
 import { Link, NavLink, useLocation } from 'react-router';
 import { useUploadStore } from '@/shared/Sidebar/UploadDailog/uploadStore';
@@ -171,6 +180,7 @@ export default function Sidebar({ className }: { className?: string }) {
   const { data: folders, isPending: foldersPending } = useQuery(
     trpc.folder.list.queryOptions({ parentId: null }),
   );
+  const [isFoldersCollapsed, setIsFoldersCollapsed] = React.useState(false);
   return (
     <aside
       className={cn(
@@ -187,7 +197,7 @@ export default function Sidebar({ className }: { className?: string }) {
         </Link>
         <div className="p-4">
           <Button
-            className="w-full py-5"
+            className="w-full py-5 cursor-pointer"
             size="lg"
             onClick={() => useUploadStore.getState().openDialog()}
           >
@@ -201,25 +211,43 @@ export default function Sidebar({ className }: { className?: string }) {
           </nav>
         </div>
         <div className="space-y-1 mt-2 px-4">
-          <h3 className="text-sm font-medium text-muted-foreground px-4">
-            Folders
-          </h3>
-          {foldersPending ? (
-            <p className="px-7 py-1 text-xs text-muted-foreground">Loading…</p>
-          ) : folders && folders.length > 0 ? (
-            folders.map((item, index) => (
-              <SidebarFolderList
-                key={item.id}
-                label={item.name}
-                href={`/dashboard/folder/${item.id}`}
-                color={FOLDER_COLORS[index % FOLDER_COLORS.length]}
-                icon={Folder}
-              />
-            ))
-          ) : (
-            <p className="px-7 py-1 text-xs text-muted-foreground">
-              No folders yet
-            </p>
+          <button
+            onClick={() => setIsFoldersCollapsed((prev) => !prev)}
+            className="flex items-center justify-between w-full text-sm font-medium text-muted-foreground hover:text-foreground px-4 py-1.5 rounded-lg hover:bg-muted/40 transition-colors cursor-pointer group"
+          >
+            <span className="flex items-center gap-2">
+              <Folder className="size-4 opacity-70" />
+              Folders
+            </span>
+            <ChevronDown
+              className={cn(
+                'size-4 transition-transform duration-200 opacity-70 group-hover:opacity-100',
+                isFoldersCollapsed && '-rotate-90',
+              )}
+            />
+          </button>
+          {!isFoldersCollapsed && (
+            <div className="space-y-1 mt-1 transition-all duration-300">
+              {foldersPending ? (
+                <p className="px-7 py-1 text-xs text-muted-foreground">
+                  Loading…
+                </p>
+              ) : folders && folders.length > 0 ? (
+                folders.map((item, index) => (
+                  <SidebarFolderList
+                    key={item.id}
+                    label={item.name}
+                    href={`/dashboard/folder/${item.id}`}
+                    color={FOLDER_COLORS[index % FOLDER_COLORS.length]}
+                    icon={Folder}
+                  />
+                ))
+              ) : (
+                <p className="px-7 py-1 text-xs text-muted-foreground">
+                  No folders yet
+                </p>
+              )}
+            </div>
           )}
         </div>
       </div>

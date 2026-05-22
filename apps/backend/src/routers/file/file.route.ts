@@ -465,4 +465,132 @@ export const fileRouter = router({
       url: resolvePublicFileUrl(f.s3Url),
     }));
   }),
+
+  move: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().uuid(),
+        folderId: z.string().uuid().nullable(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (input.folderId) {
+        const folder = await ctx.db.folder.findFirst({
+          where: {
+            id: input.folderId,
+            ownerId: ctx.auth.userId,
+            trashed: false,
+          },
+        });
+        if (!folder) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Target folder not found',
+          });
+        }
+      }
+      return ctx.db.file.update({
+        where: { id: input.id, ownerId: ctx.auth.userId },
+        data: { folderId: input.folderId },
+      });
+    }),
+
+  moveMany: protectedProcedure
+    .input(
+      z.object({
+        ids: z.array(z.string().uuid()),
+        folderId: z.string().uuid().nullable(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (input.folderId) {
+        const folder = await ctx.db.folder.findFirst({
+          where: {
+            id: input.folderId,
+            ownerId: ctx.auth.userId,
+            trashed: false,
+          },
+        });
+        if (!folder) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Target folder not found',
+          });
+        }
+      }
+      return ctx.db.file.updateMany({
+        where: { id: { in: input.ids }, ownerId: ctx.auth.userId },
+        data: { folderId: input.folderId },
+      });
+    }),
+
+  toggleStarMany: protectedProcedure
+    .input(
+      z.object({
+        ids: z.array(z.string().uuid()),
+        starred: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.file.updateMany({
+        where: { id: { in: input.ids }, ownerId: ctx.auth.userId },
+        data: { starred: input.starred },
+      });
+    }),
+
+  toggleTrashMany: protectedProcedure
+    .input(
+      z.object({
+        ids: z.array(z.string().uuid()),
+        trashed: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.file.updateMany({
+        where: { id: { in: input.ids }, ownerId: ctx.auth.userId },
+        data: { trashed: input.trashed },
+      });
+    }),
+
+  deleteManyPermanently: protectedProcedure
+    .input(
+      z.object({
+        ids: z.array(z.string().uuid()),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const files = await ctx.db.file.findMany({
+        where: { id: { in: input.ids }, ownerId: ctx.auth.userId },
+        select: { id: true, s3Url: true, sizeMb: true },
+      });
+      if (files.length === 0) return { success: true };
+
+      for (const file of files) {
+        try {
+          const objectKey = extractObjectKey(file.s3Url);
+          await deleteObject(objectKey);
+        } catch (err) {
+          console.error(`Failed to delete file from S3:`, err);
+        }
+      }
+
+      const totalSizeMb = files.reduce((sum, f) => sum + f.sizeMb, 0);
+
+      const transactions: any[] = [
+        ctx.db.file.deleteMany({
+          where: { id: { in: input.ids }, ownerId: ctx.auth.userId },
+        }),
+      ];
+      if (totalSizeMb > 0) {
+        transactions.push(
+          ctx.db.userStorage.update({
+            where: { userId: ctx.auth.userId },
+            data: { usedStorage: { decrement: totalSizeMb } },
+          }),
+        );
+      }
+      await ctx.db.$transaction(transactions);
+
+      return { success: true };
+    }),
 });

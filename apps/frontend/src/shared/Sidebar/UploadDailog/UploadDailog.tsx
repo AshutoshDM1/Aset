@@ -19,6 +19,7 @@ export default function UploadDailog() {
     folderId,
     files,
     isUploading,
+    persistStructure,
     minimizeDialog,
     setFiles,
     updateFileProgress,
@@ -32,6 +33,9 @@ export default function UploadDailog() {
   // tRPC Mutations
   const presign = useMutation(trpc.file.presignUpload.mutationOptions());
   const registerFile = useMutation(trpc.file.create.mutationOptions());
+  const getOrCreateFolder = useMutation(
+    trpc.folder.getOrCreate.mutationOptions(),
+  );
 
   // Perform upload sequence
   const startUploads = async () => {
@@ -46,22 +50,86 @@ export default function UploadDailog() {
       size: file.size,
       progress: 0,
       status: 'idle',
+      filepath: (file as any).filepath || file.name,
     }));
 
     setFiles(storeFiles);
 
-    // Run parallel uploads
+    // 1. Resolve and create nested folder paths sequentially to avoid parallel write race conditions
+    const pathCache = new Map<string, string>();
+    const resolvedFolderIds: string[] = [];
+
+    const resolveFolderIdForPath = async (
+      filepath: string,
+      rootFolderId: string,
+    ): Promise<string> => {
+      if (
+        !persistStructure ||
+        !filepath ||
+        !filepath.includes('/') ||
+        filepath.split('/').length <= 1
+      ) {
+        return rootFolderId;
+      }
+
+      const segments = filepath.split('/');
+      const dirSegments = segments.slice(0, -1);
+
+      let currentParentId = rootFolderId;
+      let currentPath = '';
+
+      for (const segment of dirSegments) {
+        if (!segment.trim()) continue;
+        currentPath = currentPath ? `${currentPath}/${segment}` : segment;
+        const cacheKey = `${rootFolderId}::${currentPath}`;
+
+        if (pathCache.has(cacheKey)) {
+          currentParentId = pathCache.get(cacheKey)!;
+        } else {
+          const folder = await getOrCreateFolder.mutateAsync({
+            name: segment,
+            parentId: currentParentId,
+          });
+          pathCache.set(cacheKey, folder.id);
+          currentParentId = folder.id;
+        }
+      }
+
+      return currentParentId;
+    };
+
+    const loadToast = toast.loading('Recreating folder structure...');
+    try {
+      for (const file of localFiles) {
+        const path = (file as any).filepath || file.name;
+        const targetFolderId = await resolveFolderIdForPath(path, folderId);
+        resolvedFolderIds.push(targetFolderId);
+      }
+      toast.success('Folder structures prepared successfully!');
+    } catch (err) {
+      console.error('Error pre-resolving folder structure:', err);
+      toast.error('Failed to create subfolders. Uploading to root folder.');
+      // Fallback to root folder if resolution fails
+      while (resolvedFolderIds.length < localFiles.length) {
+        resolvedFolderIds.push(folderId);
+      }
+    } finally {
+      toast.dismiss(loadToast);
+    }
+
+    // 2. Run parallel uploads
     const uploadPromises = localFiles.map(async (file, index) => {
       const fileState = storeFiles[index];
       const fileId = fileState.id;
+      const targetFolderId = resolvedFolderIds[index];
 
       try {
         updateFileStatus(fileId, 'uploading');
         const sizeMb = file.size / (1024 * 1024);
 
-        // 1. Get presigned URL
+        // 1. Get presigned URL using targetFolderId
         const signed = await presign.mutateAsync({
-          folderId,
+          folderId: targetFolderId,
           fileName: file.name,
           contentType: file.type || 'application/octet-stream',
           sizeMb,
@@ -77,10 +145,10 @@ export default function UploadDailog() {
           },
         );
 
-        // 3. Register file in database
+        // 3. Register file in database using targetFolderId
         await registerFile.mutateAsync({
           name: file.name,
-          folderId,
+          folderId: targetFolderId,
           objectKey: signed.objectKey,
           sizeMb,
         });
@@ -98,7 +166,9 @@ export default function UploadDailog() {
 
     await Promise.all(uploadPromises);
 
-    // Invalidate dashboard and storage queries
+    // Invalidate dashboard, folder list and storage queries
+    void queryClient.invalidateQueries(trpc.folder.list.queryFilter());
+    void queryClient.invalidateQueries(trpc.folder.listAll.queryFilter());
     void queryClient.invalidateQueries(
       trpc.file.listByFolder.queryFilter({ folderId }),
     );
@@ -173,7 +243,7 @@ export default function UploadDailog() {
         </header>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-5">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-5">
           {!isUploading ? (
             <div className="space-y-5">
               <FolderSelectionStage />

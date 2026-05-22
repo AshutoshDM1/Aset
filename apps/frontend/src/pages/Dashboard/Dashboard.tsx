@@ -6,9 +6,17 @@ import UploadDailog from '@/shared/Sidebar/UploadDailog/UploadDailog';
 import { SettingDialog } from '@/shared/Setting/SettingDialog';
 import { Button } from '@/components/ui/button';
 import { ArrowBigLeftDash } from 'lucide-react';
+import { useSelectionStore } from '@/store/selectionStore';
+import { useEffect } from 'react';
+import { BulkActionBar } from '@/shared/Dashboard/BulkActionBar';
 
 export default function Dashboard() {
   const location = useLocation();
+  const clearSelection = useSelectionStore((s) => s.clearSelection);
+
+  useEffect(() => {
+    clearSelection();
+  }, [location.pathname, clearSelection]);
   const isDashboardRoot =
     location.pathname === '/dashboard' || location.pathname === '/dashboard/';
 
@@ -38,6 +46,7 @@ export default function Dashboard() {
       <BottomNav />
       <UploadDailog />
       <SettingDialog />
+      <BulkActionBar />
     </div>
   );
 }

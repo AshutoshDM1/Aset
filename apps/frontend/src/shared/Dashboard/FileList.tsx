@@ -5,7 +5,7 @@ import ImageFilePreview from './ImageFilePreview';
 import PdfFilePreview from './PdfFilePreview';
 import VideoFilePreview from './VideoFilePreview';
 import TextFilePreview from './TextFilePreview';
-import { useViewMode } from '@/context/ViewModeContext';
+import { useViewMode, sortItems } from '@/context/ViewModeContext';
 import { FileTable } from './FileTable';
 import {
   isImageFileName,
@@ -14,6 +14,7 @@ import {
   isTextCodeFileName,
 } from '@/utils/file/file-utils';
 import { OtherFileTile } from './OtherFileTile';
+import * as React from 'react';
 
 export type FileListMode = 'recent' | 'starred' | 'trash';
 
@@ -22,7 +23,7 @@ type FileListProps = {
 };
 
 export function FileList({ mode = 'recent' }: FileListProps) {
-  const { viewMode } = useViewMode();
+  const { viewMode, sortField, sortOrder } = useViewMode();
 
   let listQuery;
   if (mode === 'starred') {
@@ -40,6 +41,18 @@ export function FileList({ mode = 'recent' }: FileListProps) {
     error,
     refetch,
   } = useQuery(listQuery);
+
+  const sortedFiles = React.useMemo(() => {
+    if (!files) return [];
+    return sortItems(
+      files.map((f) => ({
+        ...f,
+        createdAt: new Date(f.createdAt),
+      })),
+      sortField,
+      sortOrder,
+    );
+  }, [files, sortField, sortOrder]);
 
   if (isLoading) {
     return (
@@ -77,20 +90,12 @@ export function FileList({ mode = 'recent' }: FileListProps) {
   }
 
   if (viewMode === 'table') {
-    return (
-      <FileTable
-        onRefetch={refetch}
-        files={files.map((f) => ({
-          ...f,
-          createdAt: new Date(f.createdAt),
-        }))}
-      />
-    );
+    return <FileTable onRefetch={refetch} files={sortedFiles} />;
   }
 
   return (
     <ul className="grid grid-cols-3 md:grid-cols-8 xl:grid-cols-12 justify-evenly">
-      {files.map((file) => (
+      {sortedFiles.map((file) => (
         <li key={file.id} className="flex items-start justify-center">
           {isImageFileName(file.name) ? (
             <ImageFilePreview

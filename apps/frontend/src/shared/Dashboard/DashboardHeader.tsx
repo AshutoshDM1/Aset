@@ -1,6 +1,6 @@
 import { CreateFolderDialog } from '@/shared/Dashboard/CreateFolderDialog';
 import { UploadFileButton } from './UploadFileButton';
-import { ViewToggle } from './ViewToggle';
+import { DashboardToolbar } from './DashboardToolbar';
 
 interface DashboardHeaderProps {
   folderId: string | number;
@@ -26,7 +26,7 @@ const DashboardHeader = ({
         <p className="mt-1 text-sm text-muted-foreground">{folerDescription}</p>
       </div>
       <div className="flex items-center gap-2">
-        <ViewToggle />
+        <DashboardToolbar />
         <div className="flex gap-2 ml-2">
           {canCreate && (
             <CreateFolderDialog

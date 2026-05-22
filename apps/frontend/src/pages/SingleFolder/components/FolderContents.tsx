@@ -2,7 +2,7 @@ import FolderComponent, {
   type FolderColor,
 } from '@/shared/Dashboard/FolderComponent';
 import ImageFilePreview from '@/shared/Dashboard/ImageFilePreview';
-import { useViewMode } from '@/context/ViewModeContext';
+import { useViewMode, sortItems } from '@/context/ViewModeContext';
 import {
   UnifiedTable,
   type UnifiedItem,
@@ -17,6 +17,7 @@ import { OtherFileTile } from '@/shared/Dashboard/OtherFileTile';
 import PdfFilePreview from '@/shared/Dashboard/PdfFilePreview';
 import VideoFilePreview from '@/shared/Dashboard/VideoFilePreview';
 import TextFilePreview from '@/shared/Dashboard/TextFilePreview';
+import * as React from 'react';
 
 const COLOR_CYCLE: FolderColor[] = ['cyan', 'yellow', 'pink', 'black'];
 
@@ -51,17 +52,58 @@ export function FolderContents({
   onRefetch,
   emptyMessage = 'This folder is empty.',
 }: FolderContentsProps) {
-  const { viewMode } = useViewMode();
-  const imageFiles = files.filter((f) => isImageFileName(f.name));
-  const pdfFiles = files.filter((f) => isPdfFileName(f.name));
-  const videoFiles = files.filter((f) => isVideoFileName(f.name));
-  const textFiles = files.filter((f) => isTextCodeFileName(f.name));
-  const otherFiles = files.filter(
-    (f) =>
-      !isImageFileName(f.name) &&
-      !isPdfFileName(f.name) &&
-      !isVideoFileName(f.name) &&
-      !isTextCodeFileName(f.name),
+  const { viewMode, sortField, sortOrder } = useViewMode();
+
+  const sortedFolders = React.useMemo(() => {
+    return sortItems(
+      folders.map((f) => ({
+        ...f,
+        starred: f.starred ?? false,
+        trashed: f.trashed ?? false,
+      })),
+      sortField,
+      sortOrder,
+    );
+  }, [folders, sortField, sortOrder]);
+
+  const sortedFiles = React.useMemo(() => {
+    return sortItems(
+      files.map((f) => ({
+        ...f,
+        starred: f.starred ?? false,
+        trashed: f.trashed ?? false,
+      })),
+      sortField,
+      sortOrder,
+    );
+  }, [files, sortField, sortOrder]);
+
+  const imageFiles = React.useMemo(
+    () => sortedFiles.filter((f) => isImageFileName(f.name)),
+    [sortedFiles],
+  );
+  const pdfFiles = React.useMemo(
+    () => sortedFiles.filter((f) => isPdfFileName(f.name)),
+    [sortedFiles],
+  );
+  const videoFiles = React.useMemo(
+    () => sortedFiles.filter((f) => isVideoFileName(f.name)),
+    [sortedFiles],
+  );
+  const textFiles = React.useMemo(
+    () => sortedFiles.filter((f) => isTextCodeFileName(f.name)),
+    [sortedFiles],
+  );
+  const otherFiles = React.useMemo(
+    () =>
+      sortedFiles.filter(
+        (f) =>
+          !isImageFileName(f.name) &&
+          !isPdfFileName(f.name) &&
+          !isVideoFileName(f.name) &&
+          !isTextCodeFileName(f.name),
+      ),
+    [sortedFiles],
   );
 
   if (folders.length === 0 && files.length === 0) {
@@ -74,15 +116,15 @@ export function FolderContents({
 
   if (viewMode === 'table') {
     const items: UnifiedItem[] = [
-      ...folders.map((f) => ({ ...f, type: 'folder' as const })),
-      ...files.map((f) => ({ ...f, type: 'file' as const })),
+      ...sortedFolders.map((f) => ({ ...f, type: 'folder' as const })),
+      ...sortedFiles.map((f) => ({ ...f, type: 'file' as const })),
     ];
     return <UnifiedTable items={items} onRefetch={onRefetch} />;
   }
 
   return (
     <ul className="grid grid-cols-3 md:grid-cols-8 xl:grid-cols-10 justify-evenly">
-      {folders.map((item, index) => (
+      {sortedFolders.map((item, index) => (
         <li key={`f-${item.id}`}>
           <FolderComponent
             folderId={item.id}

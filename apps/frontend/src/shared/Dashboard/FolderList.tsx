@@ -4,8 +4,9 @@ import FolderComponent, {
   type FolderColor,
 } from '@/shared/Dashboard/FolderComponent';
 import Loader from '@/shared/PageLoader/Loader';
-import { useViewMode } from '@/context/ViewModeContext';
+import { useViewMode, sortItems } from '@/context/ViewModeContext';
 import { FolderTable } from './FolderTable';
+import * as React from 'react';
 
 export type FolderListMode =
   | 'all'
@@ -23,7 +24,7 @@ type FolderListProps = {
 const COLOR_CYCLE: FolderColor[] = ['cyan', 'yellow', 'pink', 'black'];
 
 export function FolderList({ mode = 'all', parentFolderId }: FolderListProps) {
-  const { viewMode } = useViewMode();
+  const { viewMode, sortField, sortOrder } = useViewMode();
 
   const normalQuery = useQuery({
     ...trpc.folder.list.queryOptions(
@@ -59,6 +60,21 @@ export function FolderList({ mode = 'all', parentFolderId }: FolderListProps) {
           : normalQuery;
 
   const { data: folders, isLoading, isError, error, refetch } = activeQuery;
+
+  const sortedFolders = React.useMemo(() => {
+    if (!folders) return [];
+    return sortItems(
+      folders.map((f) => ({
+        ...f,
+        starred: (f as any).starred ?? false,
+        trashed: (f as any).trashed ?? false,
+        createdAt: new Date(f.createdAt),
+      })),
+      sortField,
+      sortOrder,
+    );
+  }, [folders, sortField, sortOrder]);
+
   if (isLoading) {
     return (
       <div className="py-10">
@@ -103,26 +119,21 @@ export function FolderList({ mode = 'all', parentFolderId }: FolderListProps) {
       <FolderTable
         onRefetch={refetch}
         isOwner={isOwner}
-        folders={folders.map((f) => ({
-          ...f,
-          starred: (f as any).starred ?? false,
-          trashed: (f as any).trashed ?? false,
-          createdAt: new Date(f.createdAt),
-        }))}
+        folders={sortedFolders}
       />
     );
   }
 
   return (
     <ul className="grid grid-cols-3 md:grid-cols-8 xl:grid-cols-12 justify-evenly">
-      {folders.map((folder, index) => (
+      {sortedFolders.map((folder, index) => (
         <li key={folder.id}>
           <FolderComponent
             folderId={folder.id}
             folderName={folder.name}
             color={COLOR_CYCLE[index % COLOR_CYCLE.length]}
-            starred={(folder as any).starred ?? false}
-            trashed={(folder as any).trashed ?? false}
+            starred={folder.starred}
+            trashed={folder.trashed}
             onRefetch={refetch}
             isOwner={isOwner}
             createdAt={folder.createdAt}

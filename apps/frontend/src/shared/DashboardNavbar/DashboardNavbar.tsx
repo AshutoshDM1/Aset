@@ -7,6 +7,7 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { trpc } from '@/utils/trpc';
 import Logo from '../Navbar/Logo';
+import { SearchDialog } from '@/shared/Search/SearchDialog';
 
 const UUID_REGEX =
   /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
@@ -48,30 +49,33 @@ function DashboardNavbar({ className }: { className?: string }) {
   }, [location, folder?.name]);
 
   return (
-    <header
-      className={cn(
-        'sticky top-0 z-20 w-full bg-background/70 backdrop-blur supports-backdrop-filter:bg-background/55 border-b',
-        className,
-      )}
-    >
-      <div className="flex items-center justify-between gap-4 px-4 py-2.5 sm:px-6 sm:py-4">
-        <BreadcrumbComponent
-          className="max-w-sm hidden md:block"
-          items={breadcrumbItems}
-        />
-        <Link
-          to="/dashboard"
-          className="md:hidden flex items-center gap-2 lock"
-        >
-          <Logo className="size-8" />
-          <h1 className="text-lg font-bold">Aset</h1>
-        </Link>
-        <div className="flex items-center justify-between gap-4 w-fit md:w-full md:max-w-xl">
-          <DashboardNavbarSearch className="flex-1 hidden md:block" />
-          <DashboardNavbarActions />
+    <>
+      <header
+        className={cn(
+          'sticky top-0 z-20 w-full bg-background/70 backdrop-blur supports-backdrop-filter:bg-background/55 border-b',
+          className,
+        )}
+      >
+        <div className="flex items-center justify-between gap-4 px-4 py-2.5 sm:px-6 sm:py-4">
+          <BreadcrumbComponent
+            className="max-w-sm hidden md:block"
+            items={breadcrumbItems}
+          />
+          <Link
+            to="/dashboard"
+            className="md:hidden flex items-center gap-2 lock"
+          >
+            <Logo className="size-8" />
+            <h1 className="text-lg font-bold">Aset</h1>
+          </Link>
+          <div className="flex items-center justify-between gap-4 w-fit md:w-full md:max-w-xl">
+            <DashboardNavbarSearch className="flex-1 hidden md:block" />
+            <DashboardNavbarActions />
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+      <SearchDialog />
+    </>
   );
 }
 

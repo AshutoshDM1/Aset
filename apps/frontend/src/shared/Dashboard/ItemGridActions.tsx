@@ -20,12 +20,15 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
-import { Share2 } from 'lucide-react';
+import { Share2, ArrowRight } from 'lucide-react';
 import { ShareDialog } from './ShareDialog';
 import { RenameDialog } from './RenameDialog';
 import { useFileDownload } from '../../hooks/useFileDownload';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import { DetailsDialog } from './DetailsDialog';
+import { MoveDialog } from './MoveDialog';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useSelectionStore } from '@/store/selectionStore';
 
 interface ItemGridActionsProps {
   id: string;
@@ -57,6 +60,7 @@ export function ItemGridActions({
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isMoveOpen, setIsMoveOpen] = useState(false);
   const { download } = useFileDownload();
 
   const folderStarMutation = useMutation({
@@ -165,11 +169,41 @@ export function ItemGridActions({
     }
   };
 
+  const { isSelected, toggleFolder, toggleFile } = useSelectionStore();
+  const checked = isSelected(type, id);
+
   const showTrigger = type === 'file' || isOwner;
   if (!showTrigger) return null;
 
   return (
     <>
+      {checked && (
+        <div className="absolute inset-0 pointer-events-none rounded-2xl ring-2 ring-primary/40 bg-primary/[0.03] z-0" />
+      )}
+      <div
+        className={cn(
+          'absolute top-1.5 left-1.5 transition-all z-10',
+          checked
+            ? 'opacity-100'
+            : 'opacity-100 lg:opacity-0 lg:group-hover:opacity-100',
+        )}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+      >
+        <Checkbox
+          checked={checked}
+          onCheckedChange={() => {
+            if (type === 'folder') {
+              toggleFolder(id);
+            } else {
+              toggleFile(id);
+            }
+          }}
+          className="size-5 rounded bg-background/95 backdrop-blur shadow-sm border border-border data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground transition-all duration-200"
+        />
+      </div>
       <div className="absolute top-1.5 right-1.5 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity z-10">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -214,6 +248,19 @@ export function ItemGridActions({
               >
                 <Pencil className="size-3.5 mr-2" />
                 Rename
+              </DropdownMenuItem>
+            )}
+            {isOwner && !trashed && (
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  setTimeout(() => {
+                    setIsMoveOpen(true);
+                  }, 100);
+                }}
+              >
+                <ArrowRight className="size-3.5 mr-2" />
+                Move to Folder
               </DropdownMenuItem>
             )}
             {type === 'folder' && isOwner && (
@@ -340,6 +387,13 @@ export function ItemGridActions({
         trashed={trashed}
         url={url}
         onRefetch={onRefetch}
+      />
+
+      <MoveDialog
+        open={isMoveOpen}
+        onOpenChange={setIsMoveOpen}
+        items={[{ id, type, name }]}
+        onSuccess={onRefetch}
       />
     </>
   );

@@ -2,7 +2,11 @@
 import { protectedProcedure, router } from '../../trpc';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { extractObjectKey, deleteObject } from '../../utils/r2';
+import {
+  extractObjectKey,
+  deleteObject,
+  resolvePublicFileUrl,
+} from '../../utils/r2';
 
 async function getAllDescendantFolderIds(
   db: any,
@@ -212,6 +216,35 @@ export const folderRouter = router({
       });
       return { id: folder.id, name: folder.name };
     }),
+  getOrCreate: protectedProcedure
+    .input(
+      z.object({
+        name: z.string().min(1),
+        parentId: z.string().uuid().nullable().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const parentId = input.parentId ?? null;
+      const existing = await ctx.db.folder.findFirst({
+        where: {
+          name: input.name,
+          parentId,
+          ownerId: ctx.auth.userId,
+          trashed: false,
+        },
+      });
+      if (existing) {
+        return { id: existing.id, name: existing.name };
+      }
+      const folder = await ctx.db.folder.create({
+        data: {
+          name: input.name,
+          ownerId: ctx.auth.userId,
+          parentId,
+        },
+      });
+      return { id: folder.id, name: folder.name };
+    }),
   getStarred: protectedProcedure.query(async ({ ctx }) => {
     const folders = await ctx.db.folder.findMany({
       where: { ownerId: ctx.auth.userId, starred: true, trashed: false },
@@ -357,9 +390,151 @@ export const folderRouter = router({
       select: {
         id: true,
         name: true,
+        parentId: true,
       },
     });
   }),
+
+  move: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().uuid(),
+        parentId: z.string().uuid().nullable(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (input.parentId === input.id) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Cannot move a folder into itself',
+        });
+      }
+      if (input.parentId) {
+        const descendants = await getAllDescendantFolderIds(ctx.db, input.id);
+        if (descendants.includes(input.parentId)) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Cannot move a folder into one of its subfolders',
+          });
+        }
+      }
+      return ctx.db.folder.update({
+        where: { id: input.id, ownerId: ctx.auth.userId },
+        data: { parentId: input.parentId },
+      });
+    }),
+
+  moveMany: protectedProcedure
+    .input(
+      z.object({
+        ids: z.array(z.string().uuid()),
+        parentId: z.string().uuid().nullable(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      for (const id of input.ids) {
+        if (input.parentId === id) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Cannot move a folder into itself',
+          });
+        }
+        if (input.parentId) {
+          const descendants = await getAllDescendantFolderIds(ctx.db, id);
+          if (descendants.includes(input.parentId)) {
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: 'Cannot move a folder into one of its subfolders',
+            });
+          }
+        }
+      }
+      return ctx.db.folder.updateMany({
+        where: { id: { in: input.ids }, ownerId: ctx.auth.userId },
+        data: { parentId: input.parentId },
+      });
+    }),
+
+  toggleStarMany: protectedProcedure
+    .input(
+      z.object({
+        ids: z.array(z.string().uuid()),
+        starred: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.folder.updateMany({
+        where: { id: { in: input.ids }, ownerId: ctx.auth.userId },
+        data: { starred: input.starred },
+      });
+    }),
+
+  toggleTrashMany: protectedProcedure
+    .input(
+      z.object({
+        ids: z.array(z.string().uuid()),
+        trashed: z.boolean(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.folder.updateMany({
+        where: { id: { in: input.ids }, ownerId: ctx.auth.userId },
+        data: { trashed: input.trashed },
+      });
+    }),
+
+  deleteManyPermanently: protectedProcedure
+    .input(
+      z.object({
+        ids: z.array(z.string().uuid()),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const folders = await ctx.db.folder.findMany({
+        where: { id: { in: input.ids }, ownerId: ctx.auth.userId },
+      });
+      if (folders.length === 0) return { success: true };
+
+      const allFolderIds: string[] = [];
+      for (const id of input.ids) {
+        const descendants = await getAllDescendantFolderIds(ctx.db, id);
+        allFolderIds.push(...descendants);
+      }
+      const uniqueFolderIds = Array.from(new Set(allFolderIds));
+
+      const files = await ctx.db.file.findMany({
+        where: { folderId: { in: uniqueFolderIds } },
+        select: { id: true, s3Url: true, sizeMb: true },
+      });
+
+      for (const file of files) {
+        try {
+          const objectKey = extractObjectKey(file.s3Url);
+          await deleteObject(objectKey);
+        } catch (err) {
+          console.error(`Failed to delete file ${file.id} from R2:`, err);
+        }
+      }
+
+      const totalSizeMb = files.reduce((sum, f) => sum + f.sizeMb, 0);
+
+      const transactions: any[] = [
+        ctx.db.folder.deleteMany({
+          where: { id: { in: uniqueFolderIds } },
+        }),
+      ];
+      if (totalSizeMb > 0) {
+        transactions.push(
+          ctx.db.userStorage.update({
+            where: { userId: ctx.auth.userId },
+            data: { usedStorage: { decrement: totalSizeMb } },
+          }),
+        );
+      }
+      await ctx.db.$transaction(transactions);
+
+      return { success: true };
+    }),
 
   getShareSettings: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
@@ -571,4 +746,99 @@ export const folderRouter = router({
 
     return folderList;
   }),
+
+  search: protectedProcedure
+    .input(z.object({ query: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const queryStr = input.query.trim();
+      if (!queryStr) {
+        return { folders: [], files: [] };
+      }
+
+      // 1. Fetch folders owned by user matching name
+      const folders = await ctx.db.folder.findMany({
+        where: {
+          ownerId: ctx.auth.userId,
+          trashed: false,
+          name: { contains: queryStr, mode: 'insensitive' },
+        },
+        select: {
+          id: true,
+          name: true,
+          createdAt: true,
+          starred: true,
+          trashed: true,
+        },
+      });
+
+      // 2. Fetch shared folders matching name
+      const currentUser = await ctx.db.user.findUnique({
+        where: { id: ctx.auth.userId },
+      });
+      const userEmail = currentUser?.email || ctx.auth.email || '';
+
+      const sharedShares = await ctx.db.folderShare.findMany({
+        where: {
+          email: userEmail.toLowerCase().trim(),
+          folder: {
+            trashed: false,
+            name: { contains: queryStr, mode: 'insensitive' },
+          },
+        },
+        include: {
+          folder: {
+            select: {
+              id: true,
+              name: true,
+              createdAt: true,
+              starred: true,
+              trashed: true,
+            },
+          },
+        },
+      });
+
+      const sharedFolders = sharedShares.map((s) => s.folder);
+
+      // Merge and deduplicate folders
+      const allFoldersMap = new Map<string, (typeof folders)[number]>();
+      folders.forEach((f) => allFoldersMap.set(f.id, f));
+      sharedFolders.forEach((f) => allFoldersMap.set(f.id, f));
+      const allFolders = Array.from(allFoldersMap.values());
+
+      // 3. Fetch files owned by user matching name
+      const files = await ctx.db.file.findMany({
+        where: {
+          ownerId: ctx.auth.userId,
+          trashed: false,
+          name: { contains: queryStr, mode: 'insensitive' },
+        },
+        select: {
+          id: true,
+          name: true,
+          createdAt: true,
+          starred: true,
+          trashed: true,
+          sizeMb: true,
+          s3Url: true,
+          folderId: true,
+        },
+      });
+
+      const resolvedFiles = files.map((f) => ({
+        id: f.id,
+        name: f.name,
+        createdAt: f.createdAt,
+        starred: f.starred,
+        trashed: f.trashed,
+        sizeMb: f.sizeMb,
+        url: resolvePublicFileUrl(f.s3Url),
+        folderId: f.folderId,
+      }));
+
+      return {
+        folders: allFolders,
+        files: resolvedFiles,
+      };
+    }),
 });

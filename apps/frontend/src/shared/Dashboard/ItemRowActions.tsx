@@ -20,12 +20,13 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
-import { Share2 } from 'lucide-react';
+import { Share2, ArrowRight } from 'lucide-react';
 import { ShareDialog } from './ShareDialog';
 import { RenameDialog } from './RenameDialog';
 import { useFileDownload } from '../../hooks/useFileDownload';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import { DetailsDialog } from './DetailsDialog';
+import { MoveDialog } from './MoveDialog';
 
 interface ItemRowActionsProps {
   id: string;
@@ -57,6 +58,7 @@ export function ItemRowActions({
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isMoveOpen, setIsMoveOpen] = useState(false);
 
   const folderStarMutation = useMutation({
     ...trpc.folder.toggleStar.mutationOptions(),
@@ -300,6 +302,19 @@ export function ItemRowActions({
                   Rename
                 </DropdownMenuItem>
               )}
+              {isOwner && !trashed && (
+                <DropdownMenuItem
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    setTimeout(() => {
+                      setIsMoveOpen(true);
+                    }, 100);
+                  }}
+                >
+                  <ArrowRight className="size-3.5 mr-2" />
+                  Move to Folder
+                </DropdownMenuItem>
+              )}
               {type === 'folder' && isOwner && (
                 <DropdownMenuItem
                   onSelect={(e) => {
@@ -428,6 +443,13 @@ export function ItemRowActions({
         trashed={trashed}
         url={url}
         onRefetch={onRefetch}
+      />
+
+      <MoveDialog
+        open={isMoveOpen}
+        onOpenChange={setIsMoveOpen}
+        items={[{ id, type, name }]}
+        onSuccess={onRefetch}
       />
     </>
   );
