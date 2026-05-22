@@ -1,0 +1,58 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/backend/**'
+      - 'packages/**'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/deploy.yml'
+
+jobs:
+  deploy:
+    name: Deploy to DigitalOcean
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || '22' }}
+          script_stop: true # Stop execution if any command fails
+          script: |
+            echo "🚀 Starting Deployment..."
+
+            # Navigate to the project root
+            cd ~/Aset
+
+            # Fetch latest changes
+            echo "📥 Fetching latest code from GitHub..."
+            git pull origin main
+
+            # Install dependencies
+            echo "📦 Installing workspace dependencies..."
+            pnpm install --frozen-lockfile
+
+            # Go to that folder
+            echo "Go to that folder"
+            cd apps/backend
+
+            # Push the DB Schema
+            echo "Pushing DB Schema..."
+            pnpm run push
+
+            # Build the backend (generates Prisma Client and bundles with esbuild)
+            echo "🛠️ Building aset-backend..."
+            pnpm run build
+
+            # Restart the service in PM2 using its name
+            echo "🔄 Restarting PM2 process 'aset-backend'..."
+            pm2 restart aset-backend --update-env
+
+            echo "🎉 Deployment successful!"
