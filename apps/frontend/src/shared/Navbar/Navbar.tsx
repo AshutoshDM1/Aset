@@ -2,7 +2,7 @@ import Section from '../Section/Sectiont';
 import Logo from './Logo';
 import BrandButton from '../BrandButton/BrandButton';
 import { Link } from 'react-router';
-import { SignInButton, useUser } from '@clerk/react';
+import { SignInButton, SignUpButton, useUser } from '@clerk/react';
 
 const Navbar = () => {
   const { isSignedIn } = useUser();
@@ -60,13 +60,20 @@ const Navbar = () => {
             ),
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
           {isSignedIn ? (
             <BrandButton label="Dashboard" to="/dashboard" />
           ) : (
-            <SignInButton mode="modal" withSignUp>
-              <BrandButton label="Sign In" />
-            </SignInButton>
+            <>
+              <SignInButton mode="modal">
+                <button className="text-sm font-semibold text-zinc-600 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white transition-colors duration-300 cursor-pointer">
+                  Sign In
+                </button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <BrandButton label="Sign Up" />
+              </SignUpButton>
+            </>
           )}
         </div>
       </div>
