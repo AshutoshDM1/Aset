@@ -26,8 +26,8 @@ export function UploadFileButton({
       }
       className="gap-1.5"
     >
-      <Upload className="size-4" />
-      Upload file
+      <Upload className="size-4" /> Upload
+      <span className="hidden sm:block">file</span>
     </Button>
   );
 }

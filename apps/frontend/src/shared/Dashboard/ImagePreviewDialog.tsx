@@ -19,7 +19,7 @@ import {
   Loader2,
   CheckCheck,
 } from 'lucide-react';
-import { useOptimizeImage } from './useOptimizeImage';
+import { useOptimizeImage } from '../../hooks/useOptimizeImage';
 import { DetailsDialog } from './DetailsDialog';
 import { cn } from '@/lib/utils';
 import { motion, useMotionValue } from 'motion/react';

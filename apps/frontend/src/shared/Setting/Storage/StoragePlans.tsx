@@ -8,8 +8,8 @@ import { toast } from 'sonner';
 
 import { Badge } from '@/components/ui/badge';
 import { trpc, queryClient } from '@/utils/trpc';
-import { useSettingStore } from './settingStore';
 import { cn } from '@/lib/utils';
+import { useSettingStore } from './settingStore';
 
 const MB_PER_GB = 1024;
 
@@ -106,7 +106,7 @@ export function StoragePlans() {
               key={plan.id}
               onClick={() => !plan.upcoming && !isActive && handleSelect(plan)}
               className={cn(
-                'flex items-center justify-between gap-4 px-4 py-3.5 rounded-xl border transition-all duration-150',
+                'flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3.5 rounded-xl border transition-all duration-150',
                 plan.upcoming
                   ? 'border-border/30 bg-muted/10 opacity-50 cursor-not-allowed'
                   : isActive
@@ -151,8 +151,8 @@ export function StoragePlans() {
                 </div>
               </div>
 
-              {/* Right: price + status */}
-              <div className="flex flex-col items-end gap-1.5 shrink-0">
+              {/* Right: price + status — row on mobile (below features), column on sm+ */}
+              <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-1.5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/30">
                 <span className="text-xs font-medium text-muted-foreground">
                   {plan.price}
                 </span>

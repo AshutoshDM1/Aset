@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useFileDownload } from '@/hooks/useFileDownload';
 import { toast } from 'sonner';
+import { Lock, Unlock } from 'lucide-react';
 
 import { useVideoPlayer } from './useVideoPlayer';
 import { VideoHeader } from './VideoHeader';
@@ -24,6 +25,7 @@ export function VideoPreview({
   fileId,
 }: VideoPreviewProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const { download, isDownloading } = useFileDownload();
 
   const {
@@ -53,7 +55,14 @@ export function VideoPreview({
     handleLoadedMetadata,
     handleScrubberChange,
     resetControlsTimer,
-  } = useVideoPlayer({ open, onClose, videoRef });
+    // lock, fullscreen, and rotation features
+    isLocked,
+    setIsLocked,
+    isFullscreen,
+    toggleFullscreen,
+    isRotated,
+    toggleRotation,
+  } = useVideoPlayer({ open, onClose, videoRef, containerRef });
 
   const handleDownload = () => {
     if (fileId) {
@@ -75,6 +84,7 @@ export function VideoPreview({
   return (
     <AnimatePresence>
       <motion.div
+        ref={containerRef}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -82,19 +92,27 @@ export function VideoPreview({
         onMouseMove={resetControlsTimer}
         onClick={resetControlsTimer}
       >
-        <VideoHeader
-          fileName={fileName}
-          isDownloading={isDownloading}
-          showControls={showControls}
-          handleDownload={handleDownload}
-          onClose={onClose}
-        />
+        {/* Header - only visible when unlocked and controls are showing */}
+        <AnimatePresence>
+          {!isLocked && showControls && (
+            <VideoHeader
+              fileName={fileName}
+              isDownloading={isDownloading}
+              showControls={showControls}
+              handleDownload={handleDownload}
+              onClose={onClose}
+            />
+          )}
+        </AnimatePresence>
 
+        {/* Viewport for the video */}
         <VideoViewport
           videoRef={videoRef}
           fileUrl={fileUrl}
           isPlaying={isPlaying}
           isBuffering={isBuffering}
+          isLocked={isLocked}
+          isRotated={isRotated}
           handleWaiting={handleWaiting}
           handlePlaying={handlePlaying}
           handleSeeked={handleSeeked}
@@ -105,26 +123,61 @@ export function VideoPreview({
           setIsPlaying={setIsPlaying}
         />
 
-        <VideoControls
-          showControls={showControls}
-          currentTime={currentTime}
-          duration={duration}
-          bufferedTime={bufferedTime}
-          isPlaying={isPlaying}
-          skipAmount={skipAmount}
-          showSkipConfig={showSkipConfig}
-          volume={volume}
-          isMuted={isMuted}
-          togglePlay={togglePlay}
-          handleSkipForward={handleSkipForward}
-          handleSkipBackward={handleSkipBackward}
-          setSkipAmount={setSkipAmount}
-          setShowSkipConfig={setShowSkipConfig}
-          toggleMute={toggleMute}
-          handleVolumeChange={handleVolumeChange}
-          handleScrubberChange={handleScrubberChange}
-          formatTime={formatTime}
-        />
+        {/* Floating Lock/Unlock Button - accessible whenever controls show, or always when locked */}
+        <AnimatePresence>
+          {(showControls || isLocked) && (
+            <motion.button
+              type="button"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsLocked(!isLocked);
+                resetControlsTimer();
+              }}
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-130 size-10 md:size-11 rounded-full bg-black/60 hover:bg-black/80 border border-white/10 text-white flex items-center justify-center cursor-pointer shadow-2xl backdrop-blur-md transition-colors"
+              title={isLocked ? 'Unlock Screen' : 'Lock Screen'}
+            >
+              {isLocked ? (
+                <Lock className="size-5 text-primary opacity-40" />
+              ) : (
+                <Unlock className="size-5 text-white/80" />
+              )}
+            </motion.button>
+          )}
+        </AnimatePresence>
+
+        {/* Controls - only visible when unlocked and controls are showing */}
+        <AnimatePresence>
+          {!isLocked && showControls && (
+            <VideoControls
+              showControls={showControls}
+              currentTime={currentTime}
+              duration={duration}
+              bufferedTime={bufferedTime}
+              isPlaying={isPlaying}
+              skipAmount={skipAmount}
+              showSkipConfig={showSkipConfig}
+              volume={volume}
+              isMuted={isMuted}
+              isFullscreen={isFullscreen}
+              isRotated={isRotated}
+              togglePlay={togglePlay}
+              handleSkipForward={handleSkipForward}
+              handleSkipBackward={handleSkipBackward}
+              setSkipAmount={setSkipAmount}
+              setShowSkipConfig={setShowSkipConfig}
+              toggleMute={toggleMute}
+              handleVolumeChange={handleVolumeChange}
+              handleScrubberChange={handleScrubberChange}
+              formatTime={formatTime}
+              toggleFullscreen={toggleFullscreen}
+              toggleRotation={toggleRotation}
+            />
+          )}
+        </AnimatePresence>
       </motion.div>
     </AnimatePresence>
   );

@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils';
 import { DashboardNavbarSearch } from './DashboardNavbarSearch';
 import { DashboardNavbarActions } from './DashboardNavbarActions';
 import BreadcrumbComponent from '../Breadcrumb/Breadcrumb';
-import { useLocation } from 'react-router';
+import { Link, useLocation } from 'react-router';
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { trpc } from '@/utils/trpc';
@@ -59,10 +59,13 @@ function DashboardNavbar({ className }: { className?: string }) {
           className="max-w-sm hidden md:block"
           items={breadcrumbItems}
         />
-        <div className="md:hidden flex items-center gap-2 lock">
+        <Link
+          to="/dashboard"
+          className="md:hidden flex items-center gap-2 lock"
+        >
           <Logo className="size-8" />
           <h1 className="text-lg font-bold">Aset</h1>
-        </div>
+        </Link>
         <div className="flex items-center justify-between gap-4 w-fit md:w-full md:max-w-xl">
           <DashboardNavbarSearch className="flex-1 hidden md:block" />
           <DashboardNavbarActions />

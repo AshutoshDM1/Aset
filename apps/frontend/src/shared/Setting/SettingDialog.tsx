@@ -6,10 +6,10 @@
 import { X } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { useSettingStore } from './settingStore';
+import { useSettingStore } from './Storage/settingStore';
 import { SettingSidebar } from './SettingSidebar';
-import { StorageOverview } from './StorageOverview';
-import { StoragePlans } from './StoragePlans';
+import { StorageOverview } from './Storage/StorageOverview';
+import { StoragePlans } from './Storage/StoragePlans';
 
 function RightPanel() {
   const { activeTab, storageView } = useSettingStore();
@@ -32,11 +32,11 @@ export function SettingDialog() {
       }}
     >
       <DialogContent
-        className="p-0 overflow-hidden flex flex-col rounded-2xl border border-border/60 bg-background shadow-2xl sm:max-w-2xl max-h-[85vh]"
+        className="p-0 overflow-hidden flex flex-col rounded-2xl border border-border/60 bg-background shadow-2xl w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] sm:max-h-[85vh]"
         showCloseButton={false}
       >
         {/* Title bar */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-border/50 shrink-0">
+        <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-3.5 border-b border-border/50 shrink-0">
           <DialogTitle className="text-sm font-semibold">Settings</DialogTitle>
           <button
             onClick={closeDialog}
@@ -47,10 +47,10 @@ export function SettingDialog() {
           </button>
         </div>
 
-        {/* Two-panel body */}
-        <div className="flex flex-1 overflow-hidden min-h-0">
+        {/* Body: stacked on mobile, side-by-side on sm+ */}
+        <div className="flex flex-col sm:flex-row flex-1 overflow-hidden min-h-0">
           <SettingSidebar />
-          <main className="flex-1 overflow-y-auto p-6">
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6">
             <RightPanel />
           </main>
         </div>

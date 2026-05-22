@@ -6,6 +6,8 @@ interface VideoViewportProps {
   fileUrl: string;
   isPlaying: boolean;
   isBuffering: boolean;
+  isLocked: boolean;
+  isRotated: boolean;
   handleWaiting: () => void;
   handlePlaying: () => void;
   handleSeeked: () => void;
@@ -21,6 +23,8 @@ export function VideoViewport({
   fileUrl,
   isPlaying,
   isBuffering,
+  isLocked,
+  isRotated,
   handleWaiting,
   handlePlaying,
   handleSeeked,
@@ -31,15 +35,7 @@ export function VideoViewport({
   setIsPlaying,
 }: VideoViewportProps) {
   return (
-    <div
-      className="flex-1 flex items-center justify-center relative cursor-pointer"
-      onClick={(e) => {
-        // Only toggle play if clicking main container, not controls
-        if (e.target === e.currentTarget) {
-          togglePlay();
-        }
-      }}
-    >
+    <div className="flex-1 flex items-center justify-center relative cursor-pointer overflow-hidden w-full h-full">
       <video
         ref={videoRef}
         src={fileUrl}
@@ -51,8 +47,20 @@ export function VideoViewport({
         onPlaying={handlePlaying}
         onSeeked={handleSeeked}
         onCanPlay={handlePlaying}
-        onClick={togglePlay}
-        className="max-h-screen max-w-full object-contain pointer-events-auto"
+        onClick={isLocked ? undefined : togglePlay}
+        className="max-h-screen max-w-full object-contain pointer-events-auto transition-all duration-300 ease-out"
+        style={
+          isRotated
+            ? {
+                transform: 'rotate(90deg)',
+                width: '100vh',
+                height: '100vw',
+                maxWidth: 'none',
+                maxHeight: 'none',
+                objectFit: 'contain',
+              }
+            : {}
+        }
         playsInline
         preload="auto"
       />
@@ -70,7 +78,8 @@ export function VideoViewport({
             <div className="size-7 rounded-full border-3 border-white/20 border-t-primary animate-spin" />
           </motion.div>
         ) : (
-          !isPlaying && (
+          !isPlaying &&
+          !isLocked && (
             <motion.div
               key="play"
               whileTap={{ scale: 0.9 }}

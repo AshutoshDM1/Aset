@@ -4,12 +4,14 @@ interface UseVideoPlayerProps {
   open: boolean;
   onClose: () => void;
   videoRef: React.RefObject<HTMLVideoElement | null>;
+  containerRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export function useVideoPlayer({
   open,
   onClose,
   videoRef,
+  containerRef,
 }: UseVideoPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -22,9 +24,18 @@ export function useVideoPlayer({
   const [bufferedTime, setBufferedTime] = useState(0);
   const [isBuffering, setIsBuffering] = useState(false);
 
+  // New lock, fullscreen, and rotation states
+  const [isLocked, setIsLocked] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isRotated, setIsRotated] = useState(false);
+
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const resetControlsTimer = () => {
+    if (isLocked) {
+      setShowControls(false);
+      return;
+    }
     setShowControls(true);
     if (controlsTimeoutRef.current) {
       clearTimeout(controlsTimeoutRef.current);
@@ -37,6 +48,29 @@ export function useVideoPlayer({
     }, 3000);
   };
 
+  // Sync fullscreen change event
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const active = document.fullscreenElement === containerRef.current;
+      setIsFullscreen(active);
+      if (!active) {
+        setIsRotated(false); // Reset rotation when exiting fullscreen
+        if (window.screen && window.screen.orientation) {
+          try {
+            const orientation = window.screen.orientation as any;
+            if (typeof orientation.unlock === 'function') {
+              orientation.unlock();
+            }
+          } catch (e) {}
+        }
+      }
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, [containerRef]);
+
   useEffect(() => {
     if (open) {
       resetControlsTimer();
@@ -46,7 +80,7 @@ export function useVideoPlayer({
         clearTimeout(controlsTimeoutRef.current);
       }
     };
-  }, [open, isPlaying]);
+  }, [open, isPlaying, isLocked]);
 
   // Handle Play/Pause
   const togglePlay = () => {
@@ -158,10 +192,46 @@ export function useVideoPlayer({
     resetControlsTimer();
   };
 
+  const toggleFullscreen = async () => {
+    if (!containerRef.current) return;
+    try {
+      if (!document.fullscreenElement) {
+        await containerRef.current.requestFullscreen();
+        setIsFullscreen(true);
+        // Try auto-locking orientation to landscape on mobile
+        if (window.screen && window.screen.orientation) {
+          try {
+            const orientation = window.screen.orientation as any;
+            if (typeof orientation.lock === 'function') {
+              await orientation.lock('landscape');
+            }
+          } catch (e) {}
+        }
+      } else {
+        await document.exitFullscreen();
+        setIsFullscreen(false);
+      }
+    } catch (err) {
+      console.error('Fullscreen toggle failed:', err);
+    }
+  };
+
+  const toggleRotation = () => {
+    setIsRotated((prev) => !prev);
+  };
+
   // Keyboard controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!open) return;
+
+      // When locked, block all hotkeys except Escape
+      if (isLocked) {
+        if (e.key === 'Escape') {
+          onClose();
+        }
+        return;
+      }
 
       // Ignore if user typing in input (e.g. custom skip input)
       if (
@@ -212,7 +282,7 @@ export function useVideoPlayer({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [open, isPlaying, volume, isMuted, skipAmount, duration]);
+  }, [open, isPlaying, volume, isMuted, skipAmount, duration, isLocked]);
 
   return {
     isPlaying,
@@ -241,5 +311,12 @@ export function useVideoPlayer({
     handleLoadedMetadata,
     handleScrubberChange,
     resetControlsTimer,
+    // lock, fullscreen, and rotation features
+    isLocked,
+    setIsLocked,
+    isFullscreen,
+    toggleFullscreen,
+    isRotated,
+    toggleRotation,
   };
 }

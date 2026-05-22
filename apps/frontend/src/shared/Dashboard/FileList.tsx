@@ -89,7 +89,7 @@ export function FileList({ mode = 'recent' }: FileListProps) {
   }
 
   return (
-    <ul className="flex gap-5">
+    <ul className="grid grid-cols-3 md:grid-cols-8 xl:grid-cols-12 justify-evenly">
       {files.map((file) => (
         <li key={file.id} className="flex items-start justify-center">
           {isImageFileName(file.name) ? (

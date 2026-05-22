@@ -81,7 +81,7 @@ export function FolderContents({
   }
 
   return (
-    <ul className="flex gap-5">
+    <ul className="grid grid-cols-3 md:grid-cols-8 xl:grid-cols-10 justify-evenly">
       {folders.map((item, index) => (
         <li key={`f-${item.id}`}>
           <FolderComponent
@@ -95,7 +95,7 @@ export function FolderContents({
         </li>
       ))}
       {imageFiles.map((item) => (
-        <li key={`file-${item.id}`} className="flex items-start justify-center">
+        <li key={`file-${item.id}`} className="flex">
           <ImageFilePreview
             fileId={item.id}
             name={item.name}
@@ -107,7 +107,7 @@ export function FolderContents({
         </li>
       ))}
       {pdfFiles.map((item) => (
-        <li key={`file-${item.id}`} className="flex items-start justify-center">
+        <li key={`file-${item.id}`} className="flex">
           <PdfFilePreview
             fileId={item.id}
             name={item.name}
@@ -119,7 +119,7 @@ export function FolderContents({
         </li>
       ))}
       {videoFiles.map((item) => (
-        <li key={`file-${item.id}`} className="flex items-start justify-center">
+        <li key={`file-${item.id}`} className="flex">
           <VideoFilePreview
             fileId={item.id}
             name={item.name}
@@ -131,7 +131,7 @@ export function FolderContents({
         </li>
       ))}
       {textFiles.map((item) => (
-        <li key={`file-${item.id}`} className="flex items-start justify-center">
+        <li key={`file-${item.id}`} className="flex">
           <TextFilePreview
             fileId={item.id}
             name={item.name}
@@ -143,7 +143,7 @@ export function FolderContents({
         </li>
       ))}
       {otherFiles.map((item) => (
-        <li key={`file-${item.id}`} className="flex items-start justify-center">
+        <li key={`file-${item.id}`} className="flex">
           <OtherFileTile
             fileId={item.id}
             name={item.name}

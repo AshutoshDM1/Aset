@@ -114,7 +114,7 @@ export function FolderList({ mode = 'all', parentFolderId }: FolderListProps) {
   }
 
   return (
-    <ul className="flex gap-5">
+    <ul className="grid grid-cols-3 md:grid-cols-8 xl:grid-cols-12 justify-evenly">
       {folders.map((folder, index) => (
         <li key={folder.id}>
           <FolderComponent

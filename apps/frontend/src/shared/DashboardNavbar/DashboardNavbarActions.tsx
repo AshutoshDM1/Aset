@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 
-import { useSettingStore } from '@/shared/Setting/settingStore';
+import { useSettingStore } from '@/shared/Setting/Storage/settingStore';
 
 export function DashboardNavbarActions() {
   const openSettings = useSettingStore((state) => state.openDialog);

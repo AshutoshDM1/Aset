@@ -55,7 +55,9 @@ export function StatCard({
           <HugeiconsIcon icon={TrendIcon} size={12} strokeWidth={2} />
           {change}
         </span>
-        {hint ? <span className="text-muted-foreground">{hint}</span> : null}
+        {hint ? (
+          <span className="text-muted-foreground text-[10px]">{hint}</span>
+        ) : null}
       </div>
     </div>
   );

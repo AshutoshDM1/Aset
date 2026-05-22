@@ -58,7 +58,7 @@ function SidebarNavItem({ item }: { item: SidebarItem }) {
   );
 }
 
-import { useSettingStore } from '@/shared/Setting/settingStore';
+import { useSettingStore } from '@/shared/Setting/Storage/settingStore';
 
 const MB_PER_GB = 1024;
 

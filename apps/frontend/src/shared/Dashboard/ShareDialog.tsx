@@ -238,7 +238,7 @@ export function ShareDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton
-        className="sm:max-w-md md:max-w-lg p-6 rounded-3xl overflow-hidden"
+        className="w-[calc(100vw-2rem)] sm:max-w-md md:max-w-lg p-4 sm:p-6 rounded-3xl overflow-hidden"
       >
         {isPendingDelay && (
           <div className="absolute z-10 inset-0 bg-black/15 backdrop-blur-sm flex justify-center items-center">
@@ -247,7 +247,7 @@ export function ShareDialog({
         )}
 
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold flex items-center justify-between gap-2">
+          <DialogTitle className="text-lg sm:text-xl font-bold flex items-center justify-between gap-2">
             <span className="truncate">Share "{folderName}"</span>
           </DialogTitle>
           <DialogDescription>
@@ -301,7 +301,7 @@ export function ShareDialog({
                         disabled={isPending}
                       />
                     </div>
-                    <div className="flex gap-2 shrink-0">
+                    <div className="flex gap-2 shrink-0 w-full sm:w-auto">
                       <Select
                         value={inviteRole}
                         onValueChange={(val) =>
@@ -311,7 +311,7 @@ export function ShareDialog({
                       >
                         <SelectTrigger
                           size="default"
-                          className="h-10 w-28 rounded-xl bg-input/20 border-border/80 text-xs px-3"
+                          className="h-10 flex-1 sm:w-28 rounded-xl bg-input/20 border-border/80 text-xs px-3"
                         >
                           <SelectValue />
                         </SelectTrigger>
@@ -333,7 +333,7 @@ export function ShareDialog({
 
                       <Button
                         type="submit"
-                        className="h-10 rounded-xl px-4 font-semibold shadow-xs hover:scale-[1.01] active:scale-[0.99] transition-all gap-1.5 shrink-0"
+                        className="h-10 flex-1 sm:flex-initial rounded-xl px-4 font-semibold shadow-xs hover:scale-[1.01] active:scale-[0.99] transition-all gap-1.5 shrink-0"
                         disabled={isPending || !emailInput.trim()}
                       >
                         <UserPlus className="size-4" />
@@ -357,7 +357,7 @@ export function ShareDialog({
 
                   <div className="max-h-56 overflow-y-auto divide-y divide-border/40 rounded-xl border border-border/80 bg-background shadow-inner">
                     {/* Owner Row */}
-                    <div className="flex items-center justify-between p-3 gap-4 hover:bg-muted/5 transition-colors">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 gap-3 sm:gap-4 hover:bg-muted/5 transition-colors">
                       <div className="flex items-center gap-3 min-w-0">
                         <Avatar
                           size="default"
@@ -368,7 +368,7 @@ export function ShareDialog({
                           </AvatarFallback>
                         </Avatar>
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                          <p className="text-sm font-semibold text-foreground flex items-center gap-1.5 flex-wrap">
                             Workspace Owner
                             <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-semibold select-none">
                               Owner
@@ -379,7 +379,7 @@ export function ShareDialog({
                           </p>
                         </div>
                       </div>
-                      <span className="text-xs text-muted-foreground font-semibold bg-muted px-2.5 py-1 rounded-xl select-none">
+                      <span className="text-xs text-muted-foreground font-semibold bg-muted px-2.5 py-1 rounded-xl select-none self-start sm:self-auto">
                         Owner
                       </span>
                     </div>
@@ -402,7 +402,7 @@ export function ShareDialog({
                         return (
                           <div
                             key={share.id}
-                            className="flex items-center justify-between p-3 gap-4 hover:bg-muted/5 transition-colors"
+                            className="flex flex-col sm:flex-row sm:items-center justify-between p-3 gap-3 sm:gap-4 hover:bg-muted/5 transition-colors"
                           >
                             <div className="flex items-center gap-3 min-w-0">
                               <Avatar
@@ -428,7 +428,7 @@ export function ShareDialog({
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-2 shrink-0">
+                            <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto border-t sm:border-t-0 border-border/20 pt-2 sm:pt-0 shrink-0">
                               <Select
                                 value={share.canUpload ? 'editor' : 'viewer'}
                                 onValueChange={(val) =>
@@ -441,7 +441,7 @@ export function ShareDialog({
                               >
                                 <SelectTrigger
                                   size="sm"
-                                  className="h-8 w-24 rounded-xl bg-muted/40 border-muted text-xs px-2"
+                                  className="h-8 flex-1 sm:flex-initial sm:w-24 rounded-xl bg-muted/40 border-muted text-xs px-2"
                                 >
                                   <SelectValue />
                                 </SelectTrigger>
@@ -465,7 +465,7 @@ export function ShareDialog({
                                 type="button"
                                 variant="ghost"
                                 size="icon-sm"
-                                className="size-8 text-destructive hover:bg-destructive/10 hover:text-destructive rounded-full transition-colors"
+                                className="size-8 text-destructive hover:bg-destructive/10 hover:text-destructive rounded-full transition-colors shrink-0"
                                 onClick={() =>
                                   removeShareMutation.mutate({
                                     folderId: id,
@@ -495,10 +495,10 @@ export function ShareDialog({
                   <div className="absolute -inset-px bg-linear-to-r from-primary/5 via-primary/0 to-primary/5 opacity-50 rounded-xl pointer-events-none" />
 
                   <div className="flex items-start justify-between gap-4 relative">
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 min-w-0">
                       <div
                         className={cn(
-                          'rounded-lg transition-all duration-300 mt-1',
+                          'rounded-lg transition-all duration-300 mt-1 shrink-0',
                           settings.isPublic
                             ? 'text-primary'
                             : 'text-muted-foreground',
@@ -506,7 +506,7 @@ export function ShareDialog({
                       >
                         <Globe className="size-5" />
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <h4 className="font-semibold text-sm">
                           Public link sharing
                         </h4>
@@ -520,7 +520,7 @@ export function ShareDialog({
                       checked={settings.isPublic}
                       onCheckedChange={handleTogglePublic}
                       disabled={isPending}
-                      className="mt-1"
+                      className="mt-1 shrink-0"
                     />
                   </div>
 
@@ -543,7 +543,7 @@ export function ShareDialog({
                         >
                           <SelectTrigger
                             size="sm"
-                            className="h-8 w-48 rounded-xl bg-background border-border text-xs px-2.5"
+                            className="h-8 w-full sm:w-48 rounded-xl bg-background border-border text-xs px-2.5"
                           >
                             <SelectValue />
                           </SelectTrigger>
@@ -565,29 +565,29 @@ export function ShareDialog({
                       </div>
 
                       {/* Copy Link Input block */}
-                      <div className="flex items-center gap-2 mt-2 bg-background border border-border/80 rounded-xl p-1.5 shadow-xs">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mt-2 bg-background border border-border/80 rounded-xl p-1.5 shadow-xs">
                         <Input
                           readOnly
-                          className="text-xs bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-8 font-mono select-all flex-1 text-muted-foreground"
+                          className="text-xs bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-8 font-mono select-all flex-1 text-muted-foreground min-w-0 w-full text-center sm:text-left px-2"
                           value={`${window.location.origin}/dashboard/folder/${id}`}
                         />
                         <Button
                           size="sm"
                           onClick={handleCopyLink}
                           className={cn(
-                            'h-8 px-4 rounded-lg transition-all duration-300 font-semibold text-xs shrink-0',
+                            'h-8 px-4 rounded-lg transition-all duration-300 font-semibold text-xs shrink-0 w-full sm:w-auto',
                             copiedLink
                               ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border border-emerald-500/30'
                               : 'bg-primary text-primary-foreground hover:scale-[1.02] shadow-xs',
                           )}
                         >
                           {copiedLink ? (
-                            <span className="flex items-center gap-1.5 animate-in fade-in zoom-in-95 duration-200">
+                            <span className="flex items-center gap-1.5 justify-center w-full animate-in fade-in zoom-in-95 duration-200">
                               <Check className="size-3 text-emerald-500 stroke-3" />
                               Copied!
                             </span>
                           ) : (
-                            <span className="flex items-center gap-1.5">
+                            <span className="flex items-center gap-1.5 justify-center w-full">
                               <Copy className="size-3" />
                               Copy Link
                             </span>
@@ -613,12 +613,12 @@ export function ShareDialog({
                   </p>
 
                   <div className="space-y-3 pt-2 border-t border-border/40">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="space-y-0.5 min-w-0">
                         <Label className="text-xs font-semibold flex items-center gap-1.5">
                           Display my full name
                         </Label>
-                        <p className="text-[10px] text-muted-foreground leading-none">
+                        <p className="text-[10px] text-muted-foreground leading-normal">
                           Allows other users to see your real profile name.
                         </p>
                       </div>
@@ -627,15 +627,16 @@ export function ShareDialog({
                         checked={settings.showOwnerName}
                         onCheckedChange={handleToggleOwnerName}
                         disabled={isPending}
+                        className="shrink-0"
                       />
                     </div>
 
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="space-y-0.5 min-w-0">
                         <Label className="text-xs font-semibold flex items-center gap-1.5">
                           Display my email address
                         </Label>
-                        <p className="text-[10px] text-muted-foreground leading-none">
+                        <p className="text-[10px] text-muted-foreground leading-normal">
                           Allows other users to contact you directly.
                         </p>
                       </div>
@@ -644,6 +645,7 @@ export function ShareDialog({
                         checked={settings.showOwnerEmail}
                         onCheckedChange={handleToggleOwnerEmail}
                         disabled={isPending}
+                        className="shrink-0"
                       />
                     </div>
                   </div>

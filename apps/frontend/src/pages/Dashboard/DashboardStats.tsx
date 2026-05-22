@@ -6,6 +6,7 @@ import { StorageUsage } from './components/StorageUsage';
 import { UploadsChart } from './components/UploadsChart';
 import { FileTypeBreakdown } from './components/FileTypeBreakdown';
 import { RecentActivity } from './components/RecentActivity';
+import GetStarted from './components/GetStarted';
 
 export default function DashboardStats() {
   const { data, isLoading } = useQuery(
@@ -14,6 +15,13 @@ export default function DashboardStats() {
 
   if (isLoading || !data) {
     return <Loader />;
+  }
+
+  const foldersStat = data.overview.find((item) => item.id === 'folders');
+  const hasNoFolders = !foldersStat || foldersStat.value === '0';
+
+  if (hasNoFolders) {
+    return <GetStarted />;
   }
 
   return (

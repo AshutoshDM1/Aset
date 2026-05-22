@@ -6,6 +6,8 @@ import {
   Settings,
   Volume2,
   VolumeX,
+  Maximize,
+  Minimize,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
@@ -20,6 +22,8 @@ interface VideoControlsProps {
   showSkipConfig: boolean;
   volume: number;
   isMuted: boolean;
+  isFullscreen: boolean;
+  isRotated: boolean;
   togglePlay: () => void;
   handleSkipForward: () => void;
   handleSkipBackward: () => void;
@@ -29,6 +33,8 @@ interface VideoControlsProps {
   handleVolumeChange: (volume: number) => void;
   handleScrubberChange: (time: number) => void;
   formatTime: (time: number) => string;
+  toggleFullscreen: () => void;
+  toggleRotation: () => void;
 }
 
 export function VideoControls({
@@ -41,6 +47,8 @@ export function VideoControls({
   showSkipConfig,
   volume,
   isMuted,
+  isFullscreen,
+  isRotated,
   togglePlay,
   handleSkipForward,
   handleSkipBackward,
@@ -50,6 +58,8 @@ export function VideoControls({
   handleVolumeChange,
   handleScrubberChange,
   formatTime,
+  toggleFullscreen,
+  toggleRotation,
 }: VideoControlsProps) {
   const watchedPct = (currentTime / (duration || 1)) * 100;
   const bufferedPct = (bufferedTime / (duration || 1)) * 100;
@@ -163,30 +173,57 @@ export function VideoControls({
                   initial={{ opacity: 0, y: 15, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 15, scale: 0.95 }}
-                  className="absolute bottom-12 left-0 z-120 bg-black/95 border border-white/10 backdrop-blur-md rounded-xl p-3 shadow-2xl flex flex-col gap-2 min-w-44 select-none"
+                  className="absolute bottom-12 left-0 z-120 bg-black/95 border border-white/10 backdrop-blur-md rounded-xl p-3 shadow-2xl flex flex-col gap-3.5 min-w-48 select-none"
                 >
-                  <span className="text-[10px] font-bold tracking-wider text-white/40 uppercase">
-                    Skip Duration
-                  </span>
-                  <div className="flex bg-white/5 p-0.5 rounded-lg gap-1 text-[11px] font-semibold">
-                    {[5, 10, 15, 30].map((s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => {
-                          setSkipAmount(s);
-                          setShowSkipConfig(false);
-                        }}
-                        className={cn(
-                          'flex-1 py-1 rounded transition-colors cursor-pointer',
-                          skipAmount === s
-                            ? 'bg-white/15 text-white'
-                            : 'text-white/60 hover:text-white hover:bg-white/5',
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-[10px] font-bold tracking-wider text-white/40 uppercase">
+                      Skip Duration
+                    </span>
+                    <div className="flex bg-white/5 p-0.5 rounded-lg gap-1 text-[11px] font-semibold">
+                      {[5, 10, 15, 30].map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => {
+                            setSkipAmount(s);
+                            setShowSkipConfig(false);
+                          }}
+                          className={cn(
+                            'flex-1 py-1 rounded transition-colors cursor-pointer',
+                            skipAmount === s
+                              ? 'bg-white/15 text-white'
+                              : 'text-white/60 hover:text-white hover:bg-white/5',
+                          )}
+                        >
+                          {s}s
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-white/10 w-full" />
+
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-[10px] font-bold tracking-wider text-white/40 uppercase">
+                      Screen Options
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        toggleFullscreen();
+                        setShowSkipConfig(false);
+                      }}
+                      className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold text-white/80 hover:text-white bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
+                    >
+                      <span className="flex items-center gap-2">
+                        {isFullscreen ? (
+                          <Minimize className="size-3.5" />
+                        ) : (
+                          <Maximize className="size-3.5" />
                         )}
-                      >
-                        {s}s
-                      </button>
-                    ))}
+                        {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                      </span>
+                    </button>
                   </div>
                 </motion.div>
               )}
@@ -194,8 +231,9 @@ export function VideoControls({
           </div>
         </div>
 
-        {/* Volume controls and slider bar */}
-        <div className="flex items-center gap-2 max-w-[35%] md:max-w-none">
+        {/* Volume, Rotation & Fullscreen controls */}
+        <div className="flex items-center gap-2 max-w-[45%] md:max-w-none">
+          {/* Volume Mute Toggle */}
           <motion.button
             type="button"
             onClick={toggleMute}
@@ -211,6 +249,7 @@ export function VideoControls({
             )}
           </motion.button>
 
+          {/* Volume Slider Bar */}
           <input
             type="range"
             min="0"
@@ -226,6 +265,28 @@ export function VideoControls({
               background: `linear-gradient(to right, #fff 0%, #fff ${(isMuted ? 0 : volume) * 100}%, rgba(255, 255, 255, 0.2) ${(isMuted ? 0 : volume) * 100}%, rgba(255, 255, 255, 0.2) 100%)`,
             }}
           />
+
+          {/* Manual Rotate Button */}
+          <motion.button
+            type="button"
+            onClick={toggleRotation}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className={cn(
+              'hidden size-9 md:size-10 rounded-xl md:flex items-center justify-center cursor-pointer border transition-all shrink-0',
+              isRotated
+                ? 'bg-primary/20 border-primary/30 text-primary'
+                : 'bg-white/5 border-white/5 text-white/85 hover:bg-white/15 hover:text-white',
+            )}
+            title="Rotate Video 90°"
+          >
+            <RotateCw
+              className={cn(
+                'size-4.5 transition-transform duration-300',
+                isRotated && 'rotate-90',
+              )}
+            />
+          </motion.button>
         </div>
       </div>
     </motion.div>
