@@ -126,3 +126,20 @@ export async function deleteObject(objectKey: string): Promise<void> {
   });
   await client.send(command);
 }
+
+export async function uploadObject(
+  objectKey: string,
+  body: Buffer,
+  contentType: string,
+): Promise<void> {
+  const bucket = process.env.R2_BUCKET?.trim();
+  if (!bucket) throw new Error('R2_BUCKET is required');
+  const client = r2Client();
+  const command = new PutObjectCommand({
+    Bucket: bucket,
+    Key: objectKey,
+    Body: body,
+    ContentType: contentType,
+  });
+  await client.send(command);
+}

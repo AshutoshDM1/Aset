@@ -1,4 +1,4 @@
-import { ArrowUpDown, LayoutGrid, List } from 'lucide-react';
+import { ArrowUpDown, LayoutGrid, List, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   useViewMode,
@@ -27,86 +27,158 @@ export const DashboardToolbar = () => {
   } = useViewMode();
 
   return (
-    <div className="flex items-center gap-1.5 rounded-xl border border-border bg-muted/40 p-1 select-none">
-      {/* View Mode Toggle */}
-      <div className="flex items-center gap-0.5">
-        <Button
-          variant="ghost"
-          size="icon"
-          className={cn(
-            'size-8 rounded-lg transition-all cursor-pointer',
-            viewMode === 'grid'
-              ? 'bg-background shadow-xs text-primary'
-              : 'text-muted-foreground hover:text-foreground',
-          )}
-          onClick={() => setViewMode('grid')}
-          title="Grid View"
-        >
-          <LayoutGrid className="size-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className={cn(
-            'size-8 rounded-lg transition-all cursor-pointer',
-            viewMode === 'table'
-              ? 'bg-background shadow-xs text-primary'
-              : 'text-muted-foreground hover:text-foreground',
-          )}
-          onClick={() => setViewMode('table')}
-          title="Table View"
-        >
-          <List className="size-4" />
-        </Button>
-      </div>
-
-      <div className="w-px h-4 bg-border/60 shrink-0 mx-0.5" />
-
-      {/* Sort Controls */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+    <>
+      {/* Desktop Toolbar - Hidden on Mobile */}
+      <div className="hidden sm:flex items-center gap-1.5 rounded-xl border border-border bg-muted/40 p-1 select-none">
+        {/* View Mode Toggle */}
+        <div className="flex items-center gap-0.5">
           <Button
             variant="ghost"
             size="icon"
-            className="size-8 rounded-lg text-muted-foreground hover:text-foreground transition-all cursor-pointer"
-            title="Sort options"
+            className={cn(
+              'size-8 rounded-lg transition-all cursor-pointer',
+              viewMode === 'grid'
+                ? 'bg-background shadow-xs text-primary'
+                : 'text-muted-foreground hover:text-foreground',
+            )}
+            onClick={() => setViewMode('grid')}
+            title="Grid View"
           >
-            <ArrowUpDown className="size-4" />
+            <LayoutGrid className="size-4" />
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuLabel>Sort By</DropdownMenuLabel>
-          <DropdownMenuRadioGroup
-            value={sortField}
-            onValueChange={(val) => setSortField(val as SortField)}
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              'size-8 rounded-lg transition-all cursor-pointer',
+              viewMode === 'table'
+                ? 'bg-background shadow-xs text-primary'
+                : 'text-muted-foreground hover:text-foreground',
+            )}
+            onClick={() => setViewMode('table')}
+            title="Table View"
           >
-            <DropdownMenuRadioItem className="cursor-pointer" value="name">
-              Name
-            </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem className="cursor-pointer" value="createdAt">
-              Date Created
-            </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem className="cursor-pointer" value="size">
-              Size
-            </DropdownMenuRadioItem>
-          </DropdownMenuRadioGroup>
+            <List className="size-4" />
+          </Button>
+        </div>
 
-          <DropdownMenuSeparator />
+        <div className="w-px h-4 bg-border/60 shrink-0 mx-0.5" />
 
-          <DropdownMenuLabel>Order</DropdownMenuLabel>
-          <DropdownMenuRadioGroup
-            value={sortOrder}
-            onValueChange={(val) => setSortOrder(val as SortOrder)}
-          >
-            <DropdownMenuRadioItem className="cursor-pointer" value="asc">
-              Ascending
-            </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem className="cursor-pointer" value="desc">
-              Descending
-            </DropdownMenuRadioItem>
-          </DropdownMenuRadioGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+        {/* Sort Controls */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8 rounded-lg text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+              title="Sort options"
+            >
+              <ArrowUpDown className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuLabel>Sort By</DropdownMenuLabel>
+            <DropdownMenuRadioGroup
+              value={sortField}
+              onValueChange={(val) => setSortField(val as SortField)}
+            >
+              <DropdownMenuRadioItem className="cursor-pointer" value="name">
+                Name
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem
+                className="cursor-pointer"
+                value="createdAt"
+              >
+                Date Created
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem className="cursor-pointer" value="size">
+                Size
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+
+            <DropdownMenuSeparator />
+
+            <DropdownMenuLabel>Order</DropdownMenuLabel>
+            <DropdownMenuRadioGroup
+              value={sortOrder}
+              onValueChange={(val) => setSortOrder(val as SortOrder)}
+            >
+              <DropdownMenuRadioItem className="cursor-pointer" value="asc">
+                Ascending
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem className="cursor-pointer" value="desc">
+                Descending
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      {/* Mobile Toolbar - Hidden on Desktop */}
+      <div className="flex sm:hidden">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-9 rounded-xl border-border bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all cursor-pointer"
+              title="View & Sort options"
+            >
+              <MoreVertical className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuLabel>View Mode</DropdownMenuLabel>
+            <DropdownMenuRadioGroup
+              value={viewMode}
+              onValueChange={(val) => setViewMode(val as 'grid' | 'table')}
+            >
+              <DropdownMenuRadioItem className="cursor-pointer" value="grid">
+                Grid View
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem className="cursor-pointer" value="table">
+                Table View
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+
+            <DropdownMenuSeparator />
+
+            <DropdownMenuLabel>Sort By</DropdownMenuLabel>
+            <DropdownMenuRadioGroup
+              value={sortField}
+              onValueChange={(val) => setSortField(val as SortField)}
+            >
+              <DropdownMenuRadioItem className="cursor-pointer" value="name">
+                Name
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem
+                className="cursor-pointer"
+                value="createdAt"
+              >
+                Date Created
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem className="cursor-pointer" value="size">
+                Size
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+
+            <DropdownMenuSeparator />
+
+            <DropdownMenuLabel>Order</DropdownMenuLabel>
+            <DropdownMenuRadioGroup
+              value={sortOrder}
+              onValueChange={(val) => setSortOrder(val as SortOrder)}
+            >
+              <DropdownMenuRadioItem className="cursor-pointer" value="asc">
+                Ascending
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem className="cursor-pointer" value="desc">
+                Descending
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </>
   );
 };

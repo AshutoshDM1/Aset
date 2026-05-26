@@ -43,8 +43,20 @@ type FileTableProps = {
 
 export function FileTable({ files, onRefetch }: FileTableProps) {
   const [preview, setPreview] = useState<FileItem | null>(null);
+  const [optimizationStats, setOptimizationStats] = useState<{
+    oldSize: number;
+    newSize: number;
+    savedPercent: number;
+  } | null>(null);
   const { selectedFileIds, toggleFile, selectFiles, clearSelection } =
     useSelectionStore();
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setPreview(null);
+      setOptimizationStats(null);
+    }
+  };
 
   const handleFileClick = (file: FileItem) => {
     if (file.url) {
@@ -185,7 +197,7 @@ export function FileTable({ files, onRefetch }: FileTableProps) {
 
       <ImagePreviewDialog
         open={!!preview && isImageFileName(preview.name)}
-        onOpenChange={(open) => !open && setPreview(null)}
+        onOpenChange={handleOpenChange}
         fileName={preview?.name ?? ''}
         imageUrl={preview?.url ?? ''}
         fileId={preview?.id}
@@ -194,6 +206,16 @@ export function FileTable({ files, onRefetch }: FileTableProps) {
         starred={preview?.starred}
         trashed={preview?.trashed}
         onRefetch={onRefetch}
+        optimizationStats={optimizationStats}
+        onOptimizeSuccess={(stats) => {
+          setOptimizationStats(stats);
+          const currentPreview = preview;
+          setPreview(null);
+          setTimeout(() => {
+            const updated = files.find((f) => f.id === currentPreview?.id);
+            setPreview(updated || currentPreview);
+          }, 600);
+        }}
       />
       <PdfPreviewDialog
         open={!!preview && isPdfFileName(preview.name)}

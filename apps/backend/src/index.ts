@@ -7,6 +7,7 @@ import cors from 'cors';
 import { appRouter } from './appRouter';
 import { createContext } from './context';
 import { clerkWebhookHandler } from './webhooks/clerk';
+import { optixUpdateFileHandler } from './webhooks/optix';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -24,7 +25,11 @@ app.post(
   clerkWebhookHandler,
 );
 
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Secure internal route for Optix image compression updates
+app.post('/api/optix/update-file', optixUpdateFileHandler);
 
 app.get('/', (req, res) => {
   res

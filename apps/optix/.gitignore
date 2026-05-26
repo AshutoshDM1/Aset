@@ -8,3 +8,4 @@ dist
 .env.production.local
 .vercel
 tmp
+server.exe

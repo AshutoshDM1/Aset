@@ -23,7 +23,6 @@ import { useOptimizeImage } from '../../hooks/useOptimizeImage';
 import { DetailsDialog } from './DetailsDialog';
 import { cn } from '@/lib/utils';
 import { motion, useMotionValue } from 'motion/react';
-
 type ImagePreviewDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -35,6 +34,16 @@ type ImagePreviewDialogProps = {
   starred?: boolean;
   trashed?: boolean;
   onRefetch?: () => void;
+  optimizationStats?: {
+    oldSize: number;
+    newSize: number;
+    savedPercent: number;
+  } | null;
+  onOptimizeSuccess?: (stats: {
+    oldSize: number;
+    newSize: number;
+    savedPercent: number;
+  }) => void;
 };
 
 export function ImagePreviewDialog({
@@ -48,6 +57,8 @@ export function ImagePreviewDialog({
   starred,
   trashed,
   onRefetch,
+  optimizationStats,
+  onOptimizeSuccess,
 }: ImagePreviewDialogProps) {
   const [scale, setScale] = useState(1);
   const [rotate, setRotate] = useState(0);
@@ -225,6 +236,44 @@ export function ImagePreviewDialog({
             </div>
           )}
 
+          {/* Optimization Stats Premium Banner */}
+          {optimizationStats && !isFullscreen && (
+            <motion.div
+              initial={{ opacity: 0, y: -15, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.4, ease: 'easeOut' }}
+              className="flex items-center justify-between gap-4 p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 backdrop-blur-md shadow-sm select-none"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex size-9 items-center justify-center rounded-lg bg-emerald-500/25 text-emerald-500 border border-emerald-500/30">
+                  <Sparkles className="size-5 animate-pulse" />
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                    Image Optimized successfully!
+                  </span>
+                  <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                    Reduced by{' '}
+                    <span className="font-bold text-sm text-emerald-800 dark:text-emerald-200">
+                      {optimizationStats.savedPercent.toFixed(1)}%
+                    </span>{' '}
+                    · Saved{' '}
+                    <span className="font-semibold">
+                      {(
+                        (optimizationStats.oldSize -
+                          optimizationStats.newSize) /
+                        1024
+                      ).toFixed(1)}{' '}
+                      KB
+                    </span>{' '}
+                    ({(optimizationStats.oldSize / 1024).toFixed(1)} KB →{' '}
+                    {(optimizationStats.newSize / 1024).toFixed(1)} KB)
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           {/* Normal Mode Toolbar */}
           {!isFullscreen && (
             <div className="flex flex-wrap items-center justify-between gap-2 bg-muted/40 border border-border/40 rounded-xl px-3 py-1.5 shrink-0 text-sm">
@@ -279,8 +328,20 @@ export function ImagePreviewDialog({
                   variant="secondary"
                   size="sm"
                   className="h-8 gap-1.5 rounded-lg px-3 font-medium text-xs shadow-sm"
-                  disabled={optimizeState === 'uploading'}
-                  onClick={() => optimize(imageUrl, fileName)}
+                  disabled={optimizeState === 'uploading' || !fileId}
+                  onClick={async () => {
+                    if (fileId) {
+                      const res = await optimize(imageUrl, fileName, fileId);
+                      if (res) {
+                        onRefetch?.();
+                        onOptimizeSuccess?.({
+                          oldSize: res.oldSize,
+                          newSize: res.newSize,
+                          savedPercent: res.savedPercent,
+                        });
+                      }
+                    }
+                  }}
                   title="Send to Optix · compress & verify"
                 >
                   {optimizeState === 'uploading' ? (
@@ -421,8 +482,20 @@ export function ImagePreviewDialog({
                 variant="ghost"
                 size="sm"
                 className="h-9 gap-1.5 text-white/80 hover:text-white hover:bg-white/10 rounded-xl px-3 text-xs font-semibold"
-                disabled={optimizeState === 'uploading'}
-                onClick={() => optimize(imageUrl, fileName)}
+                disabled={optimizeState === 'uploading' || !fileId}
+                onClick={async () => {
+                  if (fileId) {
+                    const res = await optimize(imageUrl, fileName, fileId);
+                    if (res) {
+                      onRefetch?.();
+                      onOptimizeSuccess?.({
+                        oldSize: res.oldSize,
+                        newSize: res.newSize,
+                        savedPercent: res.savedPercent,
+                      });
+                    }
+                  }
+                }}
                 title="Send to Optix · compress & verify"
               >
                 {optimizeState === 'uploading' ? (

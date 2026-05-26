@@ -45,6 +45,11 @@ type UnifiedTableProps = {
 
 export function UnifiedTable({ items, onRefetch }: UnifiedTableProps) {
   const [preview, setPreview] = useState<UnifiedItem | null>(null);
+  const [optimizationStats, setOptimizationStats] = useState<{
+    oldSize: number;
+    newSize: number;
+    savedPercent: number;
+  } | null>(null);
   const {
     selectedFolderIds,
     selectedFileIds,
@@ -54,6 +59,13 @@ export function UnifiedTable({ items, onRefetch }: UnifiedTableProps) {
     selectFiles,
     clearSelection,
   } = useSelectionStore();
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setPreview(null);
+      setOptimizationStats(null);
+    }
+  };
 
   const handleFileClick = (item: UnifiedItem) => {
     if (item.type === 'file' && item.url) {
@@ -229,7 +241,7 @@ export function UnifiedTable({ items, onRefetch }: UnifiedTableProps) {
 
       <ImagePreviewDialog
         open={!!preview && isImageFileName(preview.name)}
-        onOpenChange={(open) => !open && setPreview(null)}
+        onOpenChange={handleOpenChange}
         fileName={preview?.name ?? ''}
         imageUrl={preview?.url ?? ''}
         fileId={preview?.id}
@@ -238,6 +250,16 @@ export function UnifiedTable({ items, onRefetch }: UnifiedTableProps) {
         starred={preview?.starred}
         trashed={preview?.trashed}
         onRefetch={onRefetch}
+        optimizationStats={optimizationStats}
+        onOptimizeSuccess={(stats) => {
+          setOptimizationStats(stats);
+          const currentPreview = preview;
+          setPreview(null);
+          setTimeout(() => {
+            const updated = items.find((i) => i.id === currentPreview?.id);
+            setPreview(updated || currentPreview);
+          }, 600);
+        }}
       />
       <PdfPreviewDialog
         open={!!preview && isPdfFileName(preview.name)}

@@ -26,10 +26,22 @@ const ImageFilePreview = ({
 }: ImageFilePreviewProps) => {
   const [open, setOpen] = useState(false);
   const [errored, setErrored] = useState(false);
+  const [optimizationStats, setOptimizationStats] = useState<{
+    oldSize: number;
+    newSize: number;
+    savedPercent: number;
+  } | null>(null);
 
   const dot = name.lastIndexOf('.');
   const base = dot > 0 ? name.slice(0, dot) : name;
   const ext = dot > 0 ? name.slice(dot) : '';
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) {
+      setOptimizationStats(null);
+    }
+  };
 
   return (
     <>
@@ -76,7 +88,7 @@ const ImageFilePreview = ({
       </div>
       <ImagePreviewDialog
         open={open}
-        onOpenChange={setOpen}
+        onOpenChange={handleOpenChange}
         fileName={name}
         imageUrl={url}
         fileId={fileId}
@@ -85,6 +97,14 @@ const ImageFilePreview = ({
         starred={starred}
         trashed={trashed}
         onRefetch={onRefetch}
+        optimizationStats={optimizationStats}
+        onOptimizeSuccess={(stats) => {
+          setOptimizationStats(stats);
+          setOpen(false);
+          setTimeout(() => {
+            setOpen(true);
+          }, 600);
+        }}
       />
     </>
   );

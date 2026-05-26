@@ -86,7 +86,7 @@ export default function SingleFolder() {
   }
 
   return (
-    <div className="w-full rounded-lg bg-background p-4 shadow-sm ring-1 ring-border/60">
+    <div className="w-full rounded-lg bg-background p-2 sm:p-4 shadow-sm ring-1 ring-border/60">
       <DashboardHeader
         folderId={folder.id}
         folderName={folder.name}
