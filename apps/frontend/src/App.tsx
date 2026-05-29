@@ -10,10 +10,12 @@ import Trash from './pages/Trash/Trash';
 import MyFiles from './pages/MyFiles/MyFiles';
 import DashboardStats from './pages/Dashboard/DashboardStats';
 import RequireDashboardAccess from './shared/auth/RequireDashboardAccess';
+import FontChanger, { FontInitializer } from './shared/FontChanger/FontChanger';
 
 function App() {
   return (
     <>
+      <FontInitializer />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route element={<RequireDashboardAccess />}>
@@ -30,6 +32,7 @@ function App() {
         </Route>
         <Route path="*" element={<ErrorPage />} />
       </Routes>
+      <FontChanger />
     </>
   );
 }

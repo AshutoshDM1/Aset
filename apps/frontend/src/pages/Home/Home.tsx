@@ -1,7 +1,9 @@
 import Footer from '@/shared/Footer/Footer';
 import Navbar from '@/shared/Navbar/Navbar';
 import Section from '@/shared/Section/Sectiont';
-import Herosection from './Folds/Herosection';
+import Herosection from './Folds/Herosection/Herosection';
+import UnlimitedIntegrations from './Folds/UnlimitedIntegrations/UnlimitedIntegrations';
+import Workflow from './Folds/Workflow/Workflow';
 
 const Home = () => {
   return (
@@ -12,6 +14,12 @@ const Home = () => {
           <Herosection />
         </Section>
       </div>
+      <Section className="pt-10 md:pt-20">
+        <UnlimitedIntegrations />
+      </Section>
+      <Section className="pt-10 md:pt-20">
+        <Workflow />
+      </Section>
       <Footer />
     </>
   );

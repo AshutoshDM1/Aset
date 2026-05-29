@@ -12,7 +12,7 @@ interface BrandButtonProps {
 const BrandButton = ({
   className,
   to,
-  label = 'Button',
+  label,
   onClick,
   children,
 }: BrandButtonProps) => {
