@@ -14,6 +14,7 @@ import {
   SvgIcon,
   AsetBrandIcon,
 } from './UnlimitedIntegrationsWireframes';
+import Logo from '@/shared/Navbar/Logo';
 
 interface FileTypeItem {
   x: number;
@@ -274,11 +275,11 @@ export const ConnectionsDiagram: React.FC = () => {
                 default: { duration: 0.4 },
               }}
               className={cn(
-                'w-32 h-32 rounded-xl bg-linear-to-br from-indigo-600 via-violet-600 to-violet-500 dark:from-indigo-500 dark:via-violet-600 dark:to-violet-700 flex items-center justify-center border cursor-pointer',
+                'size-32 scale-75 -mt-4 rounded-xl bg-linear-to-br from-indigo-600 via-violet-600 to-violet-500 dark:from-indigo-500 dark:via-violet-600 dark:to-violet-700 flex items-center justify-center border cursor-pointer',
               )}
             >
-              <div className="scale-160 flex items-center justify-center">
-                <AsetBrandIcon />
+              <div className="flex items-center justify-center">
+                <Logo className="invert size-16" />
               </div>
             </motion.div>
           </foreignObject>

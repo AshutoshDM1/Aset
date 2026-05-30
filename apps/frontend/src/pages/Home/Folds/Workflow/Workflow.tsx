@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import SectionHeading from '@/shared/SectionHeading/SectionHeading';
+import WorkflowWireframe from './WorkflowWireframe';
 
 interface WorkflowStep {
   number: string;
@@ -38,15 +39,15 @@ const Workflow: React.FC = () => {
         description="Discover how Aset simplifies cloud backups, directory organization, and secure sharing in one sleek, unified interface."
         align="center"
       />
-      <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-6  py-16 px-4">
-        <div className="w-full flex flex-col items-start text-left gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2  gap-6  py-16 px-4">
+        <div className="w-full flex flex-col items-start text-left gap-8 max-w-xl ml-auto">
           <h2 className="text-xl md:text-3xl font-semibold tracking-tight text-zinc-900 dark:text-white leading-tight">
             Streamline your
             <span className="text-primary dark:text-white ml-2">drive</span>
           </h2>
 
           {/* Steps List */}
-          <div className="flex flex-col gap-6 w-full max-w-xl">
+          <div className="flex flex-col gap-6 w-full ">
             {steps.map((step, index) => (
               <motion.div
                 key={index}
@@ -74,12 +75,8 @@ const Workflow: React.FC = () => {
         </div>
 
         {/* Right side: Mockup Canvas Screen */}
-        <div className="w-full flex justify-center bg-[#F0F2F6] p-10 rounded-4xl ">
-          <img
-            src="https://framerusercontent.com/images/ilnxb8JlQSPXcjRWoZTNLGSFBk.png?width=1071&height=920"
-            alt="image"
-            className="object-cover rounded-4xl"
-          />
+        <div className="w-full flex justify-center">
+          <WorkflowWireframe />
         </div>
       </div>
     </div>

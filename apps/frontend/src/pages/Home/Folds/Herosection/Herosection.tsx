@@ -1,4 +1,4 @@
-import { HeroImage1, HeroImage2 } from '@/assets/import';
+import { HeroImage1 } from '@/assets/import';
 import { cn } from '@/lib/utils';
 import Section from '@/shared/Section/Sectiont';
 import { ArrowRight } from 'lucide-react';
@@ -19,18 +19,11 @@ const Herosection = () => {
 
       <Section>
         <div className="py-10 flex md:flex-row flex-col gap-4">
-          <div className="w-full flex">
+          <div className="w-full flex overflow-hidden rounded-4xl shadow-lg">
             <img
               src={HeroImage1}
               alt="Folders and files in Aset"
-              className="w-full h-full rounded-2xl object-cover object-top flex-1 shadow-sm aspect-video"
-            />
-          </div>
-          <div className="w-full md:w-[40%] flex">
-            <img
-              src={HeroImage2}
-              alt="Uploading and organizing files"
-              className="w-full h-full rounded-2xl object-cover object-top flex-1 shadow-sm aspect-9/12 sm:aspect-video"
+              className="w-full h-full object-contain "
             />
           </div>
         </div>
