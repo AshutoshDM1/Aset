@@ -12,11 +12,19 @@ import DashboardStats from './pages/Dashboard/DashboardStats';
 import RequireDashboardAccess from './shared/auth/RequireDashboardAccess';
 import FontChanger, { FontInitializer } from './shared/FontChanger/FontChanger';
 
+const FontStudio = import.meta.env.DEV
+  ? { FontInitializer, FontChanger }
+  : null;
+
 function App() {
   return (
     <>
-      {/* <FontInitializer /> */}
-      {/* <FontChanger /> */}
+      {FontStudio && (
+        <>
+          <FontStudio.FontInitializer />
+          <FontStudio.FontChanger />
+        </>
+      )}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route element={<RequireDashboardAccess />}>

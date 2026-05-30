@@ -19,27 +19,28 @@ const FooterLinkColumn = ({ title, links }: FooterLinkColumnProps) => {
       </p>
       <ul className="flex flex-col gap-2.5">
         {links.map((link) => {
+          const isInternalRoute = link.href.startsWith('/');
           const isExternal = link.href.startsWith('http');
           const baseClass =
             'text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors duration-200 flex items-center gap-2';
 
           return (
             <li key={link.href}>
-              {isExternal ? (
+              {isInternalRoute ? (
+                <Link to={link.href} className={baseClass}>
+                  {link.label}
+                  {link.badge && <Badge label={link.badge} />}
+                </Link>
+              ) : (
                 <a
                   href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  target={isExternal ? '_blank' : undefined}
+                  rel={isExternal ? 'noopener noreferrer' : undefined}
                   className={baseClass}
                 >
                   {link.label}
                   {link.badge && <Badge label={link.badge} />}
                 </a>
-              ) : (
-                <Link to={link.href} className={baseClass}>
-                  {link.label}
-                  {link.badge && <Badge label={link.badge} />}
-                </Link>
               )}
             </li>
           );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useTransition } from 'react';
+import { useState, useEffect, useRef, useTransition } from 'react';
 import {
   Type,
   Search,
@@ -382,7 +382,7 @@ export default function FontChanger() {
         onClick={() => setIsOpen(true)}
         aria-label="Customize Typography"
         className={cn(
-          'fixed bottom-6 right-6 z-50 flex items-center justify-center gap-2',
+          'cursor-pointer fixed bottom-6 left-6 z-50 flex items-center justify-center gap-2',
           'h-12 px-4 rounded-full font-mono text-[11px] uppercase tracking-widest text-zinc-300',
           'bg-zinc-950/80 backdrop-blur-xl border border-zinc-800/80 shadow-2xl',
           'hover:border-purple-500/50 hover:shadow-[0_0_20px_rgba(168,85,247,0.2)]',

@@ -40,9 +40,9 @@ const Workflow: React.FC = () => {
         description="Discover how Aset simplifies cloud backups, directory organization, and secure sharing in one sleek, unified interface."
         align="center"
       />
-      <div className="grid grid-cols-1 lg:grid-cols-2  gap-6  py-16 px-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2  gap-6 py-16 px-4">
         <FadeIn direction="right" delay={0.15}>
-          <div className="w-full flex flex-col items-start text-left gap-8 max-w-xl ml-auto">
+          <div className="w-full flex flex-col items-center lg:items-start text-left gap-8 max-w-xl mx-auto lg:ml-auto">
             <h2 className="text-xl md:text-3xl font-semibold tracking-tight text-zinc-900 dark:text-white leading-tight">
               Streamline your
               <span className="text-primary dark:text-white ml-2">drive</span>
@@ -67,7 +67,7 @@ const Workflow: React.FC = () => {
                     <h3 className="text-xl font-semibold text-zinc-900 dark:text-white ">
                       {step.title}
                     </h3>
-                    <p className="text-lg font-medium  text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                    <p className="text-sm md:text-lg font-medium  text-zinc-500 dark:text-zinc-400 leading-relaxed">
                       {step.description}
                     </p>
                   </div>

@@ -1,18 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import {
-  Database,
-  Cpu,
-  Globe,
-  Server,
-  Laptop,
-  RefreshCw,
-  Zap,
-  Network,
-  ArrowUpRight,
-  Cloud,
-} from 'lucide-react';
-import IncrementText from '@/shared/IncrementText/IncrementText';
+import { Cpu } from 'lucide-react';
+import CountUp from '@/components/CountUp';
 
 // Premium, custom-designed spinning network device client icon
 const ClientDeviceIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -377,7 +366,8 @@ const GlobalStatusCard: React.FC = () => {
                   US-EAST
                 </span>
                 <span className="text-[10px] font-medium text-zinc-850 dark:text-zinc-100 font-mono mt-0.5">
-                  <IncrementText to={12} suffix="ms" step={0.2} />
+                  <CountUp to={12} duration={1} />
+                  ms
                 </span>
               </div>
             </div>
@@ -403,7 +393,8 @@ const GlobalStatusCard: React.FC = () => {
                   EU-WEST
                 </span>
                 <span className="text-[10px] font-medium text-zinc-850 dark:text-zinc-100 font-mono mt-0.5">
-                  <IncrementText to={18} suffix="ms" step={0.3} />
+                  <CountUp to={18} duration={1.2} />
+                  ms
                 </span>
               </div>
             </div>
@@ -426,7 +417,8 @@ const GlobalStatusCard: React.FC = () => {
                   AS-PAC
                 </span>
                 <span className="text-[10px] font-medium text-zinc-850 dark:text-zinc-100 font-mono mt-0.5">
-                  <IncrementText to={26} suffix="ms" step={0.4} />
+                  <CountUp to={26} duration={1.4} />
+                  ms
                 </span>
               </div>
             </div>
@@ -441,7 +433,8 @@ const GlobalStatusCard: React.FC = () => {
       <div className="flex items-center justify-between w-full mt-2 px-1 z-10">
         <div className="flex flex-col">
           <span className="text-lg font-medium text-zinc-900 dark:text-white tracking-tight leading-none">
-            <IncrementText to={18} suffix="ms" step={0.3} />
+            <CountUp to={18} duration={1.2} />
+            ms
           </span>
           <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mt-1.5 leading-none">
             Avg Edge Latency
@@ -450,7 +443,7 @@ const GlobalStatusCard: React.FC = () => {
 
         <div className="flex flex-col">
           <span className="text-lg font-medium text-zinc-900 dark:text-white tracking-tight leading-none">
-            <IncrementText to={310} suffix="+" step={5} />
+            <CountUp to={310} duration={1.5} />+
           </span>
           <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mt-1.5 leading-none">
             Global Edge POPs
@@ -459,7 +452,7 @@ const GlobalStatusCard: React.FC = () => {
 
         <div className="flex flex-col">
           <span className="text-lg font-medium text-zinc-900 dark:text-white tracking-tight leading-none">
-            <IncrementText to={99.4} decimals={1} suffix="%" step={1.5} />
+            <CountUp to={99.4} duration={1.5} />%
           </span>
           <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mt-1.5 leading-none">
             Cache Hit Ratio

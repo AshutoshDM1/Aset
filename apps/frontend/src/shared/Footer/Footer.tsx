@@ -16,7 +16,7 @@ const quickLinks: FooterLink[] = [
 const Footer = () => {
   return (
     <footer className="bg-white dark:bg-background">
-      <Section className="px-4 sm:px-6 pt-12 pb-4 grid grid-cols-1 md:grid-cols-2 gap-12">
+      <Section className="px-4 sm:px-9 pt-12 pb-4 grid grid-cols-1 md:grid-cols-2 gap-12">
         <FooterBrand />
         <div className="grid grid-cols-2 gap-12 mt-12 md:mt-0">
           <FooterLinkColumn title="Features" links={quickLinks.slice(0, 3)} />

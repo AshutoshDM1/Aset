@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import CountUp from '@/components/CountUp';
 
 interface BarProps {
   label: string;
@@ -85,7 +86,7 @@ const SystemEvolutionCard: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-start w-full">
         <div>
-          <h3 className="text-lg font-bold text-zinc-950 dark:text-white tracking-tight leading-none">
+          <h3 className="text-lg font-bold text-zinc-955 dark:text-white tracking-tight leading-none">
             Aset vs Dropbox
           </h3>
           <p className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 mt-1 uppercase tracking-wider">
@@ -109,7 +110,7 @@ const SystemEvolutionCard: React.FC = () => {
             Aset Power
           </span>
           <span className="text-xl font-extrabold text-primary tracking-tight mt-0.5 block leading-none">
-            96
+            <CountUp to={96} duration={1.5} />
             <span className="text-zinc-400 dark:text-zinc-600 text-xs font-semibold">
               /100
             </span>

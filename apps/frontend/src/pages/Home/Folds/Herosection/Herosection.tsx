@@ -1,9 +1,12 @@
 import { HeroImageLight, HeroImageDark } from '@/assets/import';
+import ShinyText from '@/components/ShinyText';
+import SplitText from '@/components/SplitText';
 import { useTheme } from '@/components/theme-provider';
 import { cn } from '@/lib/utils';
 import { ArrowRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
+import { motion } from 'motion/react';
 
 const Herosection = () => {
   const { theme } = useTheme();
@@ -34,11 +37,35 @@ const Herosection = () => {
 
   return (
     <>
-      <div className="max-w-5xl mx-auto text-center py-28">
+      <div className="max-w-5xl mx-auto text-center py-14 md:py-28">
         <HeroBadge />
-        <h1 className="text-2xl md:text-7xl font-bold tracking-tight text-zinc-900 dark:text-white mb-6 leading-tight">
-          Upload, organize, and share <br className="hidden md:block" />
-          files without the chaos.
+        <h1 className="text-3xl md:text-7xl font-bold tracking-tight text-zinc-900 dark:text-white mb-6 leading-tight">
+          <SplitText
+            text="Upload, organize, and share"
+            delay={30}
+            duration={1.15}
+            ease="power3.out"
+            splitType="chars"
+            from={{ opacity: 0, y: 40 }}
+            to={{ opacity: 1, y: 0 }}
+            threshold={0.1}
+            rootMargin="-100px"
+            textAlign="center"
+          />
+          <br className="hidden md:block" />
+          <SplitText
+            text="files without the chaos."
+            delay={30}
+            animationDelay={1250}
+            duration={1.15}
+            ease="power3.out"
+            splitType="chars"
+            from={{ opacity: 0, y: 40 }}
+            to={{ opacity: 1, y: 0 }}
+            threshold={0.1}
+            rootMargin="-100px"
+            textAlign="center"
+          />
         </h1>
         <HeroSubheadline />
         <HeroCTA />
@@ -67,7 +94,18 @@ const HeroBadge = () => {
           New
         </span>
         <span className="pr-2 text-xs md:text-sm font-semibold">
-          A lightweight cloud drive
+          <ShinyText
+            text="✨  A lightweight cloud drive"
+            speed={2}
+            delay={0}
+            color="#ffffff"
+            shineColor="#a4a4fc"
+            spread={120}
+            direction="left"
+            yoyo={false}
+            pauseOnHover={false}
+            disabled={false}
+          />
         </span>
       </div>
     </div>
@@ -76,14 +114,21 @@ const HeroBadge = () => {
 
 const HeroSubheadline = () => {
   return (
-    <p className="mt-4 text-sm md:text-xl text-zinc-600 dark:text-zinc-300 font-medium">
-      Drop in documents, images, and projects—keep them in folders you control.
-      Share when you need to, with{' '}
-      <span className="font-semibold text-zinc-900 dark:text-white">
-        less clutter and fewer steps
-      </span>{' '}
-      than a full enterprise suite.
-    </p>
+    <div className="overflow-hidden h-fit">
+      <motion.p
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.7, duration: 0.8, ease: 'easeOut' }}
+        className="mt-4 text-sm md:text-xl text-zinc-600 dark:text-zinc-300 font-medium"
+      >
+        Drop in documents, images, and projects—keep them in folders you
+        control. Share when you need to, with{' '}
+        <span className="font-semibold text-zinc-900 dark:text-white">
+          less clutter and fewer steps
+        </span>{' '}
+        than a full enterprise suite.
+      </motion.p>
+    </div>
   );
 };
 

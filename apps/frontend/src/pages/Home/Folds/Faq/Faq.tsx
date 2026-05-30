@@ -157,7 +157,10 @@ export const Faq: React.FC = () => {
               </p>
             </div>
 
-            <BrandButton className="w-fit flex items-center justify-center gap-2 group/btn cursor-pointer py-3">
+            <BrandButton
+              to="https://x.com/AshutoshDM_1"
+              className="w-fit flex items-center justify-center gap-2 group/btn cursor-pointer py-3"
+            >
               <MessageSquare className="size-4 shrink-0 transition-transform group-hover/btn:scale-110" />
               <span>Chat with Support</span>
               <ArrowRight className="size-4 shrink-0 opacity-0 -translate-x-2 group-hover/btn:opacity-100 group-hover/btn:translate-x-0 transition-all duration-300" />

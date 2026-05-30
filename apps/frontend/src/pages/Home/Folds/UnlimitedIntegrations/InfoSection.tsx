@@ -3,7 +3,7 @@ import BrandButton from '@/shared/BrandButton/BrandButton';
 
 export const InfoSection: React.FC = () => {
   return (
-    <div className="w-full flex flex-col items-start text-left gap-6">
+    <div className="w-full flex flex-col items-center lg:items-start text-center lg:text-left lg:gap-6">
       <h2 className="text-2xl md:text-4xl font-semibold leading-14 text-zinc-900 dark:text-white ">
         Any file format,
         <span className="text-primary dark:text-white ml-2">

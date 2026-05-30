@@ -54,7 +54,7 @@ const GeminiBatteryCard: React.FC = () => {
         </div>
 
         <div className="text-left leading-none">
-          <span className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 tracking-tight block">
+          <span className="text-2xl font-medium text-zinc-900 dark:text-zinc-100 tracking-tight block">
             {percentage}%
           </span>
           <span className="text-[8px] text-zinc-400 dark:text-zinc-500 font-bold uppercase block mt-1 tracking-wider">
@@ -63,7 +63,7 @@ const GeminiBatteryCard: React.FC = () => {
         </div>
       </div>
 
-      <span className="text-[9.5px] font-extrabold text-zinc-800 dark:text-zinc-200 uppercase tracking-tight text-center leading-none mt-1">
+      <span className="text-[11px] text-zinc-800 dark:text-zinc-200 uppercase tracking-tight text-center leading-none mt-1">
         AES-256 Crypto Shield
       </span>
     </motion.div>

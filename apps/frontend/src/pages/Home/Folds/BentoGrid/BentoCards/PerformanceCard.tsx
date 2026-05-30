@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import CountUp from '@/components/CountUp';
 
 const PerformanceCard: React.FC = () => {
   return (
@@ -155,7 +156,8 @@ const PerformanceCard: React.FC = () => {
           <span className="size-2 rounded-full bg-primary" />
           <div>
             <span className="text-sm font-extrabold text-zinc-900 dark:text-white leading-none block">
-              38ms avg
+              <CountUp to={38} duration={1.2} />
+              ms avg
             </span>
             <span className="text-[9px] text-zinc-400 font-semibold uppercase">
               Aset Direct R2
@@ -166,7 +168,8 @@ const PerformanceCard: React.FC = () => {
           <span className="size-2 rounded-full bg-zinc-300 dark:bg-zinc-700" />
           <div>
             <span className="text-sm font-extrabold text-zinc-900 dark:text-white leading-none block">
-              480ms avg
+              <CountUp to={480} duration={1.5} />
+              ms avg
             </span>
             <span className="text-[9px] text-zinc-400 font-semibold uppercase">
               Dropbox / GDrive

@@ -1,0 +1,31 @@
+# Aset
+
+> A modern, cloud-native file storage & management platform.
+> Main website: https://aset.elitedev.space
+
+Aset is a full-stack, Google Drive–style file management application. It provides a clean, dashboard-based experience for managing personal files and folders with support for sharing, starring, trash, and more — backed by cloud object storage and a type-safe API layer.
+
+## Key Features
+
+- **Secure Authentication**: Integrated with Clerk for authentication and session management.
+- **File & Folder Management**: Support for uploading files, creating folders, nesting directories, renaming, moving, and deleting items.
+- **Cloud Storage**: Seamless integration with Cloudflare R2 / AWS S3 using presigned URLs for direct-to-cloud uploads.
+- **Smart Views**: Special sections including All Files, Recent, Starred, Shared, and Trash.
+- **Modern UI**: Dark/light mode support, responsive dashboard built with React 19, Tailwind CSS v4, and Radix UI.
+- **Type-Safe API**: Type-safe end-to-end integration with tRPC and Prisma.
+
+## Site Structure
+
+- `/` - Landing Page (Features, Integrations, Pricing, FAQ, Interactive Workflow)
+- `/dashboard` - User Dashboard / Main entry point
+- `/all-files` - File explorer and management
+- `/recent` - Chronological view of recently updated files
+- `/starred` - Favorites/starred files
+- `/shared` - Files shared with or by the user
+- `/trash` - Soft-deleted files with restore or permanent delete options
+
+## Technical Details
+
+- **Frontend**: React 19, Vite, TypeScript, Tailwind CSS v4, TanStack Query, tRPC Client, React Router v7, Radix UI.
+- **Backend**: Node.js, Express 5, tRPC, Prisma 7, PostgreSQL (Neon), Clerk SDK, AWS S3 SDK.
+- **Monorepo**: Shared TypeScript types for full end-to-end type safety between frontend and backend.

@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import CountUp from '@/components/CountUp';
 
 const ImageOptimizerCard: React.FC = () => {
   return (
@@ -40,7 +41,8 @@ const ImageOptimizerCard: React.FC = () => {
 
         {/* Compression stats */}
         <span className="text-[9.5px] font-extrabold text-zinc-850 dark:text-zinc-200 mt-2 font-mono leading-none">
-          4.2 MB → 420 KB{' '}
+          <CountUp to={4.2} duration={1.2} /> MB →{' '}
+          <CountUp to={420} duration={1.2} /> KB{' '}
           <motion.span
             className="text-emerald-500 font-medium inline-block"
             animate={{
@@ -53,7 +55,9 @@ const ImageOptimizerCard: React.FC = () => {
               delay: 0.4,
             }}
           >
-            (-90%)
+            (-
+            <CountUp to={90} duration={1.2} />
+            %)
           </motion.span>
         </span>
       </div>

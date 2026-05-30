@@ -1,0 +1,7 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Host & Sitemap
+Host: https://aset.elitedev.space
+Sitemap: https://aset.elitedev.space/sitemap.xml

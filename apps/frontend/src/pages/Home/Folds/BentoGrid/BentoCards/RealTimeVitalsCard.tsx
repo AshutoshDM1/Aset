@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import CountUp from '@/components/CountUp';
 
 // ─── Donut Arc ───────────────────────────────────────────────────────────────
 interface DonutArcProps {
@@ -73,7 +74,7 @@ const DonutArc: React.FC<DonutArcProps> = ({
 
 // ─── Stat item at the bottom ─────────────────────────────────────────────────
 interface StatProps {
-  value: string;
+  value: React.ReactNode;
   label: string;
   dotColor: string;
   delay: number;
@@ -144,7 +145,7 @@ const RealTimeVitalsCard: React.FC = () => {
 
       {/* Title */}
       <motion.p
-        className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] text-center leading-none"
+        className="text-[13px] font-bold text-zinc-900 dark:text-zinc-500 uppercase tracking-wide text-center leading-none"
         initial={{ opacity: 0, y: -6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
@@ -215,9 +216,36 @@ const RealTimeVitalsCard: React.FC = () => {
 
       {/* Stats Row */}
       <div className="flex items-center justify-between w-full px-2">
-        <Stat value="91%" label="Bypassed" dotColor="#7c3aed" delay={0.6} />
-        <Stat value="0.8s" label="Upload" dotColor="#a1a1aa" delay={0.72} />
-        <Stat value="0%" label="Egress" dotColor="#a1a1aa" delay={0.84} />
+        <Stat
+          value={
+            <>
+              <CountUp to={91} duration={1.2} />%
+            </>
+          }
+          label="Bypassed"
+          dotColor="#7c3aed"
+          delay={0.6}
+        />
+        <Stat
+          value={
+            <>
+              <CountUp to={0.8} duration={1.2} />s
+            </>
+          }
+          label="Upload"
+          dotColor="#a1a1aa"
+          delay={0.72}
+        />
+        <Stat
+          value={
+            <>
+              <CountUp to={0} duration={0.8} />%
+            </>
+          }
+          label="Egress"
+          dotColor="#a1a1aa"
+          delay={0.84}
+        />
       </div>
     </div>
   );
