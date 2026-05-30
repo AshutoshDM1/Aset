@@ -1,10 +1,12 @@
 import Footer from '@/shared/Footer/Footer';
 import Navbar from '@/shared/Navbar/Navbar';
-import Section from '@/shared/Section/Sectiont';
+import Section from '@/shared/Section/Section';
 import Herosection from './Folds/Herosection/Herosection';
 import UnlimitedIntegrations from './Folds/UnlimitedIntegrations/UnlimitedIntegrations';
 import Feature from './Folds/Feature/Feature';
 import Workflow from './Folds/Workflow/Workflow';
+import BentoGrid from './Folds/BentoGrid/BentoGrid';
+import CTA from './Folds/CTA/CTA';
 import Faq from './Folds/Faq/Faq';
 
 const Home = () => {
@@ -25,8 +27,14 @@ const Home = () => {
       <Section className="pt-10 md:pt-32">
         <Workflow />
       </Section>
+      <Section className="pt-10 md:pt-32">
+        <BentoGrid />
+      </Section>
       <Section className="pt-10 md:pt-32 pb-16">
         <Faq />
+      </Section>
+      <Section className="py-10">
+        <CTA />
       </Section>
       <Footer />
     </>

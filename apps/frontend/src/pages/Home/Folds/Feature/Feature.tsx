@@ -52,7 +52,7 @@ const Feature: React.FC = () => {
       />
 
       {/* 3-Column Premium Responsive Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mt-14 max-w-5xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mt-14 ">
         {features.map((feature, index) => {
           const IconComponent = feature.icon;
           const isHovered = hoveredIndex === index;
@@ -62,7 +62,7 @@ const Feature: React.FC = () => {
               key={index}
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
-              className="group relative flex flex-col items-center text-center p-8 rounded-none border-dashed border bg-white/60 dark:bg-zinc-950/40 border-zinc-300 dark:border-zinc-800/80 hover:border-primary/45 dark:hover:border-primary/45 transition-all duration-350 shadow-2xs hover:shadow-md cursor-pointer select-none"
+              className="group relative flex flex-col items-center text-center p-8 border rounded-3xl bg-white/60 dark:bg-zinc-950/40 border-zinc-200/80 dark:border-zinc-800/80 hover:border-primary/25 dark:hover:border-primary/45 transition-all duration-350 shadow-sm hover:shadow-md cursor-pointer select-none"
               whileHover={{ y: -5 }}
               transition={{ type: 'spring', stiffness: 300, damping: 22 }}
             >
@@ -87,12 +87,6 @@ const Feature: React.FC = () => {
               <p className="text-[13px] font-medium text-zinc-500 dark:text-zinc-400 mt-2.5 leading-relaxed">
                 {feature.description}
               </p>
-
-              {/* Decorative Corner Light Pulsing Ring */}
-              <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex size-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/40 opacity-75" />
-                <span className="relative inline-flex rounded-full size-1.5 bg-primary/70" />
-              </div>
             </motion.div>
           );
         })}

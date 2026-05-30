@@ -1,6 +1,5 @@
 import { HeroImage1 } from '@/assets/import';
 import { cn } from '@/lib/utils';
-import Section from '@/shared/Section/Sectiont';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router';
 
@@ -17,17 +16,15 @@ const Herosection = () => {
         <HeroCTA />
       </div>
 
-      <Section>
-        <div className="py-10 flex md:flex-row flex-col gap-4">
-          <div className="w-full flex overflow-hidden rounded-4xl shadow-lg">
-            <img
-              src={HeroImage1}
-              alt="Folders and files in Aset"
-              className="w-full h-full object-contain "
-            />
-          </div>
+      <div className="py-10 flex md:flex-row flex-col gap-4">
+        <div className="w-full flex overflow-hidden rounded-4xl shadow-lg">
+          <img
+            src={HeroImage1}
+            alt="Folders and files in Aset"
+            className="w-full h-full object-contain "
+          />
         </div>
-      </Section>
+      </div>
     </>
   );
 };

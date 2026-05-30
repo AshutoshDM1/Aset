@@ -71,7 +71,7 @@ const FaqItemComponent: React.FC<{
 };
 
 export const Faq: React.FC = () => {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const faqData: FaqItem[] = [
     {
@@ -107,7 +107,7 @@ export const Faq: React.FC = () => {
 
   return (
     <div>
-      <div className="space-y-10 ">
+      <div className="space-y-10 max-w-5xl mx-auto">
         {/* Left Side: Header & Support Card */}
         <SectionHeading
           badge="FAQ"
@@ -117,7 +117,7 @@ export const Faq: React.FC = () => {
         />
 
         {/* Right Side: Accordion Accordions */}
-        <div className="flex flex-col gap-4 w-full max-w-2xl mx-auto">
+        <div className="flex flex-col gap-4 w-full ">
           {faqData.map((faq, index) => (
             <FaqItemComponent
               key={index}
@@ -129,7 +129,7 @@ export const Faq: React.FC = () => {
           ))}
         </div>
 
-        <div className="max-w-2xl mx-auto  ">
+        <div>
           {/* Premium "Still have questions?" Card */}
           <div className="w-full bg-linear-to-b from-zinc-50 to-white dark:from-zinc-900 dark:to-zinc-950 border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-6 md:p-8 flex flex-col gap-6 shadow-[0_4px_24px_rgba(0,0,0,0.02)] dark:shadow-none relative overflow-hidden group">
             {/* Ambient Background Glow on Hover */}

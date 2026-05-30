@@ -118,7 +118,7 @@ export const ConnectionsDiagram: React.FC = () => {
       transition={{ type: 'spring', stiffness: 50, damping: 20 }}
       className="w-full lg:col-span-7 flex justify-center"
     >
-      <div className="w-full max-w-[800px] aspect-5/4 bg-white dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-10 shadow-xs dark:shadow-none relative overflow-hidden group select-none transition-all duration-500">
+      <div className="w-full max-w-[650px] aspect-5/4 bg-white dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-10 shadow-xs dark:shadow-none relative overflow-hidden group select-none transition-all duration-500">
         <svg
           className="w-full h-full relative"
           viewBox="0 0 800 600"

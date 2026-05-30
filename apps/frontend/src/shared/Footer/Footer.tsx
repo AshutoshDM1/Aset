@@ -1,4 +1,4 @@
-import Section from '../Section/Sectiont';
+import Section from '../Section/Section';
 import FooterBrand from './FooterBrand';
 import FooterBottom from './FooterBottom';
 import FooterLinkColumn, { type FooterLink } from './FooterLinkColumn';

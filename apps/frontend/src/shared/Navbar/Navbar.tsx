@@ -1,4 +1,4 @@
-import Section from '../Section/Sectiont';
+import Section from '../Section/Section';
 import Logo from './Logo';
 import BrandButton from '../BrandButton/BrandButton';
 import { Link } from 'react-router';
