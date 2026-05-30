@@ -62,7 +62,7 @@ const Feature: React.FC = () => {
               key={index}
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
-              className="group relative flex flex-col items-start text-left p-6 border-dashed border bg-white/60 dark:bg-zinc-950/40 border-zinc-300 dark:border-zinc-800/80 hover:border-primary/45 dark:hover:border-primary/45 transition-all duration-350 shadow-2xs hover:shadow-md cursor-pointer select-none"
+              className="group relative flex flex-col items-center text-center p-8 rounded-none border-dashed border bg-white/60 dark:bg-zinc-950/40 border-zinc-300 dark:border-zinc-800/80 hover:border-primary/45 dark:hover:border-primary/45 transition-all duration-350 shadow-2xs hover:shadow-md cursor-pointer select-none"
               whileHover={{ y: -5 }}
               transition={{ type: 'spring', stiffness: 300, damping: 22 }}
             >

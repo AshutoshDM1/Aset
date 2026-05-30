@@ -181,7 +181,7 @@ const WorkflowWireframe: React.FC = () => {
 
         {/* Node 1: TOP CARD (Client App) */}
         <motion.div
-          className="absolute left-[50%] top-[15.5%] -translate-x-1/2 -translate-y-1/2 w-[145px] flex flex-col items-center gap-1.5 p-3 border-dashed border bg-white dark:bg-zinc-950 border-primary/20 dark:border-primary/30 shadow-none! dark:shadow-2xs z-20"
+          className="absolute left-[50%] top-[15.5%] -translate-x-1/2 -translate-y-1/2 w-[145px] flex flex-col items-center gap-1.5 p-3 rounded-2xl border-dashed border bg-primary text-white border-white/20 shadow-none! dark:shadow-2xs z-20"
           animate={{
             boxShadow: [
               '0 2px 8px 0px rgba(124,58,237,0.06)',
@@ -199,16 +199,16 @@ const WorkflowWireframe: React.FC = () => {
           <CustomClientIcon active={false} success={false} />
 
           <div className="text-center">
-            <h4 className="text-[11px] font-semibold text-zinc-800 dark:text-zinc-200 tracking-tight leading-none">
-              Client Web App
+            <h4 className="text-[11px] font-semibold text-white tracking-tight leading-none">
+              Aset Client
             </h4>
-            <span className="text-[9px] text-primary/75 dark:text-primary/90 font-semibold mt-0.5 block">
-              SDK Client
+            <span className="text-[9px] text-white/80 font-medium mt-0.5 block">
+              Active SDK Tunnel
             </span>
           </div>
 
-          <div className="mt-1 flex items-center justify-center px-2 py-0.5 rounded-md bg-zinc-50 dark:bg-zinc-900 border border-zinc-150 dark:border-zinc-800">
-            <span className="text-[8px] text-zinc-500 dark:text-zinc-400 font-bold tracking-tight">
+          <div className="mt-1 flex items-center justify-center px-2 py-0.5 rounded-md bg-white/10 border border-white/20 text-white">
+            <span className="text-[8px] text-white font-bold tracking-tight">
               Active Tunnel
             </span>
           </div>
@@ -216,7 +216,7 @@ const WorkflowWireframe: React.FC = () => {
 
         {/* Node 2: MIDDLE CARD (Credentials Gate) */}
         <motion.div
-          className="absolute left-[50%] top-[50%] -translate-x-1/2 -translate-y-1/2 w-[175px] flex items-center gap-2.5 p-2 border-dashed border bg-white dark:bg-zinc-950 border-primary/20 dark:border-primary/30  shadow-none! dark:shadow-2xs z-20"
+          className="absolute left-[50%] top-[50%] -translate-x-1/2 -translate-y-1/2 w-[175px] flex items-center gap-2.5 p-2 rounded-xl border-dashed border bg-primary text-white border-white/20 shadow-none! dark:shadow-2xs z-20"
           animate={{
             boxShadow: [
               '0 2px 8px 0px rgba(124,58,237,0.06)',
@@ -234,10 +234,10 @@ const WorkflowWireframe: React.FC = () => {
           <CustomAuthIcon active={true} success={false} />
 
           <div className="flex flex-col min-w-0">
-            <h4 className="text-[10px] font-semibold text-zinc-800 dark:text-zinc-200 leading-none">
+            <h4 className="text-[10px] font-semibold text-white leading-none">
               Presigned URL Auth
             </h4>
-            <p className="text-[8px] text-zinc-400 dark:text-zinc-500 font-medium truncate mt-0.5">
+            <p className="text-[8px] text-white/80 font-medium truncate mt-0.5">
               Secure key handshake
             </p>
           </div>
@@ -245,7 +245,7 @@ const WorkflowWireframe: React.FC = () => {
 
         {/* Node 3: BOTTOM CARD (Cloudflare R2 Target) */}
         <motion.div
-          className="absolute left-[50%] top-[84.4%] -translate-x-1/2 -translate-y-1/2 w-[145px] flex flex-col items-center gap-1.5 p-3 border-dashed border bg-white dark:bg-zinc-950 border-primary/20 dark:border-primary/30 shadow-none! dark:shadow-2xs z-20"
+          className="absolute left-[50%] top-[84.4%] -translate-x-1/2 -translate-y-1/2 w-[145px] flex flex-col items-center gap-1.5 p-3 rounded-2xl border-dashed border bg-primary text-white border-white/20 shadow-none! dark:shadow-2xs z-20"
           animate={{
             boxShadow: [
               '0 2px 8px 0px rgba(124,58,237,0.08)',
@@ -264,16 +264,16 @@ const WorkflowWireframe: React.FC = () => {
           <CustomR2Icon active={true} success={false} />
 
           <div className="text-center">
-            <h4 className="text-[11px] font-semibold text-zinc-800 dark:text-zinc-200 tracking-tight leading-none">
+            <h4 className="text-[11px] font-semibold text-white tracking-tight leading-none">
               Cloudflare R2
             </h4>
-            <span className="text-[9px] text-primary/75 dark:text-primary/90 font-semibold mt-0.5 block">
+            <span className="text-[9px] text-white/80 font-medium mt-0.5 block">
               Object Storage
             </span>
           </div>
 
-          <div className="mt-1 flex items-center justify-center px-2 py-0.5 rounded-md bg-zinc-50 dark:bg-zinc-900 border border-zinc-150 dark:border-zinc-800">
-            <span className="text-[8px] text-zinc-500 dark:text-zinc-400 font-bold tracking-tight">
+          <div className="mt-1 flex items-center justify-center px-2 py-0.5 rounded-md bg-white/10 border border-white/20 text-white">
+            <span className="text-[8px] text-white font-bold tracking-tight">
               Bucket Ready
             </span>
           </div>
