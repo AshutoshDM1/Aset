@@ -1,9 +1,37 @@
-import { HeroImage1 } from '@/assets/import';
+import { HeroImageLight, HeroImageDark } from '@/assets/import';
+import { useTheme } from '@/components/theme-provider';
 import { cn } from '@/lib/utils';
 import { ArrowRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 
 const Herosection = () => {
+  const { theme } = useTheme();
+
+  // Stably resolve light/dark themes, including system preference updates
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
+
+  useEffect(() => {
+    const getSystemTheme = () =>
+      window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light';
+
+    if (theme === 'system') {
+      setResolvedTheme(getSystemTheme());
+
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = () => {
+        setResolvedTheme(getSystemTheme());
+      };
+
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    } else {
+      setResolvedTheme(theme);
+    }
+  }, [theme]);
+
   return (
     <>
       <div className="max-w-5xl mx-auto text-center py-28">
@@ -19,9 +47,9 @@ const Herosection = () => {
       <div className="py-10 flex md:flex-row flex-col gap-4">
         <div className="w-full flex overflow-hidden rounded-4xl shadow-lg">
           <img
-            src={HeroImage1}
+            src={resolvedTheme === 'dark' ? HeroImageDark : HeroImageLight}
             alt="Folders and files in Aset"
-            className="w-full h-full object-contain "
+            className="w-full h-full object-contain"
           />
         </div>
       </div>

@@ -11,7 +11,9 @@ export const InfoSection: React.FC = () => {
         </span>
       </h2>
 
-      <BrandButton className="mt-3 text-base px-6 ">Explore Aset </BrandButton>
+      <BrandButton to="/dashboard" className="mt-3 text-base px-6 ">
+        Explore Aset{' '}
+      </BrandButton>
 
       <p className="mt-4 text-zinc-600 dark:text-white max-w-lg leading-relaxed text-sm font-medium md:text-xl">
         "Aset is custom-built to handle everything you throw at it. Seamlessly

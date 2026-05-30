@@ -9,6 +9,8 @@ const quickLinks: FooterLink[] = [
   { label: 'FAQ', href: '#faq' },
   { label: 'Workflow', href: '#workflow' },
   { label: 'Pricing', href: '#pricing' },
+  { label: 'Github', href: 'https://github.com/AshutoshDM1/Aset' },
+  { label: 'Twitter', href: 'https://x.com/AshutoshDM_1' },
 ];
 
 const Footer = () => {
@@ -17,14 +19,8 @@ const Footer = () => {
       <Section className="px-4 sm:px-6 pt-12 pb-4 grid grid-cols-1 md:grid-cols-2 gap-12">
         <FooterBrand />
         <div className="grid grid-cols-2 gap-12 mt-12 md:mt-0">
-          <FooterLinkColumn
-            title="Quick Links"
-            links={quickLinks.slice(0, 2)}
-          />
-          <FooterLinkColumn
-            title="Quick Links"
-            links={quickLinks.slice(2, 4)}
-          />
+          <FooterLinkColumn title="Features" links={quickLinks.slice(0, 3)} />
+          <FooterLinkColumn title="Links" links={quickLinks.slice(3, 6)} />
         </div>
         <FooterBottom />
       </Section>

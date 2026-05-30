@@ -22,7 +22,7 @@ interface DonutArcProps {
 const SIZE = 120;
 const STROKE = 14;
 const R = (SIZE - STROKE) / 2;
-const CIRCUMFERENCE = 2 * Math.PI * R;
+// const CIRCUMFERENCE = 2 * Math.PI * R;
 
 /**
  * SVG-based arc segment that animates from 0 → target fraction.
@@ -91,7 +91,7 @@ const Stat: React.FC<StatProps> = ({ value, label, dotColor, delay }) => (
     </span>
     <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 leading-none">
       <span
-        className="size-1.5 rounded-full flex-shrink-0"
+        className="size-1.5 rounded-full shrink-0"
         style={{ backgroundColor: dotColor }}
       />
       {label}
