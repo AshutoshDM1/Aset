@@ -8,25 +8,24 @@ const Navbar = () => {
   const { isSignedIn } = useUser();
   const navItems = [
     {
-      label: 'About',
-      href: '/about',
+      label: 'Features',
+      href: '#feature',
     },
     {
-      label: 'Blog',
-      href: '/blog',
+      label: 'Integration',
+      href: '#integration',
     },
     {
-      label: 'Changelog',
-      href: '/changelog',
+      label: 'FAQ',
+      href: '#faq',
     },
     {
-      label: 'Contact',
-      href: '/contact',
-      target: '_blank',
+      label: 'Workflow',
+      href: '#workflow',
     },
     {
-      label: 'Power-Ups',
-      href: '/power-ups',
+      label: 'Pricing',
+      href: '#pricing',
     },
   ];
   return (
@@ -40,23 +39,24 @@ const Navbar = () => {
         </div>
         <div className="hidden md:flex items-center justify-center gap-6">
           {navItems.map((item) =>
-            item.href.startsWith('http') ? (
-              <a
-                className="text-base text-zinc-500 hover:text-zinc-900 transition-all duration-300 dark:text-white font-semibold"
-                key={item.href}
-                href={item.href}
-                target={item?.target || 'none'}
-              >
-                {item.label}
-              </a>
-            ) : (
+            item.href.startsWith('/') ? (
+              // Internal route → React Router Link
               <Link
-                className="text-base text-zinc-500 hover:text-zinc-900 transition-all  dark:text-white font-semibold"
+                className="text-base text-zinc-500 hover:text-zinc-900 transition-all dark:text-white font-semibold"
                 key={item.href}
                 to={item.href}
               >
                 {item.label}
               </Link>
+            ) : (
+              // Anchor (#section) or external (http) → native <a> so the browser handles scroll
+              <a
+                className="text-base text-zinc-500 hover:text-zinc-900 transition-all duration-300 dark:text-white font-semibold"
+                key={item.href}
+                href={item.href}
+              >
+                {item.label}
+              </a>
             ),
           )}
         </div>

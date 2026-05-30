@@ -15,7 +15,8 @@ import FontChanger, { FontInitializer } from './shared/FontChanger/FontChanger';
 function App() {
   return (
     <>
-      <FontInitializer />
+      {/* <FontInitializer /> */}
+      {/* <FontChanger /> */}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route element={<RequireDashboardAccess />}>
@@ -32,7 +33,6 @@ function App() {
         </Route>
         <Route path="*" element={<ErrorPage />} />
       </Routes>
-      <FontChanger />
     </>
   );
 }

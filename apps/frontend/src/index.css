@@ -1,5 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
@@ -40,6 +40,7 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
   --font-sans: 'Inter', sans-serif;
+  --font-raleway: 'Raleway', sans-serif;
   --font-serif: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
   --font-mono:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
@@ -104,6 +105,7 @@
   --sidebar-border: oklch(0.275 0 0);
   --sidebar-ring: oklch(0.439 0 0);
   --font-sans: 'Inter', sans-serif;
+  --font-raleway: 'Raleway', sans-serif;
   --font-serif: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
   --font-mono:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
@@ -168,6 +170,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
 
   --font-sans: var(--font-sans);
+  --font-raleway: var(--font-raleway);
   --font-mono: var(--font-mono);
   --font-serif: var(--font-serif);
 
@@ -186,16 +189,23 @@
   --shadow-2xl: var(--shadow-2xl);
   --shadow-dx: var(--shadow-dx);
 }
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
   html {
     @apply font-sans;
   }
+}
+
+body {
+  scroll-behavior: smooth;
 }
 
 /* Custom premium glassmorphic scrollbar utility */
@@ -221,4 +231,19 @@
   background: rgba(255, 255, 255, 0.25);
   border: 2px solid transparent;
   background-clip: padding-box;
+}
+
+/* Flowing dash animation for SVG connector wires (same as Workflow.tsx) */
+@keyframes workflowDash {
+  from {
+    stroke-dashoffset: 20;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-workflow-dash {
+  animation: workflowDash 0.6s linear infinite;
 }

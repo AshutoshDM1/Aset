@@ -1,6 +1,4 @@
 import React from 'react';
-import { motion } from 'motion/react';
-import { ArrowRight } from 'lucide-react';
 import BrandButton from '@/shared/BrandButton/BrandButton';
 
 const CTA: React.FC = () => {
@@ -30,16 +28,16 @@ const CTA: React.FC = () => {
       <div className="absolute right-0 bottom-0 size-80 bg-radial-[circle_at_center,rgba(124,58,237,0.035),transparent_70%] dark:bg-radial-[circle_at_center,rgba(124,58,237,0.06),transparent_65%] pointer-events-none rounded-full" />
 
       {/* Upper Label */}
-      <span className="text-[10px] md:text-[11px] font-mono font-extrabold tracking-widest text-zinc-400 dark:text-zinc-500 uppercase leading-none">
+      <span className="text-[10px] md:text-[11px] font-extrabold tracking-widest text-zinc-400 dark:text-zinc-500 uppercase leading-none">
         CTA
       </span>
 
       {/* Main Copy Details */}
       <div className="flex flex-col gap-2.5 max-w-2xl">
-        <h2 className="text-4xl md:text-6xl font-black text-zinc-950 dark:text-white tracking-tighter leading-tight">
-          Grow Faster with Aset
+        <h2 className="text-2xl md:text-4xl font-medium text-zinc-950 dark:text-white tracking-tighter leading-tight">
+          Ready to simplify your file management
         </h2>
-        <p className="text-[13px] md:text-[14px] font-mono font-semibold text-zinc-500 dark:text-zinc-400 tracking-tight leading-relaxed">
+        <p className="text-[13px] md:text-[14px] font-medium text-zinc-500 dark:text-zinc-400 tracking-tight leading-relaxed">
           Free expert workflow setup included
         </p>
       </div>

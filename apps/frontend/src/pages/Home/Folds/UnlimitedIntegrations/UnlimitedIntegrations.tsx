@@ -2,6 +2,7 @@ import React from 'react';
 import { ConnectionsDiagram } from './ConnectionsDiagram';
 import { InfoSection } from './InfoSection';
 import SectionHeading from '@/shared/SectionHeading/SectionHeading';
+import FadeIn from '@/shared/FadeIn/FadeIn';
 
 const UnlimitedIntegrations: React.FC = () => {
   return (
@@ -15,7 +16,13 @@ const UnlimitedIntegrations: React.FC = () => {
         />
         <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-12 lg:gap-16">
           <ConnectionsDiagram />
-          <InfoSection />
+          <FadeIn
+            direction="left"
+            delay={0.15}
+            className="w-full lg:col-span-5"
+          >
+            <InfoSection />
+          </FadeIn>
         </div>
       </div>
     </>

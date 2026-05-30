@@ -6,6 +6,7 @@ import {
   FolderOrganizerIcon,
   SmartSharingIcon,
 } from './FeatureIcons';
+import FadeIn from '@/shared/FadeIn/FadeIn';
 
 interface FeatureItem {
   title: string;
@@ -51,46 +52,48 @@ const Feature: React.FC = () => {
         align="center"
       />
 
-      {/* 3-Column Premium Responsive Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mt-14 ">
-        {features.map((feature, index) => {
-          const IconComponent = feature.icon;
-          const isHovered = hoveredIndex === index;
+      <FadeIn direction="up">
+        {/* 3-Column Premium Responsive Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mt-14 ">
+          {features.map((feature, index) => {
+            const IconComponent = feature.icon;
+            const isHovered = hoveredIndex === index;
 
-          return (
-            <motion.div
-              key={index}
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
-              className="group relative flex flex-col items-center text-center p-8 border rounded-3xl bg-white/60 dark:bg-zinc-950/40 border-zinc-200/80 dark:border-zinc-800/80 hover:border-primary/25 dark:hover:border-primary/45 transition-all duration-350 shadow-sm hover:shadow-md cursor-pointer select-none"
-              whileHover={{ y: -5 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-            >
-              {/* Card Radial Underglow in dark mode */}
-              <div className="absolute inset-0 bg-radial-[circle_at_center,rgba(124,58,237,0.015),transparent_65%] dark:bg-radial-[circle_at_center,rgba(124,58,237,0.03),transparent_60%] pointer-events-none rounded-3xl" />
+            return (
+              <motion.div
+                key={index}
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
+                className="group relative flex flex-col items-center text-center p-8 border rounded-3xl bg-white/60 dark:bg-zinc-950/40 border-zinc-200/80 dark:border-zinc-800/80 hover:border-primary/25 dark:hover:border-primary/45 transition-all duration-350 shadow-sm hover:shadow-md cursor-pointer select-none"
+                whileHover={{ y: -5 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+              >
+                {/* Card Radial Underglow in dark mode */}
+                <div className="absolute inset-0 bg-radial-[circle_at_center,rgba(124,58,237,0.015),transparent_65%] dark:bg-radial-[circle_at_center,rgba(124,58,237,0.03),transparent_60%] pointer-events-none rounded-3xl" />
 
-              {/* Dynamic Animated Floating Icon */}
-              <div className="mb-5 transition-transform duration-300 group-hover:scale-[1.03]">
-                <IconComponent hovered={isHovered} />
-              </div>
+                {/* Dynamic Animated Floating Icon */}
+                <div className="mb-5 transition-transform duration-300 group-hover:scale-[1.03]">
+                  <IconComponent hovered={isHovered} />
+                </div>
 
-              {/* Feature Badge */}
-              <span className="text-[10px] uppercase tracking-wider font-extrabold text-primary bg-primary/5 dark:bg-primary/10 px-2 py-0.5 rounded-full mb-3 border border-primary/10">
-                {feature.badge}
-              </span>
+                {/* Feature Badge */}
+                <span className="text-[10px] uppercase tracking-wider font-extrabold text-primary bg-primary/5 dark:bg-primary/10 px-2 py-0.5 rounded-full mb-3 border border-primary/10">
+                  {feature.badge}
+                </span>
 
-              {/* Feature Details */}
-              <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 tracking-tight leading-tight group-hover:text-primary transition-colors duration-300">
-                {feature.title}
-              </h3>
+                {/* Feature Details */}
+                <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 tracking-tight leading-tight group-hover:text-primary transition-colors duration-300">
+                  {feature.title}
+                </h3>
 
-              <p className="text-[13px] font-medium text-zinc-500 dark:text-zinc-400 mt-2.5 leading-relaxed">
-                {feature.description}
-              </p>
-            </motion.div>
-          );
-        })}
-      </div>
+                <p className="text-[13px] font-medium text-zinc-500 dark:text-zinc-400 mt-2.5 leading-relaxed">
+                  {feature.description}
+                </p>
+              </motion.div>
+            );
+          })}
+        </div>
+      </FadeIn>
     </section>
   );
 };

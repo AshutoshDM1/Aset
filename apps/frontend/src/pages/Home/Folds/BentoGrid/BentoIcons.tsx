@@ -131,10 +131,10 @@ export const BatteryStatus: React.FC<BatteryStatusProps> = ({ percentage }) => {
   const activeBars = Math.ceil((percentage / 100) * barsCount);
 
   return (
-    <div className="flex flex-col items-center gap-4 w-full py-2 select-none">
-      <div className="relative w-11 h-[88px] border-2 border-zinc-300 dark:border-zinc-700 rounded-lg p-1 flex flex-col-reverse gap-1 justify-between items-center bg-zinc-50/50 dark:bg-zinc-950/20 shadow-2xs">
+    <div className="flex items-center gap-4 py-1 select-none">
+      <div className="relative w-8 h-[54px] border-2 border-zinc-300 dark:border-zinc-700 rounded-md p-0.5 flex flex-col-reverse gap-0.5 justify-between items-center bg-zinc-50/50 dark:bg-zinc-950/20 shadow-2xs">
         {/* Battery Top Terminal cap */}
-        <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-4 h-1 bg-zinc-300 dark:bg-zinc-700 rounded-t-xs" />
+        <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-3 h-0.5 bg-zinc-300 dark:bg-zinc-700 rounded-t-xs" />
 
         {/* Battery Charging Bars (Gradient from purple to violet) */}
         {Array.from({ length: barsCount }).map((_, idx) => {
@@ -142,9 +142,9 @@ export const BatteryStatus: React.FC<BatteryStatusProps> = ({ percentage }) => {
           return (
             <motion.div
               key={idx}
-              className={`w-full h-3 rounded-xs transition-all duration-500 ${
+              className={`w-full h-1.5 rounded-3xs transition-all duration-500 ${
                 isActive
-                  ? 'bg-linear-to-r from-primary to-[#c084fc] shadow-[0_0_10px_rgba(124,58,237,0.3)]'
+                  ? 'bg-linear-to-r from-primary to-[#c084fc] shadow-[0_0_6px_rgba(124,58,237,0.25)]'
                   : 'bg-zinc-200/50 dark:bg-zinc-800/40'
               }`}
               animate={
@@ -164,9 +164,12 @@ export const BatteryStatus: React.FC<BatteryStatusProps> = ({ percentage }) => {
         })}
       </div>
 
-      <div className="text-center leading-none mt-1">
-        <span className="text-xl font-extrabold text-zinc-900 dark:text-zinc-100 tracking-tight">
+      <div className="text-left leading-none">
+        <span className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 tracking-tight block">
           {percentage}%
+        </span>
+        <span className="text-[8px] text-zinc-400 dark:text-zinc-500 font-bold uppercase block mt-1 tracking-wider">
+          Integrity Ratio
         </span>
       </div>
     </div>

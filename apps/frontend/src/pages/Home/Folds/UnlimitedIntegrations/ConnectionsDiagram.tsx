@@ -12,8 +12,8 @@ import {
   CsvIcon,
   PptxIcon,
   SvgIcon,
-  AsetBrandIcon,
 } from './UnlimitedIntegrationsWireframes';
+import FadeIn from '@/shared/FadeIn/FadeIn';
 import Logo from '@/shared/Navbar/Logo';
 
 interface FileTypeItem {
@@ -111,11 +111,8 @@ export const ConnectionsDiagram: React.FC = () => {
     hoveredIndex !== null ? fileTypes[hoveredIndex].color : '#7c3aed';
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -40 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true, margin: '-100px' }}
-      transition={{ type: 'spring', stiffness: 50, damping: 20 }}
+    <FadeIn
+      direction="right"
       className="w-full lg:col-span-7 flex justify-center"
     >
       <div className="w-full max-w-[650px] aspect-5/4 bg-white dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-10 shadow-xs dark:shadow-none relative overflow-hidden group select-none transition-all duration-500">
@@ -285,6 +282,6 @@ export const ConnectionsDiagram: React.FC = () => {
           </foreignObject>
         </svg>
       </div>
-    </motion.div>
+    </FadeIn>
   );
 };
