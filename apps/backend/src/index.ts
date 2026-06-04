@@ -8,6 +8,7 @@ import { appRouter } from './appRouter';
 import { createContext } from './context';
 import { clerkWebhookHandler } from './webhooks/clerk';
 import { optixUpdateFileHandler } from './webhooks/optix';
+import { sdkRouter } from './routers/sdk';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -30,6 +31,9 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Secure internal route for Optix image compression updates
 app.post('/api/optix/update-file', optixUpdateFileHandler);
+
+// Mount SDK Router for API keys and external programmatic access
+app.use('/api/sdk', sdkRouter);
 
 app.get('/', (req, res) => {
   res

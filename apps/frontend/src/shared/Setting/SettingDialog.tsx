@@ -10,12 +10,17 @@ import { useSettingStore } from './Storage/settingStore';
 import { SettingSidebar } from './SettingSidebar';
 import { StorageOverview } from './Storage/StorageOverview';
 import { StoragePlans } from './Storage/StoragePlans';
+import { DeveloperSettings } from './Developer/DeveloperSettings';
 
 function RightPanel() {
   const { activeTab, storageView } = useSettingStore();
 
   if (activeTab === 'storage') {
     return storageView === 'plans' ? <StoragePlans /> : <StorageOverview />;
+  }
+
+  if (activeTab === 'developer') {
+    return <DeveloperSettings />;
   }
 
   return null; // future tabs rendered here
@@ -32,7 +37,7 @@ export function SettingDialog() {
       }}
     >
       <DialogContent
-        className="p-0 overflow-hidden flex flex-col rounded-2xl border border-border/60 bg-background shadow-2xl w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] sm:max-h-[85vh]"
+        className="p-0 overflow-hidden flex flex-col rounded-2xl border border-border/60 bg-background shadow-2xl w-[calc(100vw-2rem)] sm:max-w-3xl max-h-[90vh] sm:max-h-[85vh]"
         showCloseButton={false}
       >
         {/* Title bar */}

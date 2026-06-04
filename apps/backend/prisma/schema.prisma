@@ -20,6 +20,7 @@ model User {
   files         File[]
   storage       UserStorage?
   notifications Notification[]
+  apiKeys       ApiKey[]
 }
 
 model UserStorage {
@@ -56,6 +57,7 @@ model Folder {
   showOwnerName     Boolean       @default(true)
   showOwnerEmail    Boolean       @default(true)
   shares            FolderShare[]
+  apiKeys           ApiKey[]
 
   @@index([ownerId])
   @@index([parentId])
@@ -118,4 +120,22 @@ model Notification {
 
   @@index([userId])
 }
+
+model ApiKey {
+  id         String   @id @default(uuid())
+  name       String
+  keyId      String   @unique
+  secretHash String
+  createdAt  DateTime @default(now())
+
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  folderId   String?
+  folder     Folder?  @relation(fields: [folderId], references: [id], onDelete: SetNull)
+
+  @@index([keyId])
+  @@index([userId])
+}
+
 

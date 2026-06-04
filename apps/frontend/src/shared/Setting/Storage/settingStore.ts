@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type SettingTab = 'storage'; // extend later: | 'notifications' | 'account'
+export type SettingTab = 'storage' | 'developer';
 export type StorageView = 'overview' | 'plans';
 
 interface SettingStore {

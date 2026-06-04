@@ -1,0 +1,27 @@
+{
+  "name": "aset-sdk",
+  "version": "1.1.0",
+  "description": "Official Node.js SDK for ASET Cloud Storage & Media Optimizer",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "tsc"
+  },
+  "keywords": [
+    "aset",
+    "sdk",
+    "cloud-storage",
+    "r2",
+    "s3",
+    "image-optimization",
+    "cloudinary"
+  ],
+  "author": "Aset Devs",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  }
+}
