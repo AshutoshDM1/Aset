@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface VideoControlsProps {
   showControls: boolean;
@@ -35,6 +36,23 @@ interface VideoControlsProps {
   formatTime: (time: number) => string;
   toggleFullscreen: () => void;
   toggleRotation: () => void;
+  subtitles: Array<{
+    id: string;
+    label: string;
+    language: string;
+    url: string;
+  }>;
+  audioTracks: Array<{
+    id: string;
+    label: string;
+    language: string;
+    url: string;
+  }>;
+  selectedAudioTrackId: string;
+  selectAudioTrack: (trackId: string) => void;
+  selectedTextTrackId: string;
+  selectTextTrack: (trackId: string) => void;
+  isTracksLoading?: boolean;
 }
 
 export function VideoControls({
@@ -60,6 +78,13 @@ export function VideoControls({
   formatTime,
   toggleFullscreen,
   toggleRotation,
+  subtitles,
+  audioTracks,
+  selectedAudioTrackId,
+  selectAudioTrack,
+  selectedTextTrackId,
+  selectTextTrack,
+  isTracksLoading = false,
 }: VideoControlsProps) {
   const watchedPct = (currentTime / (duration || 1)) * 100;
   const bufferedPct = (bufferedTime / (duration || 1)) * 100;
@@ -173,7 +198,13 @@ export function VideoControls({
                   initial={{ opacity: 0, y: 15, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 15, scale: 0.95 }}
-                  className="absolute bottom-12 left-0 z-120 bg-black/95 border border-white/10 backdrop-blur-md rounded-xl p-3 shadow-2xl flex flex-col gap-3.5 min-w-48 select-none"
+                  className={cn(
+                    'absolute bottom-12 left-0 z-120 bg-black/95 border border-white/10 backdrop-blur-md rounded-xl p-3.5 shadow-2xl flex flex-col gap-3.5 select-none transition-all duration-300',
+                    isTracksLoading ||
+                      (audioTracks.length > 0 && subtitles.length > 0)
+                      ? 'w-80 sm:w-[360px]'
+                      : 'w-48',
+                  )}
                 >
                   <div className="flex flex-col gap-1.5">
                     <span className="text-[10px] font-bold tracking-wider text-white/40 uppercase">
@@ -202,6 +233,131 @@ export function VideoControls({
                   </div>
 
                   <div className="h-px bg-white/10 w-full" />
+
+                  {/* Tracks Selector Loader / Grid */}
+                  {isTracksLoading ? (
+                    <>
+                      <div className="flex flex-col items-center justify-center py-6 gap-2 text-white/50 text-[11px] font-semibold">
+                        <div className="size-4.5 rounded-full border-2 border-white/20 border-t-white animate-spin" />
+                        <span>Loading tracks...</span>
+                      </div>
+                      <div className="h-px bg-white/10 w-full" />
+                    </>
+                  ) : (
+                    (audioTracks.length > 0 || subtitles.length > 0) && (
+                      <>
+                        <div
+                          className={cn(
+                            'grid gap-3.5',
+                            audioTracks.length > 0 && subtitles.length > 0
+                              ? 'grid-cols-2'
+                              : 'grid-cols-1',
+                          )}
+                        >
+                          {/* Audio Track Selector */}
+                          {audioTracks.length > 0 && (
+                            <div className="flex flex-col gap-1.5">
+                              <span className="text-[10px] font-bold tracking-wider text-white/40 uppercase">
+                                Audio Track
+                              </span>
+                              <ScrollArea className="h-32 rounded-lg border border-white/10 bg-white/5 p-1">
+                                <div className="flex flex-col gap-0.5 pr-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => selectAudioTrack('native')}
+                                    className={cn(
+                                      'w-full text-left px-2 py-1.5 rounded-md text-[11.5px] font-semibold transition-all cursor-pointer flex items-center justify-between',
+                                      selectedAudioTrackId === 'native'
+                                        ? 'bg-white/15 text-white'
+                                        : 'text-white/60 hover:text-white hover:bg-white/5',
+                                    )}
+                                  >
+                                    <span>Default</span>
+                                    {selectedAudioTrackId === 'native' && (
+                                      <span className="size-1.5 rounded-full bg-white" />
+                                    )}
+                                  </button>
+                                  {audioTracks.map((track) => (
+                                    <button
+                                      key={track.id}
+                                      type="button"
+                                      onClick={() => selectAudioTrack(track.id)}
+                                      className={cn(
+                                        'w-full text-left px-2 py-1.5 rounded-md text-[11.5px] font-semibold transition-all cursor-pointer flex items-center justify-between',
+                                        selectedAudioTrackId === track.id
+                                          ? 'bg-white/15 text-white'
+                                          : 'text-white/60 hover:text-white hover:bg-white/5',
+                                      )}
+                                    >
+                                      <span className="truncate">
+                                        {track.language
+                                          ? track.language.toUpperCase()
+                                          : 'Unknown'}
+                                      </span>
+                                      {selectedAudioTrackId === track.id && (
+                                        <span className="size-1.5 rounded-full bg-white" />
+                                      )}
+                                    </button>
+                                  ))}
+                                </div>
+                              </ScrollArea>
+                            </div>
+                          )}
+
+                          {/* Subtitles Selector */}
+                          {subtitles.length > 0 && (
+                            <div className="flex flex-col gap-1.5">
+                              <span className="text-[10px] font-bold tracking-wider text-white/40 uppercase">
+                                Subtitles
+                              </span>
+                              <ScrollArea className="h-32 rounded-lg border border-white/10 bg-white/5 p-1">
+                                <div className="flex flex-col gap-0.5 pr-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => selectTextTrack('none')}
+                                    className={cn(
+                                      'w-full text-left px-2 py-1.5 rounded-md text-[11.5px] font-semibold transition-all cursor-pointer flex items-center justify-between',
+                                      selectedTextTrackId === 'none'
+                                        ? 'bg-white/15 text-white'
+                                        : 'text-white/60 hover:text-white hover:bg-white/5',
+                                    )}
+                                  >
+                                    <span>Off</span>
+                                    {selectedTextTrackId === 'none' && (
+                                      <span className="size-1.5 rounded-full bg-white" />
+                                    )}
+                                  </button>
+                                  {subtitles.map((track) => (
+                                    <button
+                                      key={track.id}
+                                      type="button"
+                                      onClick={() => selectTextTrack(track.id)}
+                                      className={cn(
+                                        'w-full text-left px-2 py-1.5 rounded-md text-[11.5px] font-semibold transition-all cursor-pointer flex items-center justify-between',
+                                        selectedTextTrackId === track.id
+                                          ? 'bg-white/15 text-white'
+                                          : 'text-white/60 hover:text-white hover:bg-white/5',
+                                      )}
+                                    >
+                                      <span className="truncate">
+                                        {track.language
+                                          ? track.language.toUpperCase()
+                                          : 'Unknown'}
+                                      </span>
+                                      {selectedTextTrackId === track.id && (
+                                        <span className="size-1.5 rounded-full bg-white" />
+                                      )}
+                                    </button>
+                                  ))}
+                                </div>
+                              </ScrollArea>
+                            </div>
+                          )}
+                        </div>
+                        <div className="h-px bg-white/10 w-full" />
+                      </>
+                    )
+                  )}
 
                   <div className="flex flex-col gap-1.5">
                     <span className="text-[10px] font-bold tracking-wider text-white/40 uppercase">

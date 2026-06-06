@@ -1,6 +1,7 @@
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { router, protectedProcedure } from '../../trpc';
+import { processVideoTracks } from '../../utils/mediaProcessor';
 import {
   buildObjectKey,
   objectKeyPrefix,
@@ -242,6 +243,23 @@ export const fileRouter = router({
           data: { usedStorage: { increment: input.sizeMb } },
         }),
       ]);
+
+      // Trigger background track extraction for videos
+      const nameLower = file.name.toLowerCase();
+      const isVideo =
+        nameLower.endsWith('.mkv') ||
+        nameLower.endsWith('.mp4') ||
+        nameLower.endsWith('.mov') ||
+        nameLower.endsWith('.webm');
+      if (isVideo) {
+        processVideoTracks(file.id).catch((err) => {
+          console.error(
+            `[FileRoute] Background media processing failed for ${file.id}:`,
+            err,
+          );
+        });
+      }
+
       return {
         id: file.id,
         name: file.name,
@@ -592,5 +610,39 @@ export const fileRouter = router({
       await ctx.db.$transaction(transactions);
 
       return { success: true };
+    }),
+
+  getMediaTracks: protectedProcedure
+    .input(z.object({ fileId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const file = await ctx.db.file.findUnique({
+        where: { id: input.fileId },
+        include: {
+          subtitles: true,
+          audioTracks: true,
+        },
+      });
+
+      if (!file) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'File not found',
+        });
+      }
+
+      return {
+        subtitles: file.subtitles.map((sub) => ({
+          id: sub.id,
+          label: sub.label,
+          language: sub.language,
+          url: resolvePublicFileUrl(sub.s3Url),
+        })),
+        audioTracks: file.audioTracks.map((audio) => ({
+          id: audio.id,
+          label: audio.label,
+          language: audio.language,
+          url: resolvePublicFileUrl(audio.s3Url),
+        })),
+      };
     }),
 });

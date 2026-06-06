@@ -5,6 +5,12 @@ interface UseVideoPlayerProps {
   onClose: () => void;
   videoRef: React.RefObject<HTMLVideoElement | null>;
   containerRef: React.RefObject<HTMLDivElement | null>;
+  subtitles?: Array<{
+    id: string;
+    label: string;
+    language: string;
+    url: string;
+  }>;
 }
 
 export function useVideoPlayer({
@@ -12,6 +18,7 @@ export function useVideoPlayer({
   onClose,
   videoRef,
   containerRef,
+  subtitles = [],
 }: UseVideoPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -28,6 +35,151 @@ export function useVideoPlayer({
   const [isLocked, setIsLocked] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isRotated, setIsRotated] = useState(false);
+
+  // Ref for external synchronized audio element
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Subtitle and Audio tracks selection states
+  const [selectedTextTrackId, setSelectedTextTrackId] =
+    useState<string>('none');
+  const [selectedAudioTrackId, setSelectedAudioTrackId] =
+    useState<string>('native');
+
+  const selectTextTrack = (trackId: string) => {
+    setSelectedTextTrackId(trackId);
+  };
+
+  const selectAudioTrack = (trackId: string) => {
+    setSelectedAudioTrackId(trackId);
+    const video = videoRef.current;
+    const audio = audioRef.current;
+    if (!video) return;
+
+    if (trackId === 'native') {
+      video.muted = isMuted;
+      if (audio) {
+        audio.pause();
+      }
+    } else {
+      video.muted = true;
+      if (audio) {
+        audio.currentTime = video.currentTime;
+        audio.playbackRate = video.playbackRate;
+        if (isPlaying) {
+          audio
+            .play()
+            .catch((e) => console.error('[AudioSync] Play failed:', e));
+        }
+      }
+    }
+  };
+
+  // Sync selected subtitle track mode with HTML5 TextTracks
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !open) return;
+
+    const syncTracks = () => {
+      const nativeTextTracks = video.textTracks;
+      for (let i = 0; i < nativeTextTracks.length; i++) {
+        const track = nativeTextTracks[i];
+        const matchingDbTrack = subtitles.find(
+          (s) => s.label === track.label || s.language === track.language,
+        );
+        if (matchingDbTrack) {
+          track.mode =
+            selectedTextTrackId === matchingDbTrack.id ? 'showing' : 'disabled';
+        } else {
+          track.mode = 'disabled';
+        }
+      }
+    };
+
+    // Run initial sync
+    syncTracks();
+
+    // Listen for dynamically added tracks to ensure they are synchronized as they load
+    const nativeTextTracks = video.textTracks;
+    nativeTextTracks.addEventListener('addtrack', syncTracks);
+    nativeTextTracks.onaddtrack = syncTracks;
+
+    return () => {
+      nativeTextTracks.removeEventListener('addtrack', syncTracks);
+      nativeTextTracks.onaddtrack = null;
+    };
+  }, [selectedTextTrackId, subtitles, open, videoRef.current]);
+
+  // Synced playback controller: Sync play/pause
+  useEffect(() => {
+    const video = videoRef.current;
+    const audio = audioRef.current;
+    if (!video || !audio || selectedAudioTrackId === 'native') return;
+
+    if (isPlaying) {
+      audio
+        .play()
+        .catch((err) => console.error('[AudioSync] Play failed:', err));
+    } else {
+      audio.pause();
+    }
+  }, [isPlaying, selectedAudioTrackId]);
+
+  // Synced playback controller: Sync mute and volume
+  useEffect(() => {
+    const video = videoRef.current;
+    const audio = audioRef.current;
+    if (!video || !audio) return;
+
+    if (selectedAudioTrackId === 'native') {
+      video.muted = isMuted;
+      video.volume = volume;
+    } else {
+      video.muted = true;
+      audio.muted = isMuted;
+      audio.volume = volume;
+    }
+  }, [isMuted, volume, selectedAudioTrackId]);
+
+  // Synced playback controller: Sync seeking and rate change
+  useEffect(() => {
+    const video = videoRef.current;
+    const audio = audioRef.current;
+    if (!video || !audio || selectedAudioTrackId === 'native') return;
+
+    const handleSeeking = () => {
+      audio.currentTime = video.currentTime;
+    };
+
+    const handleSeeked = () => {
+      audio.currentTime = video.currentTime;
+    };
+
+    const handleRateChange = () => {
+      audio.playbackRate = video.playbackRate;
+    };
+
+    video.addEventListener('seeking', handleSeeking);
+    video.addEventListener('seeked', handleSeeked);
+    video.addEventListener('ratechange', handleRateChange);
+
+    // Run periodic check to correct alignment drifts
+    const interval = setInterval(() => {
+      if (Math.abs(video.currentTime - audio.currentTime) > 0.15) {
+        audio.currentTime = video.currentTime;
+      }
+    }, 500);
+
+    // Initial sync
+    audio.currentTime = video.currentTime;
+    audio.playbackRate = video.playbackRate;
+
+    return () => {
+      video.removeEventListener('seeking', handleSeeking);
+      video.removeEventListener('seeked', handleSeeked);
+      video.removeEventListener('ratechange', handleRateChange);
+      clearInterval(interval);
+    };
+  }, [selectedAudioTrackId]);
 
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -318,5 +470,11 @@ export function useVideoPlayer({
     toggleFullscreen,
     isRotated,
     toggleRotation,
+    // Synced tracks control
+    audioRef,
+    selectedAudioTrackId,
+    selectAudioTrack,
+    selectedTextTrackId,
+    selectTextTrack,
   };
 }

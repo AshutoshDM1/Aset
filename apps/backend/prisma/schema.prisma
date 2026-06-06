@@ -93,9 +93,35 @@ model File {
   trashed Boolean @default(false)
 
   downloads FileDownload[]
+  subtitles SubtitleTrack[]
+  audioTracks AudioTrack[]
 
   @@index([ownerId])
   @@index([folderId])
+}
+
+model SubtitleTrack {
+  id        String   @id @default(uuid())
+  fileId    String
+  file      File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  label     String
+  language  String
+  s3Url     String
+  createdAt DateTime @default(now())
+
+  @@index([fileId])
+}
+
+model AudioTrack {
+  id        String   @id @default(uuid())
+  fileId    String
+  file      File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  label     String
+  language  String
+  s3Url     String
+  createdAt DateTime @default(now())
+
+  @@index([fileId])
 }
 
 model FileDownload {

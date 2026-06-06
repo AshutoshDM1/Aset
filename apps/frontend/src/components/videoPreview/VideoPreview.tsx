@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useFileDownload } from '@/hooks/useFileDownload';
 import { toast } from 'sonner';
 import { Lock, Unlock } from 'lucide-react';
+import { trpc } from '@/utils/trpc';
+import { useQuery } from '@tanstack/react-query';
 
 import { useVideoPlayer } from './useVideoPlayer';
 import { VideoHeader } from './VideoHeader';
@@ -27,6 +29,16 @@ export function VideoPreview({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { download, isDownloading } = useFileDownload();
+
+  const { data: mediaTracks, isLoading: isTracksLoading } = useQuery(
+    trpc.file.getMediaTracks.queryOptions(
+      { fileId: fileId || '' },
+      { enabled: !!fileId && open },
+    ),
+  );
+
+  const subtitles = mediaTracks?.subtitles || [];
+  const audioTracks = mediaTracks?.audioTracks || [];
 
   const {
     isPlaying,
@@ -53,8 +65,8 @@ export function VideoPreview({
     handleTimeUpdate,
     handleProgress,
     handleLoadedMetadata,
-    handleScrubberChange,
     resetControlsTimer,
+    handleScrubberChange,
     // lock, fullscreen, and rotation features
     isLocked,
     setIsLocked,
@@ -62,7 +74,13 @@ export function VideoPreview({
     toggleFullscreen,
     isRotated,
     toggleRotation,
-  } = useVideoPlayer({ open, onClose, videoRef, containerRef });
+    // Synced tracks control
+    audioRef,
+    selectedAudioTrackId,
+    selectAudioTrack,
+    selectedTextTrackId,
+    selectTextTrack,
+  } = useVideoPlayer({ open, onClose, videoRef, containerRef, subtitles });
 
   const handleDownload = () => {
     if (fileId) {
@@ -121,6 +139,11 @@ export function VideoPreview({
           handleProgress={handleProgress}
           handleLoadedMetadata={handleLoadedMetadata}
           setIsPlaying={setIsPlaying}
+          audioRef={audioRef}
+          audioTracks={audioTracks}
+          selectedAudioTrackId={selectedAudioTrackId}
+          subtitles={subtitles}
+          selectedTextTrackId={selectedTextTrackId}
         />
 
         {/* Floating Lock/Unlock Button - accessible whenever controls show, or always when locked */}
@@ -175,6 +198,13 @@ export function VideoPreview({
               formatTime={formatTime}
               toggleFullscreen={toggleFullscreen}
               toggleRotation={toggleRotation}
+              subtitles={subtitles}
+              audioTracks={audioTracks}
+              selectedAudioTrackId={selectedAudioTrackId}
+              selectAudioTrack={selectAudioTrack}
+              selectedTextTrackId={selectedTextTrackId}
+              selectTextTrack={selectTextTrack}
+              isTracksLoading={isTracksLoading}
             />
           )}
         </AnimatePresence>

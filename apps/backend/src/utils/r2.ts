@@ -7,7 +7,7 @@ import {
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'node:crypto';
 
-function r2Client(): S3Client {
+export function getR2Client(): S3Client {
   const endpoint = process.env.R2_ENDPOINT?.trim();
   const accessKeyId = process.env.R2_ACCESS_KEY_ID?.trim();
   const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY?.trim();
@@ -23,6 +23,8 @@ function r2Client(): S3Client {
     forcePathStyle: true,
   });
 }
+
+const r2Client = getR2Client;
 
 function publicBase(): string {
   return (

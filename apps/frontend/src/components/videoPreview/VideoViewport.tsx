@@ -16,6 +16,21 @@ interface VideoViewportProps {
   handleProgress: () => void;
   handleLoadedMetadata: () => void;
   setIsPlaying: (playing: boolean) => void;
+  audioRef?: React.RefObject<HTMLAudioElement | null>;
+  audioTracks?: Array<{
+    id: string;
+    label: string;
+    language: string;
+    url: string;
+  }>;
+  selectedAudioTrackId?: string;
+  subtitles?: Array<{
+    id: string;
+    label: string;
+    language: string;
+    url: string;
+  }>;
+  selectedTextTrackId?: string;
 }
 
 export function VideoViewport({
@@ -33,12 +48,25 @@ export function VideoViewport({
   handleProgress,
   handleLoadedMetadata,
   setIsPlaying,
+  audioRef,
+  audioTracks = [],
+  selectedAudioTrackId = 'native',
+  subtitles = [],
+  selectedTextTrackId = 'none',
 }: VideoViewportProps) {
+  const selectedAudioTrack = audioTracks.find(
+    (a) => a.id === selectedAudioTrackId,
+  );
+  const audioSrc = selectedAudioTrack ? selectedAudioTrack.url : '';
+  const selectedSubtitleTrack = subtitles.find(
+    (s) => s.id === selectedTextTrackId,
+  );
   return (
     <div className="flex-1 flex items-center justify-center relative cursor-pointer overflow-hidden w-full h-full">
       <video
         ref={videoRef}
         src={fileUrl}
+        crossOrigin="anonymous"
         onTimeUpdate={handleTimeUpdate}
         onProgress={handleProgress}
         onLoadedMetadata={handleLoadedMetadata}
@@ -63,7 +91,28 @@ export function VideoViewport({
         }
         playsInline
         preload="auto"
-      />
+      >
+        {selectedSubtitleTrack && (
+          <track
+            key={selectedSubtitleTrack.id}
+            src={selectedSubtitleTrack.url}
+            kind="subtitles"
+            srcLang={selectedSubtitleTrack.language}
+            label={selectedSubtitleTrack.label}
+            default
+          />
+        )}
+      </video>
+
+      {/* Synchronized secondary audio track player */}
+      {selectedAudioTrackId !== 'native' && (
+        <audio
+          ref={audioRef}
+          src={audioSrc}
+          style={{ display: 'none' }}
+          preload="auto"
+        />
+      )}
 
       {/* Big Play Pause Central Animation Indicator or buffering spinner */}
       <AnimatePresence mode="wait">
