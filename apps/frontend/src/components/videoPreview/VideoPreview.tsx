@@ -144,6 +144,10 @@ export function VideoPreview({
           selectedAudioTrackId={selectedAudioTrackId}
           subtitles={subtitles}
           selectedTextTrackId={selectedTextTrackId}
+          handleSkipForward={handleSkipForward}
+          handleSkipBackward={handleSkipBackward}
+          resetControlsTimer={resetControlsTimer}
+          skipAmount={skipAmount}
         />
 
         {/* Floating Lock/Unlock Button - accessible whenever controls show, or always when locked */}
