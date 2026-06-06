@@ -39,6 +39,7 @@ interface ItemRowActionsProps {
   isOwner?: boolean;
   sizeMb?: number;
   createdAt?: Date | string;
+  processingStatus?: string | null;
 }
 
 export function ItemRowActions({
@@ -52,6 +53,7 @@ export function ItemRowActions({
   isOwner = true,
   sizeMb,
   createdAt,
+  processingStatus,
 }: ItemRowActionsProps) {
   const queryClient = useQueryClient();
   const [isRenameOpen, setIsRenameOpen] = useState(false);
@@ -443,6 +445,7 @@ export function ItemRowActions({
         trashed={trashed}
         url={url}
         onRefetch={onRefetch}
+        processingStatus={processingStatus}
       />
 
       <MoveDialog

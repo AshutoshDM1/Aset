@@ -1,7 +1,10 @@
 package main
 
 import (
+	"context"
+	"log"
 	"optix/handlers"
+	"optix/utils"
 	"os"
 
 	"github.com/gin-contrib/cors"
@@ -13,6 +16,20 @@ func main() {
 	if port == "" {
 		port = "5001"
 	}
+
+	// Read Redis configuration
+	redisURL := os.Getenv("REDIS_URL")
+	if redisURL == "" {
+		redisURL = "redis://localhost:6379"
+	}
+
+	// Initialize background worker pool for media extraction
+	// We run up to 2 parallel extraction processes to not overwhelm CPU/RAM of the VM.
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	log.Println("[Main] Starting Optix background media extraction worker pool...")
+	utils.StartWorkerPool(ctx, redisURL, 2)
 
 	app := gin.Default()
 	app.SetTrustedProxies(nil) // Trust no external proxy headers

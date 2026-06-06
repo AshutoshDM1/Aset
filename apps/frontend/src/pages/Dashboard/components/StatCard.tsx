@@ -18,7 +18,7 @@ type StatCardProps = {
 
 const trendStyles: Record<StatTrend, string> = {
   up: 'text-emerald-600 bg-emerald-500/10',
-  down: 'text-rose-600 bg-rose-500/10',
+  down: 'text-muted-foreground bg-muted',
   flat: 'text-muted-foreground bg-muted',
 };
 

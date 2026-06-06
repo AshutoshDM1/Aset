@@ -1,7 +1,7 @@
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { router, protectedProcedure } from '../../trpc';
-import { processVideoTracks } from '../../utils/mediaProcessor';
+import { enqueueMediaProcess } from '../../utils/mediaQueue';
 import {
   buildObjectKey,
   objectKeyPrefix,
@@ -64,6 +64,7 @@ export const fileRouter = router({
           sizeMb: true,
           starred: true,
           trashed: true,
+          processingStatus: true,
         },
       });
       return rows.map((f) => ({
@@ -73,6 +74,7 @@ export const fileRouter = router({
         sizeMb: f.sizeMb,
         starred: f.starred,
         trashed: f.trashed,
+        processingStatus: f.processingStatus,
         url: resolvePublicFileUrl(f.s3Url),
       }));
     }),
@@ -227,6 +229,13 @@ export const fileRouter = router({
         });
       }
       const s3Url = storageUrlForKey(input.objectKey);
+      const nameLower = input.name.toLowerCase();
+      const isVideo =
+        nameLower.endsWith('.mkv') ||
+        nameLower.endsWith('.mp4') ||
+        nameLower.endsWith('.mov') ||
+        nameLower.endsWith('.webm');
+
       const [file] = await ctx.db.$transaction([
         ctx.db.file.create({
           data: {
@@ -235,6 +244,7 @@ export const fileRouter = router({
             sizeMb: input.sizeMb,
             ownerId: ctx.auth.userId,
             folderId: input.folderId,
+            processingStatus: isVideo ? 'processing' : null,
           },
           select: { id: true, name: true, s3Url: true },
         }),
@@ -244,17 +254,16 @@ export const fileRouter = router({
         }),
       ]);
 
-      // Trigger background track extraction for videos
-      const nameLower = file.name.toLowerCase();
-      const isVideo =
-        nameLower.endsWith('.mkv') ||
-        nameLower.endsWith('.mp4') ||
-        nameLower.endsWith('.mov') ||
-        nameLower.endsWith('.webm');
       if (isVideo) {
-        processVideoTracks(file.id).catch((err) => {
+        enqueueMediaProcess({
+          fileId: file.id,
+          s3Url: file.s3Url,
+          fileName: file.name,
+          ownerId: ctx.auth.userId,
+          folderId: input.folderId,
+        }).catch((err) => {
           console.error(
-            `[FileRoute] Background media processing failed for ${file.id}:`,
+            `[FileRoute] Failed to enqueue background media processing for ${file.id}:`,
             err,
           );
         });
@@ -280,6 +289,7 @@ export const fileRouter = router({
         sizeMb: true,
         starred: true,
         trashed: true,
+        processingStatus: true,
       },
     });
     return rows.map((f) => ({
@@ -289,6 +299,7 @@ export const fileRouter = router({
       sizeMb: f.sizeMb,
       starred: f.starred,
       trashed: f.trashed,
+      processingStatus: f.processingStatus,
       url: resolvePublicFileUrl(f.s3Url),
     }));
   }),
@@ -446,6 +457,7 @@ export const fileRouter = router({
         sizeMb: true,
         starred: true,
         trashed: true,
+        processingStatus: true,
       },
     });
     return rows.map((f) => ({
@@ -455,6 +467,7 @@ export const fileRouter = router({
       sizeMb: f.sizeMb,
       starred: f.starred,
       trashed: f.trashed,
+      processingStatus: f.processingStatus,
       url: resolvePublicFileUrl(f.s3Url),
     }));
   }),
@@ -471,6 +484,7 @@ export const fileRouter = router({
         sizeMb: true,
         starred: true,
         trashed: true,
+        processingStatus: true,
       },
     });
     return rows.map((f) => ({
@@ -480,6 +494,7 @@ export const fileRouter = router({
       sizeMb: f.sizeMb,
       starred: f.starred,
       trashed: f.trashed,
+      processingStatus: f.processingStatus,
       url: resolvePublicFileUrl(f.s3Url),
     }));
   }),

@@ -40,6 +40,7 @@ interface DetailsDialogProps {
   trashed?: boolean;
   url?: string;
   onRefetch?: () => void;
+  processingStatus?: string | null;
 }
 
 export function DetailsDialog({
@@ -54,6 +55,7 @@ export function DetailsDialog({
   trashed = false,
   url,
   onRefetch,
+  processingStatus,
 }: DetailsDialogProps) {
   const queryClient = useQueryClient();
   const [copiedId, setCopiedId] = useState(false);
@@ -227,6 +229,44 @@ export function DetailsDialog({
                 {trashed ? 'Yes' : 'No'}
               </span>
             </div>
+
+            {/* Processing Status Row (for videos only) */}
+            {type === 'file' &&
+              (name.toLowerCase().endsWith('.mp4') ||
+                name.toLowerCase().endsWith('.mkv') ||
+                name.toLowerCase().endsWith('.mov') ||
+                name.toLowerCase().endsWith('.webm')) && (
+                <div className="py-2.5 flex items-center justify-between text-sm">
+                  <span className="flex items-center gap-2 text-muted-foreground font-medium">
+                    <Loader2
+                      className={cn(
+                        'size-4 shrink-0',
+                        processingStatus === 'processing' &&
+                          'animate-spin text-amber-500',
+                      )}
+                    />
+                    Track Processing
+                  </span>
+                  <span
+                    className={cn(
+                      'px-2 py-0.5 rounded-full text-xs font-semibold flex items-center gap-1.5 border',
+                      processingStatus === 'completed'
+                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                        : processingStatus === 'processing'
+                          ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 animate-pulse'
+                          : processingStatus === 'failed'
+                            ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+                            : 'bg-muted text-muted-foreground border-transparent',
+                    )}
+                  >
+                    {processingStatus === 'processing' &&
+                      'Extracting Tracks...'}
+                    {processingStatus === 'completed' && 'Ready'}
+                    {processingStatus === 'failed' && 'Failed / Not Found'}
+                    {!processingStatus && 'Pending'}
+                  </span>
+                </div>
+              )}
 
             {/* ID Row */}
             <div className="py-2.5 flex flex-col gap-1.5 text-sm">

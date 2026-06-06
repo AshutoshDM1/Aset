@@ -41,6 +41,7 @@ interface ItemGridActionsProps {
   isOwner?: boolean;
   sizeMb?: number;
   createdAt?: Date | string;
+  processingStatus?: string | null;
 }
 
 export function ItemGridActions({
@@ -54,6 +55,7 @@ export function ItemGridActions({
   isOwner = true,
   sizeMb,
   createdAt,
+  processingStatus,
 }: ItemGridActionsProps) {
   const queryClient = useQueryClient();
   const [isRenameOpen, setIsRenameOpen] = useState(false);
@@ -387,6 +389,7 @@ export function ItemGridActions({
         trashed={trashed}
         url={url}
         onRefetch={onRefetch}
+        processingStatus={processingStatus}
       />
 
       <MoveDialog

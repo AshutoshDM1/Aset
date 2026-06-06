@@ -37,6 +37,7 @@ type FileItem = {
   sizeMb: number;
   starred?: boolean;
   trashed?: boolean;
+  processingStatus?: string | null;
 };
 
 type FolderContentsProps = {
@@ -169,6 +170,7 @@ export function FolderContents({
             starred={item.starred}
             trashed={item.trashed}
             onRefetch={onRefetch}
+            processingStatus={item.processingStatus}
           />
         </li>
       ))}

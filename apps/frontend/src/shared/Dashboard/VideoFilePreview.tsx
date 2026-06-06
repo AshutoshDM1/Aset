@@ -13,6 +13,7 @@ type VideoFilePreviewProps = {
   onRefetch?: () => void;
   createdAt?: Date | string;
   sizeMb?: number;
+  processingStatus?: string | null;
 };
 
 const VideoFilePreview = ({
@@ -24,6 +25,7 @@ const VideoFilePreview = ({
   onRefetch,
   createdAt,
   sizeMb,
+  processingStatus,
 }: VideoFilePreviewProps) => {
   const [open, setOpen] = useState(false);
   const [thumbnailErrored, setThumbnailErrored] = useState(false);
@@ -45,6 +47,7 @@ const VideoFilePreview = ({
           onRefetch={onRefetch}
           sizeMb={sizeMb}
           createdAt={createdAt}
+          processingStatus={processingStatus}
         />
         <button
           type="button"

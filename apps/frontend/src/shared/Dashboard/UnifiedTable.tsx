@@ -36,6 +36,7 @@ export type UnifiedItem = {
   url?: string;
   starred?: boolean;
   trashed?: boolean;
+  processingStatus?: string | null;
 };
 
 type UnifiedTableProps = {
@@ -230,6 +231,7 @@ export function UnifiedTable({ items, onRefetch }: UnifiedTableProps) {
                       onRefetch={onRefetch}
                       sizeMb={item.sizeMb}
                       createdAt={item.createdAt}
+                      processingStatus={item.processingStatus}
                     />
                   </TableCell>
                 </TableRow>

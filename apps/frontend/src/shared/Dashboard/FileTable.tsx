@@ -34,6 +34,7 @@ type FileItem = {
   sizeMb: number;
   starred?: boolean;
   trashed?: boolean;
+  processingStatus?: string | null;
 };
 
 type FileTableProps = {
@@ -186,6 +187,7 @@ export function FileTable({ files, onRefetch }: FileTableProps) {
                       onRefetch={onRefetch}
                       sizeMb={file.sizeMb}
                       createdAt={file.createdAt}
+                      processingStatus={file.processingStatus}
                     />
                   </TableCell>
                 </TableRow>

@@ -1,12 +1,12 @@
 import { db } from './db';
 import { getR2Client, extractObjectKey, storageUrlForKey } from './r2';
 import { GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
-import { createWriteStream } from 'fs';
+import { createWriteStream, existsSync, chmodSync } from 'fs';
 import fs from 'fs/promises';
 import { pipeline } from 'stream/promises';
 import path from 'path';
 import os from 'os';
-import { exec } from 'child_process';
+import { exec, execSync } from 'child_process';
 import { promisify } from 'util';
 import { randomUUID } from 'crypto';
 // @ts-ignore
@@ -28,8 +28,49 @@ function resolveBinaryPath(bin: any): string {
   return String(bin);
 }
 
-const ffmpegPath = resolveBinaryPath(ffmpeg);
-const ffprobePath = resolveBinaryPath(ffprobe);
+function resolveExecutable(localBin: any, fallbackName: string): string {
+  const localPath = resolveBinaryPath(localBin);
+
+  if (localPath && existsSync(localPath)) {
+    if (process.platform !== 'win32') {
+      try {
+        chmodSync(localPath, 0o755);
+      } catch (e) {
+        console.warn(
+          `[MediaProcessor] Failed to chmod ${fallbackName} binary:`,
+          e,
+        );
+      }
+    }
+    try {
+      execSync(`"${localPath}" -version`, { stdio: 'ignore' });
+      console.log(`[MediaProcessor] Using working static binary: ${localPath}`);
+      return localPath;
+    } catch (e) {
+      console.warn(
+        `[MediaProcessor] Static binary at ${localPath} is not working:`,
+        e,
+      );
+    }
+  }
+
+  try {
+    execSync(`${fallbackName} -version`, { stdio: 'ignore' });
+    console.log(
+      `[MediaProcessor] Using system-installed fallback: ${fallbackName}`,
+    );
+    return fallbackName;
+  } catch (e) {
+    console.error(
+      `[MediaProcessor] System-installed ${fallbackName} is also not available in PATH!`,
+    );
+  }
+
+  return localPath || fallbackName;
+}
+
+const ffmpegPath = resolveExecutable(ffmpeg, 'ffmpeg');
+const ffprobePath = resolveExecutable(ffprobe, 'ffprobe');
 
 export async function processVideoTracks(fileId: string) {
   const file = await db.file.findUnique({

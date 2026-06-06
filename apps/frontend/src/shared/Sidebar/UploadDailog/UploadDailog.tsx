@@ -98,23 +98,39 @@ export default function UploadDailog() {
       return currentParentId;
     };
 
-    const loadToast = toast.loading('Recreating folder structure...');
-    try {
-      for (const file of localFiles) {
-        const path = (file as any).filepath || file.name;
-        const targetFolderId = await resolveFolderIdForPath(path, folderId);
-        resolvedFolderIds.push(targetFolderId);
+    const needsFolderResolution =
+      persistStructure &&
+      localFiles.some((file) => {
+        const path = (file as any).filepath || '';
+        return path.includes('/') && path.split('/').length > 1;
+      });
+
+    if (needsFolderResolution) {
+      const loadToast = toast.loading('Recreating folder structure...');
+      try {
+        for (const file of localFiles) {
+          const path = (file as any).filepath || file.name;
+          const targetFolderId = await resolveFolderIdForPath(path, folderId);
+          resolvedFolderIds.push(targetFolderId);
+        }
+        toast.success('Folder structures prepared successfully!', {
+          id: loadToast,
+        });
+      } catch (err) {
+        console.error('Error pre-resolving folder structure:', err);
+        toast.error('Failed to create subfolders. Uploading to root folder.', {
+          id: loadToast,
+        });
+        // Fallback to root folder if resolution fails
+        while (resolvedFolderIds.length < localFiles.length) {
+          resolvedFolderIds.push(folderId);
+        }
       }
-      toast.success('Folder structures prepared successfully!');
-    } catch (err) {
-      console.error('Error pre-resolving folder structure:', err);
-      toast.error('Failed to create subfolders. Uploading to root folder.');
-      // Fallback to root folder if resolution fails
-      while (resolvedFolderIds.length < localFiles.length) {
+    } else {
+      // Direct resolution without any toasts or mutations
+      for (const file of localFiles) {
         resolvedFolderIds.push(folderId);
       }
-    } finally {
-      toast.dismiss(loadToast);
     }
 
     // 2. Run parallel uploads

@@ -129,6 +129,7 @@ export function FileList({ mode = 'recent' }: FileListProps) {
               onRefetch={refetch}
               createdAt={file.createdAt}
               sizeMb={file.sizeMb}
+              processingStatus={file.processingStatus}
             />
           ) : isTextCodeFileName(file.name) ? (
             <TextFilePreview
