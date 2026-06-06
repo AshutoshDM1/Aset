@@ -128,7 +128,7 @@ export default function UploadDailog() {
       }
     } else {
       // Direct resolution without any toasts or mutations
-      for (const file of localFiles) {
+      for (const {} of localFiles) {
         resolvedFolderIds.push(folderId);
       }
     }

@@ -9,9 +9,6 @@ import { trpc } from '@/utils/trpc';
 import Logo from '../Navbar/Logo';
 import { SearchDialog } from '@/shared/Search/SearchDialog';
 
-const UUID_REGEX =
-  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-
 function DashboardNavbar({ className }: { className?: string }) {
   const location = useLocation();
 
@@ -28,25 +25,106 @@ function DashboardNavbar({ className }: { className?: string }) {
     retry: false,
   });
 
+  const { data: allFolders } = useQuery({
+    ...trpc.folder.listAll.queryOptions(),
+    enabled: !!folderId,
+  });
+
   const breadcrumbItems = useMemo(() => {
     const pathnames = location.pathname.split('/').filter(Boolean);
-    const breadcrumbItems = pathnames.map((name, index) => {
-      let label = name.charAt(0).toUpperCase() + name.slice(1);
-      let href = `/${pathnames.slice(0, index + 1).join('/')}`;
 
-      if (name.toLowerCase() === 'folder') {
-        href = '/dashboard/my-files';
-      } else if (UUID_REGEX.test(name)) {
-        label = folder?.name || 'Loading...';
+    // If we're not inside a specific folder, use standard pathname-based mapping
+    if (!folderId) {
+      return pathnames.map((name, index) => {
+        let label = name.charAt(0).toUpperCase() + name.slice(1);
+        const href = `/${pathnames.slice(0, index + 1).join('/')}`;
+
+        let type: 'dashboard' | 'my-files' | 'starred' | 'trash' | 'shared' =
+          'dashboard';
+        if (name.toLowerCase() === 'my-files') {
+          label = 'My Files';
+          type = 'my-files';
+        } else if (name.toLowerCase() === 'starred') {
+          label = 'Starred';
+          type = 'starred';
+        } else if (name.toLowerCase() === 'trash') {
+          label = 'Trash';
+          type = 'trash';
+        } else if (name.toLowerCase() === 'shared') {
+          label = 'Shared with me';
+          type = 'shared';
+        }
+
+        return {
+          label,
+          href,
+          type,
+        };
+      });
+    }
+
+    // If we are inside a folder, build the full trace from allFolders
+    const items: {
+      label: string;
+      href: string;
+      type:
+        | 'dashboard'
+        | 'my-files'
+        | 'starred'
+        | 'trash'
+        | 'shared'
+        | 'folder';
+      id?: string;
+    }[] = [
+      { label: 'Dashboard', href: '/dashboard', type: 'dashboard' },
+      { label: 'My Files', href: '/dashboard/my-files', type: 'my-files' },
+    ];
+
+    if (allFolders) {
+      const hierarchy: {
+        label: string;
+        href: string;
+        type: 'folder';
+        id: string;
+      }[] = [];
+      let currentId: string | null = folderId;
+      let depth = 0;
+
+      while (currentId && depth < 20) {
+        const found = allFolders.find((f) => f.id === currentId);
+        if (found) {
+          hierarchy.unshift({
+            label: found.name,
+            href: `/dashboard/folder/${found.id}`,
+            type: 'folder',
+            id: found.id,
+          });
+          currentId = found.parentId;
+        } else {
+          break;
+        }
+        depth++;
       }
+      items.push(...hierarchy);
+    } else if (folder) {
+      // Fallback: If folder detail is loaded but listAll is not yet resolved
+      items.push({
+        label: folder.name,
+        href: `/dashboard/folder/${folder.id}`,
+        type: 'folder',
+        id: folder.id,
+      });
+    } else {
+      items.push({
+        label: 'Loading...',
+        href: `/dashboard/folder/${folderId}`,
+        type: 'folder',
+        id: folderId,
+      });
+    }
 
-      return {
-        label,
-        href,
-      };
-    });
-    return breadcrumbItems;
-  }, [location, folder?.name]);
+    return items;
+  }, [location.pathname, folderId, folder, allFolders]);
 
   return (
     <>
@@ -58,8 +136,9 @@ function DashboardNavbar({ className }: { className?: string }) {
       >
         <div className="flex items-center justify-between gap-4 px-4 py-2.5 sm:px-6 sm:py-4">
           <BreadcrumbComponent
-            className="max-w-sm hidden md:block"
+            className="hidden md:block min-w-0 max-w-lg flex-1 mr-4"
             items={breadcrumbItems}
+            allFolders={allFolders}
           />
           <Link
             to="/dashboard"
