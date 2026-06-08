@@ -8,6 +8,7 @@ import { useSettingStore, type SettingTab } from './Storage/settingStore';
 const NAV_ITEMS: { id: SettingTab; label: string }[] = [
   { id: 'storage', label: 'Storage' },
   { id: 'developer', label: 'Developer SDK' },
+  { id: 'decoding', label: 'Video Decoding' },
 ];
 
 export function SettingSidebar() {

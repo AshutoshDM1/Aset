@@ -33,6 +33,8 @@ import { toast } from 'sonner';
 interface FileSelectionStageProps {
   localFiles: File[];
   setLocalFiles: React.Dispatch<React.SetStateAction<File[]>>;
+  decodeVideos: boolean;
+  setDecodeVideos: (decode: boolean) => void;
 }
 
 interface PendingZip {
@@ -160,6 +162,8 @@ const traverseFileTree = async (entry: any, path = ''): Promise<File[]> => {
 export default function FileSelectionStage({
   localFiles,
   setLocalFiles,
+  decodeVideos,
+  setDecodeVideos,
 }: FileSelectionStageProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
@@ -167,6 +171,19 @@ export default function FileSelectionStage({
   const [pendingZips, setPendingZips] = useState<PendingZip[]>([]);
 
   const { persistStructure, setPersistStructure } = useUploadStore();
+
+  const videoFiles = localFiles.filter((file) => {
+    const nameLower = file.name.toLowerCase();
+    return (
+      nameLower.endsWith('.mkv') ||
+      nameLower.endsWith('.mp4') ||
+      nameLower.endsWith('.mov') ||
+      nameLower.endsWith('.webm')
+    );
+  });
+  const totalVideoSize = videoFiles.reduce((acc, f) => acc + f.size, 0);
+  const isDecodingDisabled =
+    videoFiles.length > 5 || totalVideoSize > 6 * 1024 * 1024 * 1024;
 
   const processFilesBeforeAdding = async (files: File[]) => {
     const zips = files.filter((f) => f.name.toLowerCase().endsWith('.zip'));
@@ -435,6 +452,40 @@ export default function FileSelectionStage({
             </div>
           </div>
         </TooltipProvider>
+      )}
+
+      {/* Video Decoding Option */}
+      {videoFiles.length > 0 && (
+        <div className="border border-border/80 bg-muted/10 rounded-2xl p-4.5 space-y-2.5 animate-in slide-in-from-top-2 duration-300">
+          <div className="flex items-start justify-between">
+            <div className="space-y-1 pr-4">
+              <label
+                htmlFor="decode-videos"
+                className="text-xs font-semibold text-foreground flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>Enable Video Decoding</span>
+              </label>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Extract subtitle tracks and secondary audio tracks from your
+                uploaded videos to support multi-language play and captions.
+              </p>
+            </div>
+            <input
+              id="decode-videos"
+              type="checkbox"
+              checked={decodeVideos && !isDecodingDisabled}
+              disabled={isDecodingDisabled}
+              onChange={(e) => setDecodeVideos(e.target.checked)}
+              className="size-4.5 rounded border-border text-primary focus:ring-primary/20 cursor-pointer disabled:cursor-not-allowed mt-0.5"
+            />
+          </div>
+          {isDecodingDisabled && (
+            <p className="text-[10px] text-destructive leading-tight font-medium">
+              ⚠️ Video decoding is disabled because you are uploading more than
+              5 videos or a total size exceeding 6 GB.
+            </p>
+          )}
+        </div>
       )}
 
       {/* Local selected files list preview */}

@@ -12,6 +12,8 @@ import {
   optixRegisterTracksHandler,
 } from './webhooks/optix';
 import { sdkRouter } from './routers/sdk';
+import { db } from './utils/db';
+import { startStaleDecodingsCleaner } from './jobs/cleaner';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -69,6 +71,8 @@ app.use(
     res.status(500).json({ error: 'Internal server error' });
   },
 );
+// Start the background task to automatically fail video decodings that take > 5 hours
+startStaleDecodingsCleaner();
 
 app.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`Server is running on port http://0.0.0.0:${PORT}`);

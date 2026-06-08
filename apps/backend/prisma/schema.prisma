@@ -92,6 +92,7 @@ model File {
   starred Boolean @default(false)
   trashed Boolean @default(false)
   processingStatus String? // "processing", "completed", "failed" or null if not a video
+  decodingEnabled Boolean @default(true)
 
   downloads FileDownload[]
   subtitles SubtitleTrack[]

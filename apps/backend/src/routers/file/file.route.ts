@@ -177,6 +177,7 @@ export const fileRouter = router({
         folderId: z.string().uuid(),
         objectKey: z.string().min(1).max(2000),
         sizeMb: z.number().nonnegative(),
+        decodingEnabled: z.boolean().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -235,6 +236,8 @@ export const fileRouter = router({
         nameLower.endsWith('.mp4') ||
         nameLower.endsWith('.mov') ||
         nameLower.endsWith('.webm');
+      const decodingRequested = input.decodingEnabled !== false; // default to true
+      const shouldDecodeVideo = isVideo && decodingRequested;
 
       const [file] = await ctx.db.$transaction([
         ctx.db.file.create({
@@ -244,7 +247,8 @@ export const fileRouter = router({
             sizeMb: input.sizeMb,
             ownerId: ctx.auth.userId,
             folderId: input.folderId,
-            processingStatus: isVideo ? 'processing' : null,
+            processingStatus: shouldDecodeVideo ? 'processing' : null,
+            decodingEnabled: decodingRequested,
           },
           select: { id: true, name: true, s3Url: true },
         }),
@@ -254,7 +258,7 @@ export const fileRouter = router({
         }),
       ]);
 
-      if (isVideo) {
+      if (shouldDecodeVideo) {
         enqueueMediaProcess({
           fileId: file.id,
           s3Url: file.s3Url,
@@ -660,4 +664,21 @@ export const fileRouter = router({
         })),
       };
     }),
+
+  getProcessingFiles: protectedProcedure.query(async ({ ctx }) => {
+    return ctx.db.file.findMany({
+      where: {
+        ownerId: ctx.auth.userId,
+        processingStatus: 'processing',
+        trashed: false,
+      },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        sizeMb: true,
+        createdAt: true,
+      },
+    });
+  }),
 });

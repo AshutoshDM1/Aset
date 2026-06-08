@@ -29,6 +29,20 @@ export default function UploadDailog() {
   } = useUploadStore();
 
   const [localFiles, setLocalFiles] = useState<File[]>([]);
+  const [decodeVideos, setDecodeVideos] = useState(true);
+
+  const videoFiles = localFiles.filter((file) => {
+    const nameLower = file.name.toLowerCase();
+    return (
+      nameLower.endsWith('.mkv') ||
+      nameLower.endsWith('.mp4') ||
+      nameLower.endsWith('.mov') ||
+      nameLower.endsWith('.webm')
+    );
+  });
+  const totalVideoSize = videoFiles.reduce((acc, f) => acc + f.size, 0);
+  const isDecodingDisabled =
+    videoFiles.length > 5 || totalVideoSize > 6 * 1024 * 1024 * 1024;
 
   // tRPC Mutations
   const presign = useMutation(trpc.file.presignUpload.mutationOptions());
@@ -167,6 +181,7 @@ export default function UploadDailog() {
           folderId: targetFolderId,
           objectKey: signed.objectKey,
           sizeMb,
+          decodingEnabled: decodeVideos && !isDecodingDisabled,
         });
 
         updateFileStatus(fileId, 'success');
@@ -196,6 +211,7 @@ export default function UploadDailog() {
   useEffect(() => {
     if (!isOpen) {
       setLocalFiles([]);
+      setDecodeVideos(true);
     }
   }, [isOpen]);
 
@@ -267,6 +283,8 @@ export default function UploadDailog() {
                 <FileSelectionStage
                   localFiles={localFiles}
                   setLocalFiles={setLocalFiles}
+                  decodeVideos={decodeVideos}
+                  setDecodeVideos={setDecodeVideos}
                 />
               )}
             </div>

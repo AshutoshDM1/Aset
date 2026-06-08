@@ -11,6 +11,7 @@ import { SettingSidebar } from './SettingSidebar';
 import { StorageOverview } from './Storage/StorageOverview';
 import { StoragePlans } from './Storage/StoragePlans';
 import { DeveloperSettings } from './Developer/DeveloperSettings';
+import { VideoDecodingSettings } from './VideoDecodingSettings';
 
 function RightPanel() {
   const { activeTab, storageView } = useSettingStore();
@@ -21,6 +22,10 @@ function RightPanel() {
 
   if (activeTab === 'developer') {
     return <DeveloperSettings />;
+  }
+
+  if (activeTab === 'decoding') {
+    return <VideoDecodingSettings />;
   }
 
   return null; // future tabs rendered here
