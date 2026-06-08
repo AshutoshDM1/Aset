@@ -237,14 +237,25 @@ export function useVideoPlayer({
   // Handle Play/Pause
   const togglePlay = () => {
     if (!videoRef.current) return;
+    const video = videoRef.current;
+    const audio = audioRef.current;
+
     if (isPlaying) {
-      videoRef.current.pause();
+      video.pause();
+      if (audio && selectedAudioTrackId !== 'native') {
+        audio.pause();
+      }
       setIsPlaying(false);
     } else {
-      videoRef.current
+      video
         .play()
         .then(() => {
           setIsPlaying(true);
+          if (audio && selectedAudioTrackId !== 'native') {
+            audio.play().catch((err) => {
+              console.error('[AudioSync] Play failed inside gesture:', err);
+            });
+          }
         })
         .catch((err) => {
           console.error('Play failed:', err);

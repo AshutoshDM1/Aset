@@ -1,6 +1,7 @@
 import { Play, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRef, useState, useEffect } from 'react';
+import { toast } from 'sonner';
 
 interface VideoViewportProps {
   videoRef: React.RefObject<HTMLVideoElement | null>;
@@ -98,6 +99,54 @@ export function VideoViewport({
     (s) => s.id === selectedTextTrackId,
   );
 
+  const [subtitleBlobUrls, setSubtitleBlobUrls] = useState<
+    Record<string, string>
+  >({});
+
+  useEffect(() => {
+    if (!subtitles || subtitles.length === 0) return;
+
+    let active = true;
+    const urlsMap: Record<string, string> = {};
+
+    const fetchAllSubtitles = async () => {
+      await Promise.all(
+        subtitles.map(async (track) => {
+          if (!track.url) return;
+          try {
+            const res = await fetch(track.url);
+            if (res.ok) {
+              const text = await res.text();
+              const blob = new Blob([text], { type: 'text/vtt' });
+              const blobUrl = URL.createObjectURL(blob);
+              urlsMap[track.id] = blobUrl;
+            }
+          } catch (e) {
+            console.error('Error prefetching subtitle track:', track.label, e);
+          }
+        }),
+      );
+      if (active) {
+        setSubtitleBlobUrls((prev) => ({ ...prev, ...urlsMap }));
+      }
+    };
+
+    fetchAllSubtitles();
+
+    return () => {
+      active = false;
+      Object.values(urlsMap).forEach((url) => {
+        if (url.startsWith('blob:')) {
+          URL.revokeObjectURL(url);
+        }
+      });
+    };
+  }, [subtitles]);
+
+  const subtitleSrc = selectedSubtitleTrack
+    ? subtitleBlobUrls[selectedSubtitleTrack.id] || selectedSubtitleTrack.url
+    : '';
+
   // Gesture seeking states
   const [activeRipple, setActiveRipple] = useState<'left' | 'right' | null>(
     null,
@@ -153,13 +202,20 @@ export function VideoViewport({
     } else {
       lastClickRef.current = { time: now, type: side };
 
-      if (singleClickTimeoutRef.current) {
-        clearTimeout(singleClickTimeoutRef.current);
-      }
-      singleClickTimeoutRef.current = setTimeout(() => {
+      if (isPlaying) {
+        // If playing, we delay the pause action to detect if it's a double tap.
+        // Pausing is allowed inside setTimeout.
+        if (singleClickTimeoutRef.current) {
+          clearTimeout(singleClickTimeoutRef.current);
+        }
+        singleClickTimeoutRef.current = setTimeout(() => {
+          togglePlay();
+          singleClickTimeoutRef.current = null;
+        }, 250);
+      } else {
+        // If paused, we must play immediately to preserve the synchronous user gesture context.
         togglePlay();
-        singleClickTimeoutRef.current = null;
-      }, 250); // 250ms delay to distinguish double-taps
+      }
     }
   };
 
@@ -173,128 +229,164 @@ export function VideoViewport({
   }, []);
 
   return (
-    <div className="flex-1 flex items-center justify-center relative cursor-pointer overflow-hidden w-full h-full select-none">
-      <video
-        ref={videoRef}
-        src={fileUrl}
-        crossOrigin="anonymous"
-        onTimeUpdate={handleTimeUpdate}
-        onProgress={handleProgress}
-        onLoadedMetadata={handleLoadedMetadata}
-        onEnded={() => setIsPlaying(false)}
-        onWaiting={handleWaiting}
-        onPlaying={handlePlaying}
-        onSeeked={handleSeeked}
-        onCanPlay={handlePlaying}
-        className="max-h-screen max-w-full object-contain pointer-events-auto transition-all duration-300 ease-out"
-        style={
-          isRotated
-            ? {
-                transform: 'rotate(90deg)',
-                width: '100vh',
-                height: '100vw',
-                maxWidth: 'none',
-                maxHeight: 'none',
-                objectFit: 'contain',
-              }
-            : {}
-        }
-        playsInline
-        preload="auto"
-      >
-        {selectedSubtitleTrack && (
-          <track
-            key={selectedSubtitleTrack.id}
-            src={selectedSubtitleTrack.url}
-            kind="subtitles"
-            srcLang={selectedSubtitleTrack.language}
-            label={selectedSubtitleTrack.label}
-            default
-          />
-        )}
-      </video>
+    <div className="flex-1 flex items-center justify-center relative overflow-hidden w-full h-full select-none bg-black">
+      <div className="relative max-h-full max-w-full flex items-center justify-center">
+        <video
+          ref={videoRef}
+          src={fileUrl}
+          onTimeUpdate={handleTimeUpdate}
+          onProgress={handleProgress}
+          onLoadedMetadata={handleLoadedMetadata}
+          onEnded={() => setIsPlaying(false)}
+          onWaiting={handleWaiting}
+          onPlaying={handlePlaying}
+          onSeeked={handleSeeked}
+          onCanPlay={handlePlaying}
+          onError={(e) => {
+            const error = (e.target as HTMLVideoElement).error;
+            if (error) {
+              toast.error(`Video Playback Error (Code: ${error.code})`);
+            }
+          }}
+          className="max-h-screen max-w-full object-contain pointer-events-auto transition-all duration-300 ease-out"
+          style={
+            isRotated
+              ? {
+                  transform: 'rotate(90deg)',
+                  width: '100vh',
+                  height: '100vw',
+                  maxWidth: 'none',
+                  maxHeight: 'none',
+                  objectFit: 'contain',
+                }
+              : {}
+          }
+          playsInline
+          preload="auto"
+        >
+          {selectedSubtitleTrack && (
+            <track
+              key={selectedSubtitleTrack.id}
+              src={subtitleSrc}
+              kind="subtitles"
+              srcLang={selectedSubtitleTrack.language}
+              label={selectedSubtitleTrack.label}
+              default
+            />
+          )}
+        </video>
 
-      {/* Invisible Double Tap Seek Hotspots */}
-      {!isLocked && (
-        <div className="absolute inset-0 flex z-30 pointer-events-none">
-          {/* Left Hotspot */}
-          <div
-            onClick={(e) => {
-              e.stopPropagation();
-              handleSideClick('left');
-            }}
-            className="w-1/2 h-full pointer-events-auto select-none cursor-pointer"
-          />
-          {/* Right Hotspot */}
-          <div
-            onClick={(e) => {
-              e.stopPropagation();
-              handleSideClick('right');
-            }}
-            className="w-1/2 h-full pointer-events-auto select-none cursor-pointer"
-          />
-        </div>
-      )}
-
-      {/* Left Double-Tap Seek Visual Indicator */}
-      <AnimatePresence>
-        {activeRipple === 'left' && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.7 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.7 }}
-            transition={{ duration: 0.2 }}
-            className="absolute left-1/4 top-1/2 -translate-y-1/2 -translate-x-1/2 z-40 flex flex-col items-center justify-center size-24 rounded-full bg-black/60 backdrop-blur-xs border border-white/10 pointer-events-none select-none"
-          >
-            <div className="flex items-center gap-0.5 text-white">
-              {[0, 1, 2].map((i) => (
-                <motion.span
-                  key={i}
-                  custom={i}
-                  variants={chevronVariantsLeft}
-                  initial="initial"
-                  animate="animate"
-                >
-                  <ChevronLeft className="size-5 fill-current" />
-                </motion.span>
-              ))}
-            </div>
-            <span className="text-xs font-bold text-white/90 mt-1">
-              -{clickCount * skipAmount}s
-            </span>
-          </motion.div>
+        {/* Invisible Double Tap Seek Hotspots */}
+        {!isLocked && (
+          <div className="absolute inset-0 flex z-30 pointer-events-none">
+            {/* Left Hotspot */}
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSideClick('left');
+              }}
+              className="w-1/2 h-full pointer-events-auto select-none cursor-pointer"
+            />
+            {/* Right Hotspot */}
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSideClick('right');
+              }}
+              className="w-1/2 h-full pointer-events-auto select-none cursor-pointer"
+            />
+          </div>
         )}
-      </AnimatePresence>
 
-      {/* Right Double-Tap Seek Visual Indicator */}
-      <AnimatePresence>
-        {activeRipple === 'right' && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.7 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.7 }}
-            transition={{ duration: 0.2 }}
-            className="absolute right-1/4 top-1/2 -translate-y-1/2 translate-x-1/2 z-40 flex flex-col items-center justify-center size-24 rounded-full bg-black/60 backdrop-blur-xs border border-white/10 pointer-events-none select-none"
-          >
-            <div className="flex items-center gap-0.5 text-white">
-              {[0, 1, 2].map((i) => (
-                <motion.span
-                  key={i}
-                  custom={i}
-                  variants={chevronVariantsRight}
-                  initial="initial"
-                  animate="animate"
-                >
-                  <ChevronRight className="size-5 fill-current" />
-                </motion.span>
-              ))}
-            </div>
-            <span className="text-xs font-bold text-white/90 mt-1">
-              +{clickCount * skipAmount}s
-            </span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        {/* Left Double-Tap Seek Visual Indicator */}
+        <AnimatePresence>
+          {activeRipple === 'left' && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.7 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.7 }}
+              transition={{ duration: 0.2 }}
+              className="absolute left-1/4 top-1/2 -translate-y-1/2 -translate-x-1/2 z-40 flex flex-col items-center justify-center size-24 rounded-full bg-black/60 backdrop-blur-xs border border-white/10 pointer-events-none select-none"
+            >
+              <div className="flex items-center gap-0.5 text-white">
+                {[0, 1, 2].map((i) => (
+                  <motion.span
+                    key={i}
+                    custom={i}
+                    variants={chevronVariantsLeft}
+                    initial="initial"
+                    animate="animate"
+                  >
+                    <ChevronLeft className="size-5 fill-current" />
+                  </motion.span>
+                ))}
+              </div>
+              <span className="text-xs font-bold text-white/90 mt-1">
+                -{clickCount * skipAmount}s
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Right Double-Tap Seek Visual Indicator */}
+        <AnimatePresence>
+          {activeRipple === 'right' && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.7 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.7 }}
+              transition={{ duration: 0.2 }}
+              className="absolute right-1/4 top-1/2 -translate-y-1/2 translate-x-1/2 z-40 flex flex-col items-center justify-center size-24 rounded-full bg-black/60 backdrop-blur-xs border border-white/10 pointer-events-none select-none"
+            >
+              <div className="flex items-center gap-0.5 text-white">
+                {[0, 1, 2].map((i) => (
+                  <motion.span
+                    key={i}
+                    custom={i}
+                    variants={chevronVariantsRight}
+                    initial="initial"
+                    animate="animate"
+                  >
+                    <ChevronRight className="size-5 fill-current" />
+                  </motion.span>
+                ))}
+              </div>
+              <span className="text-xs font-bold text-white/90 mt-1">
+                +{clickCount * skipAmount}s
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Big Play Pause Central Animation Indicator or buffering spinner */}
+        <AnimatePresence mode="wait">
+          {isBuffering ? (
+            <motion.div
+              key="buffering"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="absolute flex items-center justify-center size-16 rounded-full bg-black/40 border border-white/10 backdrop-blur-md text-white shadow-2xl pointer-events-none z-10"
+            >
+              <div className="size-7 rounded-full border-3 border-white/20 border-t-primary animate-spin" />
+            </motion.div>
+          ) : (
+            !isPlaying &&
+            !isLocked && (
+              <motion.div
+                key="play"
+                whileTap={{ scale: 0.9 }}
+                whileHover={{ scale: 1.1 }}
+                transition={{ ease: 'linear', duration: 0.2 }}
+                onClick={togglePlay}
+                className="absolute size-16 rounded-full bg-white/10 border border-white/20 backdrop-blur-md flex items-center justify-center text-white/90 hover:text-white hover:scale-105 active:scale-95 transition-all shadow-2xl cursor-pointer z-10"
+              >
+                <Play className="size-8 fill-current translate-x-0.5" />
+              </motion.div>
+            )
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* Synchronized secondary audio track player */}
       {selectedAudioTrackId !== 'native' && (
@@ -305,35 +397,6 @@ export function VideoViewport({
           preload="auto"
         />
       )}
-
-      {/* Big Play Pause Central Animation Indicator or buffering spinner */}
-      <AnimatePresence mode="wait">
-        {isBuffering ? (
-          <motion.div
-            key="buffering"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            className="absolute flex items-center justify-center size-16 rounded-full bg-black/40 border border-white/10 backdrop-blur-md text-white shadow-2xl pointer-events-none z-10"
-          >
-            <div className="size-7 rounded-full border-3 border-white/20 border-t-primary animate-spin" />
-          </motion.div>
-        ) : (
-          !isPlaying &&
-          !isLocked && (
-            <motion.div
-              key="play"
-              whileTap={{ scale: 0.9 }}
-              whileHover={{ scale: 1.1 }}
-              transition={{ ease: 'linear', duration: 0.2 }}
-              onClick={togglePlay}
-              className="absolute size-16 rounded-full bg-white/10 border border-white/20 backdrop-blur-md flex items-center justify-center text-white/90 hover:text-white hover:scale-105 active:scale-95 transition-all shadow-2xl cursor-pointer z-10"
-            >
-              <Play className="size-8 fill-current translate-x-0.5" />
-            </motion.div>
-          )
-        )}
-      </AnimatePresence>
     </div>
   );
 }

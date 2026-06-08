@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Play,
   Pause,
@@ -88,21 +88,11 @@ export function VideoControls({
   selectTextTrack,
   isTracksLoading = false,
 }: VideoControlsProps) {
-  const [isMobile, setIsMobile] = useState(false);
   const [expandedSection, setExpandedSection] = useState<
-    'audio' | 'subtitles' | null
+    'audio' | 'subtitles' | 'skip' | null
   >(null);
 
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 640);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  const toggleSection = (section: 'audio' | 'subtitles') => {
+  const toggleSection = (section: 'audio' | 'subtitles' | 'skip') => {
     setExpandedSection((prev) => (prev === section ? null : section));
   };
 
@@ -233,37 +223,63 @@ export function VideoControls({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 15, scale: 0.95 }}
                   className={cn(
-                    'absolute bottom-12 left-1/2 -translate-x-1/2 z-120 bg-black/95 border border-white/10 backdrop-blur-md rounded-xl p-3.5 shadow-2xl flex flex-col gap-3.5 select-none transition-all duration-300',
-                    isTracksLoading ||
-                      (audioTracks.length > 0 && subtitles.length > 0)
-                      ? 'w-72 sm:w-[360px]'
-                      : 'w-48',
+                    'absolute bottom-12 left-1/2 -translate-x-1/2 z-120 bg-black/95 border border-white/10 backdrop-blur-md rounded-xl p-3.5 shadow-2xl flex flex-col gap-3.5 select-none transition-all duration-300 w-72',
                   )}
                 >
                   <div className="flex flex-col gap-1.5">
-                    <span className="text-[10px] font-bold tracking-wider text-white/40 uppercase">
-                      Skip Duration
-                    </span>
-                    <div className="flex bg-white/5 p-0.5 rounded-lg gap-1 text-[11px] font-semibold">
-                      {[5, 10, 15, 30].map((s) => (
-                        <button
-                          key={s}
-                          type="button"
-                          onClick={() => {
-                            setSkipAmount(s);
-                            setShowSkipConfig(false);
-                          }}
+                    <button
+                      type="button"
+                      onClick={() => toggleSection('skip')}
+                      className="flex items-center justify-between w-full py-1 text-left cursor-pointer"
+                    >
+                      <span className="text-[10px] font-bold tracking-wider text-white/40 uppercase">
+                        Skip Duration
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[11px] font-semibold text-white/60">
+                          {skipAmount}s
+                        </span>
+                        <ChevronDown
                           className={cn(
-                            'flex-1 py-1 rounded transition-colors cursor-pointer',
-                            skipAmount === s
-                              ? 'bg-white/15 text-white'
-                              : 'text-white/60 hover:text-white hover:bg-white/5',
+                            'size-3.5 text-white/40 transition-transform duration-200',
+                            expandedSection === 'skip' && 'rotate-180',
                           )}
+                        />
+                      </div>
+                    </button>
+
+                    <AnimatePresence initial={false}>
+                      {expandedSection === 'skip' && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.2, ease: 'easeInOut' }}
+                          className="overflow-hidden"
                         >
-                          {s}s
-                        </button>
-                      ))}
-                    </div>
+                          <div className="flex bg-white/5 p-0.5 rounded-lg gap-1 text-[11px] font-semibold mt-1">
+                            {[5, 10, 15, 30].map((s) => (
+                              <button
+                                key={s}
+                                type="button"
+                                onClick={() => {
+                                  setSkipAmount(s);
+                                  setShowSkipConfig(false);
+                                }}
+                                className={cn(
+                                  'flex-1 py-1 rounded transition-colors cursor-pointer',
+                                  skipAmount === s
+                                    ? 'bg-white/15 text-white'
+                                    : 'text-white/60 hover:text-white hover:bg-white/5',
+                                )}
+                              >
+                                {s}s
+                              </button>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
 
                   <div className="h-px bg-white/10 w-full" />
@@ -280,63 +296,38 @@ export function VideoControls({
                   ) : (
                     (audioTracks.length > 0 || subtitles.length > 0) && (
                       <>
-                        <div
-                          className={cn(
-                            'flex flex-col sm:grid gap-3.5',
-                            audioTracks.length > 0 && subtitles.length > 0
-                              ? 'sm:grid-cols-2'
-                              : 'grid-cols-1',
-                          )}
-                        >
+                        <div className="flex flex-col gap-3.5">
                           {/* Audio Track Selector */}
                           {audioTracks.length > 0 && (
                             <div className="flex flex-col gap-1.5">
-                              {isMobile ? (
-                                <button
-                                  type="button"
-                                  onClick={() => toggleSection('audio')}
-                                  className="flex items-center justify-between w-full py-1 text-left cursor-pointer"
-                                >
-                                  <span className="text-[10px] font-bold tracking-wider text-white/40 uppercase">
-                                    Audio Track
-                                  </span>
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="text-[11px] font-semibold text-white/60">
-                                      {selectedAudioLabel}
-                                    </span>
-                                    <ChevronDown
-                                      className={cn(
-                                        'size-3.5 text-white/40 transition-transform duration-200',
-                                        expandedSection === 'audio' &&
-                                          'rotate-180',
-                                      )}
-                                    />
-                                  </div>
-                                </button>
-                              ) : (
+                              <button
+                                type="button"
+                                onClick={() => toggleSection('audio')}
+                                className="flex items-center justify-between w-full py-1 text-left cursor-pointer"
+                              >
                                 <span className="text-[10px] font-bold tracking-wider text-white/40 uppercase">
                                   Audio Track
                                 </span>
-                              )}
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-[11px] font-semibold text-white/60">
+                                    {selectedAudioLabel}
+                                  </span>
+                                  <ChevronDown
+                                    className={cn(
+                                      'size-3.5 text-white/40 transition-transform duration-200',
+                                      expandedSection === 'audio' &&
+                                        'rotate-180',
+                                    )}
+                                  />
+                                </div>
+                              </button>
 
                               <AnimatePresence initial={false}>
-                                {(!isMobile || expandedSection === 'audio') && (
+                                {expandedSection === 'audio' && (
                                   <motion.div
-                                    initial={
-                                      isMobile
-                                        ? { height: 0, opacity: 0 }
-                                        : undefined
-                                    }
-                                    animate={
-                                      isMobile
-                                        ? { height: 'auto', opacity: 1 }
-                                        : undefined
-                                    }
-                                    exit={
-                                      isMobile
-                                        ? { height: 0, opacity: 0 }
-                                        : undefined
-                                    }
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
                                     transition={{
                                       duration: 0.2,
                                       ease: 'easeInOut',
@@ -399,53 +390,34 @@ export function VideoControls({
                           {/* Subtitles Selector */}
                           {subtitles.length > 0 && (
                             <div className="flex flex-col gap-1.5">
-                              {isMobile ? (
-                                <button
-                                  type="button"
-                                  onClick={() => toggleSection('subtitles')}
-                                  className="flex items-center justify-between w-full py-1 text-left cursor-pointer"
-                                >
-                                  <span className="text-[10px] font-bold tracking-wider text-white/40 uppercase">
-                                    Subtitles
-                                  </span>
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="text-[11px] font-semibold text-white/60">
-                                      {selectedSubtitlesLabel}
-                                    </span>
-                                    <ChevronDown
-                                      className={cn(
-                                        'size-3.5 text-white/40 transition-transform duration-200',
-                                        expandedSection === 'subtitles' &&
-                                          'rotate-180',
-                                      )}
-                                    />
-                                  </div>
-                                </button>
-                              ) : (
+                              <button
+                                type="button"
+                                onClick={() => toggleSection('subtitles')}
+                                className="flex items-center justify-between w-full py-1 text-left cursor-pointer"
+                              >
                                 <span className="text-[10px] font-bold tracking-wider text-white/40 uppercase">
                                   Subtitles
                                 </span>
-                              )}
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-[11px] font-semibold text-white/60">
+                                    {selectedSubtitlesLabel}
+                                  </span>
+                                  <ChevronDown
+                                    className={cn(
+                                      'size-3.5 text-white/40 transition-transform duration-200',
+                                      expandedSection === 'subtitles' &&
+                                        'rotate-180',
+                                    )}
+                                  />
+                                </div>
+                              </button>
 
                               <AnimatePresence initial={false}>
-                                {(!isMobile ||
-                                  expandedSection === 'subtitles') && (
+                                {expandedSection === 'subtitles' && (
                                   <motion.div
-                                    initial={
-                                      isMobile
-                                        ? { height: 0, opacity: 0 }
-                                        : undefined
-                                    }
-                                    animate={
-                                      isMobile
-                                        ? { height: 'auto', opacity: 1 }
-                                        : undefined
-                                    }
-                                    exit={
-                                      isMobile
-                                        ? { height: 0, opacity: 0 }
-                                        : undefined
-                                    }
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
                                     transition={{
                                       duration: 0.2,
                                       ease: 'easeInOut',
