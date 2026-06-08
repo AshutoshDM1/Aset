@@ -191,7 +191,7 @@ export function BulkActionBar() {
     <>
       <div
         className={cn(
-          'fixed bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col sm:flex-row items-center gap-4 px-4 py-3 sm:py-2.5 rounded-2xl sm:rounded-full border border-border/80 bg-background/80 dark:bg-background/70 backdrop-blur-xl shadow-2xl transition-all duration-300 transform',
+          'fixed bottom-24 lg:bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col sm:flex-row items-center gap-4 px-4 py-3 sm:py-2.5 rounded-2xl sm:rounded-full border border-border/80 bg-background/80 dark:bg-background/70 backdrop-blur-xl shadow-2xl transition-all duration-300 transform w-11/12',
           active
             ? 'translate-y-0 opacity-100 scale-100'
             : 'translate-y-12 opacity-0 scale-95 pointer-events-none',
@@ -220,7 +220,7 @@ export function BulkActionBar() {
         <div className="hidden sm:block h-6 w-px bg-border/60" />
 
         {/* Action buttons */}
-        <div className="flex items-center gap-1.5 w-full sm:w-auto justify-center">
+        <div className="flex items-center gap-1.5 w-full justify-center">
           {isTrash ? (
             <>
               {/* Restore permanently */}
@@ -229,7 +229,7 @@ export function BulkActionBar() {
                 size="sm"
                 onClick={() => handleTrashMany(false)}
                 disabled={isPending}
-                className="h-9 px-3 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all cursor-pointer font-medium"
+                className="h-9 px-1 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all cursor-pointer font-medium"
               >
                 {isPending ? (
                   <Loader2 className="size-4 animate-spin text-primary mr-1.5" />
@@ -245,7 +245,7 @@ export function BulkActionBar() {
                 size="sm"
                 onClick={() => setIsDeleteConfirmOpen(true)}
                 disabled={isPending}
-                className="h-9 px-3 rounded-full text-destructive hover:bg-destructive/5 transition-all cursor-pointer font-medium"
+                className="h-9 px-1 rounded-full text-destructive hover:bg-destructive/5 transition-all cursor-pointer font-medium"
               >
                 <Trash2 className="size-4 mr-1.5" />
                 Delete Permanently
@@ -259,7 +259,7 @@ export function BulkActionBar() {
                 size="sm"
                 onClick={() => handleStarMany(true)}
                 disabled={isPending}
-                className="h-9 px-3 rounded-full text-muted-foreground hover:text-yellow-500 hover:bg-yellow-500/5 transition-all cursor-pointer font-medium"
+                className="h-9 px-1 rounded-full text-muted-foreground hover:text-yellow-500 hover:bg-yellow-500/5 transition-all cursor-pointer font-medium"
               >
                 <Star className="size-4 mr-1.5" />
                 Star
@@ -271,7 +271,7 @@ export function BulkActionBar() {
                 size="sm"
                 onClick={() => handleStarMany(false)}
                 disabled={isPending}
-                className="h-9 px-3 rounded-full text-muted-foreground hover:text-muted-foreground hover:bg-muted/65 transition-all cursor-pointer font-medium"
+                className="h-9 px-1 rounded-full text-muted-foreground hover:text-muted-foreground hover:bg-muted/65 transition-all cursor-pointer font-medium"
               >
                 <Star className="size-4 fill-current mr-1.5 text-yellow-400" />
                 Unstar
@@ -283,7 +283,7 @@ export function BulkActionBar() {
                 size="sm"
                 onClick={() => setIsMoveOpen(true)}
                 disabled={isPending}
-                className="h-9 px-3 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all cursor-pointer font-medium"
+                className="h-9 px-1 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all cursor-pointer font-medium"
               >
                 <FolderInput className="size-4 mr-1.5 text-primary" />
                 Move
@@ -295,7 +295,7 @@ export function BulkActionBar() {
                 size="sm"
                 onClick={() => handleTrashMany(true)}
                 disabled={isPending}
-                className="h-9 px-3 rounded-full text-destructive hover:bg-destructive/5 transition-all cursor-pointer font-medium"
+                className="h-9 px-1 rounded-full text-destructive hover:bg-destructive/5 transition-all cursor-pointer font-medium"
               >
                 <Trash2 className="size-4 mr-1.5" />
                 Trash

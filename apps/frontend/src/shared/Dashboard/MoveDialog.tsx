@@ -142,7 +142,7 @@ export function MoveDialog({
     >
       <DialogContent
         showCloseButton
-        className="max-w-md bg-background/85 backdrop-blur-xl border border-border/80 shadow-2xl"
+        className="min-w-[320px] sm:min-w-xs bg-background/85 backdrop-blur-xl border border-border/80 shadow-2xl"
       >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl font-bold">

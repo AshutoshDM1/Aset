@@ -3,14 +3,24 @@ import { DashboardNavbarSearch } from './DashboardNavbarSearch';
 import { DashboardNavbarActions } from './DashboardNavbarActions';
 import BreadcrumbComponent from '../Breadcrumb/Breadcrumb';
 import { Link, useLocation } from 'react-router';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { trpc } from '@/utils/trpc';
 import Logo from '../Navbar/Logo';
 import { SearchDialog } from '@/shared/Search/SearchDialog';
+import { useSelectionStore } from '@/store/selectionStore';
+import { Button } from '@/components/ui/button';
+import { ArrowBigLeftDash } from 'lucide-react';
 
 function DashboardNavbar({ className }: { className?: string }) {
   const location = useLocation();
+  const clearSelection = useSelectionStore((s) => s.clearSelection);
+
+  useEffect(() => {
+    clearSelection();
+  }, [location.pathname, clearSelection]);
+  const isDashboardRoot =
+    location.pathname === '/dashboard' || location.pathname === '/dashboard/';
 
   const folderId = useMemo(() => {
     const match = location.pathname.match(
@@ -130,11 +140,11 @@ function DashboardNavbar({ className }: { className?: string }) {
     <>
       <header
         className={cn(
-          'sticky top-0 z-20 w-full bg-background/70 backdrop-blur supports-backdrop-filter:bg-background/55 border-b',
+          'sticky top-0 z-20 w-full bg-background/70 backdrop-blur supports-backdrop-filter:bg-background/55',
           className,
         )}
       >
-        <div className="flex items-center justify-between gap-4 px-4 py-2.5 sm:px-6 sm:py-4">
+        <div className="flex items-center justify-between gap-4 px-4 py-2.5 sm:px-6 sm:py-4 border-b">
           <BreadcrumbComponent
             className="hidden md:block min-w-0 flex-1 mr-4"
             items={breadcrumbItems}
@@ -152,6 +162,18 @@ function DashboardNavbar({ className }: { className?: string }) {
             <DashboardNavbarActions />
           </div>
         </div>
+        {!isDashboardRoot && (
+          <div className="block sm:hidden text-sm px-3 mt-2">
+            <Button
+              onClick={() => {
+                window.history.back();
+              }}
+              className="rounded-lg w-fit"
+            >
+              <ArrowBigLeftDash /> Back
+            </Button>
+          </div>
+        )}
       </header>
       <SearchDialog />
     </>
