@@ -1,4 +1,4 @@
-import { db } from '../src/utils/db';
+import { db } from '../utils/db';
 
 async function main() {
   console.log('Seeding database with coupons...');
