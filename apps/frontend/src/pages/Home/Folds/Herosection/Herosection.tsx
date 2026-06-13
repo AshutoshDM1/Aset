@@ -1,70 +1,36 @@
 import { HeroImageLight, HeroImageDark } from '@/assets/import';
 import ShinyText from '@/components/ShinyText';
-import SplitText from '@/components/SplitText';
-import { useTheme } from '@/components/theme-provider';
+import { BlurShimmerText } from '@/components/blur-shimmer-text';
+import { useResolvedTheme } from '@/hooks/useResolvedTheme';
 import { cn } from '@/lib/utils';
 import { ArrowRight } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { motion } from 'motion/react';
 
 const Herosection = () => {
-  const { theme } = useTheme();
-
-  // Stably resolve light/dark themes, including system preference updates
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
-
-  useEffect(() => {
-    const getSystemTheme = () =>
-      window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light';
-
-    if (theme === 'system') {
-      setResolvedTheme(getSystemTheme());
-
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      const handleChange = () => {
-        setResolvedTheme(getSystemTheme());
-      };
-
-      mediaQuery.addEventListener('change', handleChange);
-      return () => mediaQuery.removeEventListener('change', handleChange);
-    } else {
-      setResolvedTheme(theme);
-    }
-  }, [theme]);
+  const resolvedTheme = useResolvedTheme();
 
   return (
     <>
       <div className="max-w-5xl mx-auto text-center py-14 md:py-28">
         <HeroBadge />
         <h1 className="text-3xl md:text-7xl font-bold tracking-tight text-zinc-900 dark:text-white mb-6 leading-tight">
-          <SplitText
+          <BlurShimmerText
+            as={motion.span}
             text="Upload, organize, and share"
-            delay={30}
-            duration={1.15}
-            ease="power3.out"
-            splitType="chars"
-            from={{ opacity: 0, y: 40 }}
-            to={{ opacity: 1, y: 0 }}
-            threshold={0.1}
-            rootMargin="-100px"
-            textAlign="center"
+            className=""
+            blur={8}
+            transition={{ duration: 0.8 }}
           />
           <br className="hidden md:block" />
-          <SplitText
+          <BlurShimmerText
+            as={motion.span}
             text="files without the chaos."
-            delay={30}
-            animationDelay={1250}
-            duration={1.15}
-            ease="power3.out"
-            splitType="chars"
-            from={{ opacity: 0, y: 40 }}
-            to={{ opacity: 1, y: 0 }}
-            threshold={0.1}
-            rootMargin="-100px"
-            textAlign="center"
+            className=""
+            blur={8}
+            delay={1}
+            transition={{ duration: 0.8 }}
+            interval={3.5}
           />
         </h1>
         <HeroSubheadline />
@@ -89,8 +55,8 @@ export default Herosection;
 const HeroBadge = () => {
   return (
     <div className="flex justify-center mb-6 select-none">
-      <div className="bg-secondary text-secondary-foreground px-1.5 py-1.5 rounded-full shadow flex items-center gap-2">
-        <span className="flex items-center gap-2 px-3 py-1 rounded-full bg-secondary-foreground text-secondary text-xs font-semibold ">
+      <div className="bg-white px-1.5 py-1.5 rounded-full shadow flex items-center gap-2">
+        <span className="flex items-center gap-2 px-3 py-1 rounded-full bg-black text-white text-xs font-semibold ">
           New
         </span>
         <span className="pr-2 text-xs md:text-sm font-semibold">
@@ -98,8 +64,8 @@ const HeroBadge = () => {
             text="✨  A lightweight cloud drive"
             speed={2}
             delay={0}
-            color="#ffffff"
-            shineColor="#a4a4fc"
+            color="#000000"
+            shineColor="#fff"
             spread={120}
             direction="left"
             yoyo={false}
