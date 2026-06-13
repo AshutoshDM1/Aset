@@ -11,7 +11,7 @@ export const InfoSection: React.FC = () => {
         </span>
       </h2>
 
-      <BrandButton to="/dashboard" className="mt-3 text-base px-6 ">
+      <BrandButton to="/dashboard/my-files" className="mt-3 text-base px-6 ">
         Explore Aset{' '}
       </BrandButton>
 

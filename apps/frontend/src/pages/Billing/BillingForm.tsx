@@ -145,7 +145,7 @@ export const BillingForm: React.FC<BillingFormProps> = ({
                 <div className="flex gap-2">
                   <Input
                     id="coupon-code"
-                    placeholder="e.g. FREE100"
+                    placeholder="e.g. WELCOME50"
                     value={couponInput}
                     onChange={(e) => setCouponInput(e.target.value)}
                     disabled={isValidating || isCheckoutLoading}

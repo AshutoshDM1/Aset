@@ -101,7 +101,7 @@ const HeroSubheadline = () => {
 const HeroCTA = () => {
   return (
     <div className="flex justify-center mt-8">
-      <Link to="/dashboard">
+      <Link to="/dashboard/my-files">
         <button
           className={cn(
             'text-sm md:text-lg text-primary-foreground bg-linear-to-b from-indigo-600 via-indigo-500 to-indigo-400  hover:bg-indigo-500/70 rounded-4xl px-4 py-2.5 font-semibold shadow-[0_3px_17px_rgba(0,0,0,0.2)] shadow-[#5E43F3] ',

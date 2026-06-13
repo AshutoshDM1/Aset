@@ -43,7 +43,7 @@ const CTA: React.FC = () => {
       </div>
 
       {/* Start Free Trial Button */}
-      <BrandButton to="/dashboard">Get Start Now</BrandButton>
+      <BrandButton to="/dashboard/my-files">Get Start Now</BrandButton>
 
       {/* Little clean decorative light pulse indicator at top right */}
       <div className="absolute top-6 right-6 flex size-1.5 pointer-events-none">

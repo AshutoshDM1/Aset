@@ -15,10 +15,14 @@ function mbToGb(mb: number) {
   return (mb / MB_PER_GB).toFixed(2);
 }
 
-function currentPlanLabel(totalMb: number) {
-  if (totalMb <= 10240) return 'Free — 10 GB';
-  if (totalMb <= 20480) return 'Plus — 20 GB';
-  return 'Max — 50 GB';
+function getPlanLabel(plan: string | undefined, totalMb: number) {
+  const planKey = plan?.toLowerCase() || '';
+  if (planKey === 'free' || totalMb <= 5120) return 'Starter plan — 5 GB';
+  if (planKey === 'trial' || totalMb <= 20480) return 'Free Trial — 20 GB';
+  if (planKey === 'pro' || totalMb <= 512000) return 'Pro plan — 500 GB';
+  if (planKey === 'business' || totalMb <= 1048576)
+    return 'Business plan — 1 TB';
+  return `Custom plan — ${(totalMb / 1024).toFixed(0)} GB`;
 }
 
 export function StorageOverview() {
@@ -26,12 +30,22 @@ export function StorageOverview() {
   const { data, isPending } = useQuery(trpc.user.me.queryOptions());
 
   const storage = data?.storage;
-  const totalMb = storage?.totalStorage ?? 10240;
+  const totalMb = storage?.totalStorage ?? 5120;
   const usedMb = storage?.usedStorage ?? 0;
   const totalGb = totalMb / MB_PER_GB;
   const usedGb = usedMb / MB_PER_GB;
   const percent =
     totalMb > 0 ? Math.min(100, Math.round((usedMb / totalMb) * 100)) : 0;
+
+  const isTrial =
+    storage?.plan === 'trial' ||
+    (totalMb === 20480 && storage?.plan !== 'free');
+  let daysLeft: number | undefined;
+  if (isTrial && storage?.trialExpiresAt) {
+    const expires = new Date(storage.trialExpiresAt).getTime();
+    const diff = expires - Date.now();
+    daysLeft = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -63,9 +77,16 @@ export function StorageOverview() {
       <div className="flex items-center justify-between py-3 border-b border-border/40">
         <div>
           <p className="text-sm font-medium">Current plan</p>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {currentPlanLabel(totalMb)}
-          </p>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-xs text-muted-foreground">
+              {isPending ? 'Loading...' : getPlanLabel(storage?.plan, totalMb)}
+            </span>
+            {!isPending && isTrial && daysLeft !== undefined && (
+              <span className="text-[10px] font-semibold tracking-wide bg-linear-to-r from-amber-500/10 to-orange-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full shadow-xs">
+                {daysLeft} {daysLeft === 1 ? 'day' : 'days'} left
+              </span>
+            )}
+          </div>
         </div>
         <Button
           variant="ghost"

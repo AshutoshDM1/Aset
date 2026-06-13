@@ -77,7 +77,7 @@ const PricingCards: React.FC<PricingCardsProps> = ({ billingCycle }) => {
         const { price, original } = getDisplayPrice(plan, billingCycle);
         const isFree = plan.monthlyPrice === 0 && plan.yearlyPrice === 0;
         const targetUrl = isFree
-          ? '/dashboard'
+          ? '/dashboard/my-files'
           : `/billing?plan=${encodeURIComponent(plan.name)}&cycle=${billingCycle}`;
 
         return (

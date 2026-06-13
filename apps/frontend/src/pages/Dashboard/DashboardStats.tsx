@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { trpc } from '@/utils/trpc';
 import Loader from '@/shared/PageLoader/Loader';
@@ -9,8 +10,9 @@ import { RecentActivity } from './components/RecentActivity';
 import GetStarted from './components/GetStarted';
 
 export default function DashboardStats() {
+  const [rangeDays, setRangeDays] = useState(7);
   const { data, isLoading } = useQuery(
-    trpc.stats.getDashboardStats.queryOptions(),
+    trpc.stats.getDashboardStats.queryOptions({ rangeDays }),
   );
 
   if (isLoading || !data) {
@@ -37,7 +39,11 @@ export default function DashboardStats() {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 items-stretch">
         <div className="lg:col-span-2 flex flex-col h-full">
-          <UploadsChart data={data.uploadsChart} />
+          <UploadsChart
+            data={data.uploadsChart}
+            rangeDays={rangeDays}
+            onRangeDaysChange={setRangeDays}
+          />
         </div>
         <div className="flex flex-col h-full">
           <FileTypeBreakdown data={data.fileTypes} />

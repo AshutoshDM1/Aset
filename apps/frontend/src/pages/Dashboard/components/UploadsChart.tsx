@@ -22,17 +22,45 @@ const chartConfig = {
 
 type UploadsChartProps = {
   data: UploadsPoint[];
+  rangeDays: number;
+  onRangeDaysChange: (days: number) => void;
 };
 
-export function UploadsChart({ data }: UploadsChartProps) {
+export function UploadsChart({
+  data,
+  rangeDays,
+  onRangeDaysChange,
+}: UploadsChartProps) {
   return (
     <div className="h-full rounded-lg bg-background p-5 shadow-sm ring-1 ring-border/60">
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold">Activity</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Uploads & downloads over the last 7 days
+          <p className="mt-1 text-xs text-muted-foreground">
+            Uploads & downloads over the last {rangeDays} days
           </p>
+        </div>
+        <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-lg border border-border/40 shrink-0">
+          <button
+            onClick={() => onRangeDaysChange(7)}
+            className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-all cursor-pointer ${
+              rangeDays === 7
+                ? 'bg-background text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            7 Days
+          </button>
+          <button
+            onClick={() => onRangeDaysChange(30)}
+            className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-all cursor-pointer ${
+              rangeDays === 30
+                ? 'bg-background text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            30 Days
+          </button>
         </div>
       </div>
 
@@ -70,6 +98,7 @@ export function UploadsChart({ data }: UploadsChartProps) {
             tickLine={false}
             axisLine={false}
             tickMargin={8}
+            interval={rangeDays > 7 ? 4 : 0}
           />
           <YAxis tickLine={false} axisLine={false} tickMargin={8} width={28} />
           <ChartTooltip

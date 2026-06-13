@@ -49,7 +49,7 @@ export const PlanSummary: React.FC<PlanSummaryProps> = ({
           Back
         </button>
         <div className="flex items-center gap-2 text-white">
-          <Logo className="size-7 text-white" />
+          <Logo className="size-7 text-white invert" />
           <span className="text-lg font-medium tracking-tight">Aset</span>
         </div>
       </div>

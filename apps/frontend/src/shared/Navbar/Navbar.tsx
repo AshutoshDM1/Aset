@@ -65,7 +65,7 @@ const Navbar = () => {
         </div>
         <div className="flex items-center gap-4">
           {isSignedIn ? (
-            <BrandButton label="Dashboard" to="/dashboard" />
+            <BrandButton label="Dashboard" to="/dashboard/my-files" />
           ) : (
             <>
               <SignInButton mode="modal">
