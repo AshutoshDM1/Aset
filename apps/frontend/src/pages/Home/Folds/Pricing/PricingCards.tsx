@@ -2,17 +2,23 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import BrandButton from '@/shared/BrandButton/BrandButton';
 import { Link } from 'react-router';
+import { useQuery } from '@tanstack/react-query';
+import { trpc } from '@/utils/trpc';
+import { Loader2 } from 'lucide-react';
 
 interface PricingPlan {
   name: string;
   subtitle: string;
-  monthdiscount: number;
+  storage: string;
+  storageMb: number;
   monthlyPrice: number;
-  yeardiscount: number;
   yearlyPrice: number;
+  monthlyDiscountOriginal?: number;
+  yearlyDiscountOriginal?: number;
+  btnText: string;
   features: string[];
   isPro?: boolean;
-  btnText: string;
+  description: string;
 }
 
 interface PricingCardsProps {
@@ -23,84 +29,56 @@ const getDisplayPrice = (plan: PricingPlan, cycle: 'monthly' | 'yearly') => {
   if (cycle === 'monthly') {
     return {
       price: plan.monthlyPrice,
-      original: plan.monthdiscount > 0 ? plan.monthdiscount : null,
+      original:
+        plan.monthlyDiscountOriginal && plan.monthlyDiscountOriginal > 0
+          ? plan.monthlyDiscountOriginal
+          : null,
     };
   } else {
-    // If yearlyPrice is much larger than monthlyPrice, treat it as annual total
-    const isAnnualTotal = plan.yearlyPrice > plan.monthlyPrice;
-    const price = isAnnualTotal
-      ? Math.round(plan.yearlyPrice / 12)
-      : plan.yearlyPrice;
+    const price = Math.round(plan.yearlyPrice / 12);
     const original =
-      plan.yeardiscount > 0
-        ? isAnnualTotal
-          ? Math.round(plan.yeardiscount / 12)
-          : plan.yeardiscount
+      plan.yearlyDiscountOriginal && plan.yearlyDiscountOriginal > 0
+        ? Math.round(plan.yearlyDiscountOriginal / 12)
         : null;
     return { price, original };
   }
 };
 
 const PricingCards: React.FC<PricingCardsProps> = ({ billingCycle }) => {
-  const plans: PricingPlan[] = [
-    {
-      name: 'Starter plan',
-      subtitle: 'For individuals & new creators',
-      monthdiscount: 0,
-      monthlyPrice: 0,
-      yeardiscount: 0,
-      yearlyPrice: 0,
-      btnText: 'Start Free',
-      features: [
-        '5 GB secure cloud storage',
-        'Basic file & folder sharing',
-        'Max file upload size: 100 MB',
-        'Standard collaboration tools',
-        'Web-only dashboard access',
-        'Community support',
-      ],
-    },
-    {
-      name: 'Pro plan',
-      subtitle: 'For freelancers & small teams',
-      monthdiscount: 10,
-      monthlyPrice: 5,
-      yeardiscount: 58,
-      yearlyPrice: 50,
-      btnText: 'Get Started (Free Trial)',
-      features: [
-        '400 GB high-speed storage',
-        'Everything in Starter +',
-        'Max file upload size: 2 GB',
-        'Password-protected shared links',
-        'Advanced team collaboration',
-        'Priority email & chat support',
-      ],
-      isPro: true,
-    },
-    {
-      name: 'Business plan',
-      subtitle: 'For growing teams & agencies',
-      monthdiscount: 25,
-      monthlyPrice: 20,
-      yeardiscount: 20,
-      yearlyPrice: 16,
-      btnText: 'Contact Us',
-      features: [
-        '1 TB premium cloud storage',
-        'Everything in Pro +',
-        'Unlimited file upload size',
-        'Granular access control & roles',
-        'Shared team workspaces',
-        'Dedicated 24/7 priority support',
-      ],
-    },
-  ];
+  const { data: plansData, isPending } = useQuery(
+    trpc.pricing.getPlans.queryOptions(),
+  );
+
+  if (isPending) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-zinc-500 w-full col-span-3">
+        <Loader2 className="size-8 animate-spin text-indigo-500 mb-2" />
+        <p className="text-sm font-medium">Loading plans...</p>
+      </div>
+    );
+  }
+
+  if (!plansData) {
+    return (
+      <div className="text-center py-20 text-zinc-500 text-sm font-semibold col-span-3 w-full">
+        Failed to load pricing plans.
+      </div>
+    );
+  }
+
+  // Filter out the free trial plan from the main pricing page cards grid
+  const plans = plansData.filter(
+    (p) => p.name.toLowerCase() !== '15-day free trial',
+  );
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 items-stretch">
       {plans.map((plan) => {
         const { price, original } = getDisplayPrice(plan, billingCycle);
+        const isFree = plan.monthlyPrice === 0 && plan.yearlyPrice === 0;
+        const targetUrl = isFree
+          ? '/dashboard'
+          : `/billing?plan=${encodeURIComponent(plan.name)}&cycle=${billingCycle}`;
 
         return (
           <div
@@ -144,7 +122,7 @@ const PricingCards: React.FC<PricingCardsProps> = ({ billingCycle }) => {
 
               <div className="mt-8">
                 {plan.isPro ? (
-                  <Link to="/dashboard" className="block w-full">
+                  <Link to={targetUrl} className="block w-full">
                     <button
                       className={cn(
                         'w-full text-sm md:text-base text-primary-foreground bg-linear-to-b from-indigo-600 via-indigo-500 to-indigo-400 hover:bg-indigo-500/70 rounded-4xl px-4 py-3 font-semibold shadow-[0_3px_17px_rgba(0,0,0,0.2)] shadow-[#5E43F3] ',
@@ -157,7 +135,7 @@ const PricingCards: React.FC<PricingCardsProps> = ({ billingCycle }) => {
                   </Link>
                 ) : (
                   <BrandButton
-                    to="/dashboard"
+                    to={targetUrl}
                     label={plan.btnText}
                     className="w-full text-center flex justify-center py-3 text-sm md:text-base cursor-pointer"
                   />

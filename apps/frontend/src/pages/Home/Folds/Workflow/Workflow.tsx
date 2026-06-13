@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import SectionHeading from '@/shared/SectionHeading/SectionHeading';
-import WorkflowWireframe from './WorkflowWireframe';
 import FadeIn from '@/shared/FadeIn/FadeIn';
 
 interface WorkflowStep {

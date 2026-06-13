@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import SectionHeading from '@/shared/SectionHeading/SectionHeading';
 import PricingCards from './PricingCards';
 import { cn } from '@/lib/utils';
+import { Link } from 'react-router';
 
 export const Pricing: React.FC = () => {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>(
@@ -69,6 +70,19 @@ export const Pricing: React.FC = () => {
 
       {/* Pricing Cards Grid */}
       <PricingCards billingCycle={billingCycle} />
+
+      {/* Still Confused Free Trial Link */}
+      <div className="text-center">
+        <p className="text-sm text-zinc-500 dark:text-zinc-450 font-medium">
+          Still confused?{' '}
+          <Link
+            to="/billing?plan=trial"
+            className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 font-semibold underline underline-offset-4 cursor-pointer"
+          >
+            Start your free trial now
+          </Link>
+        </p>
+      </div>
     </div>
   );
 };

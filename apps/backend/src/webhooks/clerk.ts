@@ -83,8 +83,11 @@ export async function clerkWebhookHandler(req: Request, res: Response) {
             name: fullName(data),
             storage: {
               create: {
-                totalStorage: DEFAULT_TOTAL_STORAGE_MB,
+                totalStorage: 5 * 1024, // 5 GB free limit in MB
                 usedStorage: 0,
+                plan: 'free',
+                trialExpiresAt: null,
+                hasUsedTrial: false,
               },
             },
           },

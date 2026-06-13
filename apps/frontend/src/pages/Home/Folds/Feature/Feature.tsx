@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'motion/react';
 import SectionHeading from '@/shared/SectionHeading/SectionHeading';
 import {
@@ -17,8 +17,6 @@ interface FeatureItem {
 }
 
 const Feature: React.FC = () => {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-
   const features: FeatureItem[] = [
     {
       title: 'Fast Cloud Upload',
@@ -63,8 +61,6 @@ const Feature: React.FC = () => {
             return (
               <motion.div
                 key={index}
-                onMouseEnter={() => setHoveredIndex(index)}
-                onMouseLeave={() => setHoveredIndex(null)}
                 className="group relative flex flex-col items-center text-center p-8 border rounded-3xl bg-white/60 dark:bg-zinc-950/40 border-zinc-200/80 dark:border-zinc-800/80 hover:border-primary/25 dark:hover:border-primary/45 transition-all duration-350 shadow-sm hover:shadow-md cursor-pointer select-none"
                 whileHover={{ y: -5 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 22 }}

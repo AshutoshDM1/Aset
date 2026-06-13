@@ -42,7 +42,7 @@ export function SettingDialog() {
       }}
     >
       <DialogContent
-        className="p-0 overflow-hidden flex flex-col rounded-2xl border border-border/60 bg-background shadow-2xl w-[calc(100vw-2rem)] sm:max-w-3xl max-h-[90vh] sm:max-h-[85vh]"
+        className="p-0 overflow-hidden flex flex-col rounded-2xl border border-border/60 bg-background shadow-2xl w-[calc(100vw-2rem)] sm:max-w-5xl max-h-[90vh] sm:max-h-[85vh]"
         showCloseButton={false}
       >
         {/* Title bar */}

@@ -1,35 +1,38 @@
 import Section from '../Section/Section';
 import Logo from './Logo';
 import BrandButton from '../BrandButton/BrandButton';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
 import { SignInButton, SignUpButton, useUser } from '@clerk/react';
 
 const Navbar = () => {
   const { isSignedIn } = useUser();
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
+
   const navItems = [
     {
       label: 'Features',
-      href: '#feature',
+      href: isHomePage ? '#feature' : '/#feature',
     },
     {
       label: 'Integration',
-      href: '#integration',
+      href: isHomePage ? '#integration' : '/#integration',
     },
     {
       label: 'FAQ',
-      href: '#faq',
+      href: isHomePage ? '#faq' : '/#faq',
     },
     {
       label: 'Workflow',
-      href: '#workflow',
+      href: isHomePage ? '#workflow' : '/#workflow',
     },
     {
       label: 'Pricing',
-      href: '#pricing',
+      href: isSignedIn ? '/pricing' : '/sign-in',
     },
   ];
   return (
-    <Section className="py-4">
+    <Section className="py-4 w-full">
       <div className="flex justify-between items-center">
         <div className="flex gap-2 items-center">
           <Logo className="w-10 h-10" />
@@ -39,7 +42,7 @@ const Navbar = () => {
         </div>
         <div className="hidden md:flex items-center justify-center gap-6">
           {navItems.map((item) =>
-            item.href.startsWith('/') ? (
+            item.href.startsWith('/') && !item.href.includes('#') ? (
               // Internal route → React Router Link
               <Link
                 className="text-base text-zinc-500 hover:text-zinc-900 transition-all dark:text-white font-semibold"
@@ -49,7 +52,7 @@ const Navbar = () => {
                 {item.label}
               </Link>
             ) : (
-              // Anchor (#section) or external (http) → native <a> so the browser handles scroll
+              // Anchor (#section) or starting with /# → native <a> so the browser handles scroll
               <a
                 className="text-base text-zinc-500 hover:text-zinc-900 transition-all duration-300 dark:text-white font-semibold"
                 key={item.href}

@@ -1,78 +1,72 @@
-// StoragePlans.tsx
-// Right-panel content showing available storage plans.
-// Selecting a plan calls the backend mutation and returns to the overview on success.
-
+import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Check, ChevronRight, Loader2, X } from 'lucide-react';
+import { ChevronRight, Loader2, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router';
 
 import { Badge } from '@/components/ui/badge';
 import { trpc, queryClient } from '@/utils/trpc';
 import { cn } from '@/lib/utils';
 import { useSettingStore } from './settingStore';
-
-const MB_PER_GB = 1024;
-
-interface Plan {
-  id: string;
-  label: string;
-  gb: number;
-  price: string;
-  features: string[];
-  recommended?: boolean;
-  upcoming?: boolean;
-}
-
-const PLANS: Plan[] = [
-  {
-    id: 'free',
-    label: 'Free',
-    gb: 10,
-    price: '$0 / mo',
-    features: ['Standard upload speed', 'Folder sharing & links'],
-  },
-  {
-    id: 'plus',
-    label: 'Plus',
-    gb: 20,
-    price: 'Free trial',
-    features: ['2× faster uploads', 'Double capacity', 'Priority delivery'],
-    recommended: true,
-  },
-  {
-    id: 'max',
-    label: 'Max',
-    gb: 50,
-    price: '$9.99 / mo',
-    features: ['Uncapped speed', 'Priority support', 'Unlimited transfers'],
-    upcoming: true,
-  },
-];
+import { ConfirmCancellationDialog } from './ConfirmCancellationDialog';
 
 export function StoragePlans() {
-  const { setStorageView } = useSettingStore();
-  const { data } = useQuery(trpc.user.me.queryOptions());
+  const navigate = useNavigate();
+  const { setStorageView, closeDialog } = useSettingStore();
+  const { data: userData } = useQuery(trpc.user.me.queryOptions());
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+
+  // Fetch centralized pricing plans
+  const { data: plans, isPending: isPlansLoading } = useQuery(
+    trpc.pricing.getPlans.queryOptions(),
+  );
 
   const updateStorage = useMutation({
     ...trpc.user.updateStorageLimit.mutationOptions(),
     onSuccess: () => {
       void queryClient.invalidateQueries(trpc.user.me.queryFilter());
-      toast.success('Plan updated — your new storage limit is live.');
+      toast.success(
+        'Plan cancelled successfully. You are now on the Starter (Free) plan.',
+      );
       setStorageView('overview');
     },
-    onError: (err) => {
-      toast.error(err.message || 'Failed to update plan.');
+    onError: (err: any) => {
+      toast.error(err.message || 'Failed to cancel plan.');
     },
   });
 
-  const currentMb = data?.storage?.totalStorage ?? 10240;
+  const currentMb = userData?.storage?.totalStorage ?? 5120; // Default to free 5GB limit
+  const hasUsedTrial = userData?.storage?.hasUsedTrial ?? false;
 
-  const handleSelect = (plan: Plan) => {
-    if (plan.upcoming) return;
-    const limitMb = plan.gb * MB_PER_GB;
-    if (currentMb === limitMb) return;
-    updateStorage.mutate({ limitMb });
+  const handleCancel = () => {
+    setIsConfirmOpen(true);
   };
+
+  const handleSelect = (plan: any) => {
+    const limitMb = plan.storageMb;
+    if (currentMb === limitMb) return;
+
+    if (limitMb === 5 * 1024) {
+      // Downgrading to Free plan (Cancelling plan)
+      handleCancel();
+    } else {
+      // Upgrading to Pro, Business or Trial redirects to billing flow
+      closeDialog();
+      const planParam = limitMb === 20 * 1024 ? 'trial' : plan.name;
+      navigate(`/billing?plan=${encodeURIComponent(planParam)}`);
+    }
+  };
+
+  if (isPlansLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-10 gap-2 text-zinc-500">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        <span className="text-xs">Loading plans...</span>
+      </div>
+    );
+  }
+
+  const plansList = plans || [];
 
   return (
     <div className="flex flex-col gap-5">
@@ -81,7 +75,7 @@ export function StoragePlans() {
         <div>
           <h2 className="text-base font-semibold">Storage Plans</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Upgrade instantly — no payment required right now.
+            Upgrade instantly — pricing details available.
           </p>
         </div>
         <button
@@ -95,33 +89,39 @@ export function StoragePlans() {
 
       {/* Plan rows */}
       <div className="flex flex-col gap-2">
-        {PLANS.map((plan) => {
-          const isActive = currentMb === plan.gb * MB_PER_GB;
+        {plansList.map((plan) => {
+          const isTrialPlan = plan.storageMb === 20 * 1024;
+          const isActive = currentMb === plan.storageMb;
+          const isDisabled = isTrialPlan && hasUsedTrial && !isActive;
+
           const isPending =
             updateStorage.isPending &&
-            updateStorage.variables?.limitMb === plan.gb * MB_PER_GB;
+            updateStorage.variables?.limitMb === plan.storageMb;
+
+          const displayPrice =
+            plan.monthlyPrice === 0 ? 'Free' : `$${plan.monthlyPrice} / mo`;
 
           return (
             <div
-              key={plan.id}
-              onClick={() => !plan.upcoming && !isActive && handleSelect(plan)}
+              key={plan.name}
+              onClick={() => !isActive && !isDisabled && handleSelect(plan)}
               className={cn(
                 'flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3.5 rounded-xl border transition-all duration-150',
-                plan.upcoming
-                  ? 'border-border/30 bg-muted/10 opacity-50 cursor-not-allowed'
-                  : isActive
-                    ? 'border-primary/50 bg-primary/4'
+                isActive
+                  ? 'border-primary/50 bg-primary/4'
+                  : isDisabled
+                    ? 'border-border/30 bg-card/10 opacity-50 cursor-not-allowed'
                     : 'border-border/50 bg-card/30 hover:border-border hover:bg-muted/20 cursor-pointer',
               )}
             >
-              {/* Left: name + features */}
+              {/* Left: name + size */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm font-medium">{plan.label}</span>
+                  <span className="text-sm font-medium">{plan.name}</span>
                   <span className="text-xs text-muted-foreground">
-                    {plan.gb} GB
+                    {plan.storage}
                   </span>
-                  {plan.recommended && (
+                  {plan.isPro && (
                     <Badge
                       variant="secondary"
                       className="text-[10px] px-1.5 py-0 h-4 bg-primary/10 text-primary border-primary/20 border"
@@ -129,43 +129,37 @@ export function StoragePlans() {
                       Recommended
                     </Badge>
                   )}
-                  {plan.upcoming && (
-                    <Badge
-                      variant="secondary"
-                      className="text-[10px] px-1.5 py-0 h-4"
-                    >
-                      Coming soon
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1.5">
-                  {plan.features.map((f) => (
-                    <span
-                      key={f}
-                      className="flex items-center gap-1 text-[11px] text-muted-foreground"
-                    >
-                      <Check className="h-3 w-3 shrink-0 text-emerald-500" />
-                      {f}
-                    </span>
-                  ))}
                 </div>
               </div>
 
-              {/* Right: price + status — row on mobile (below features), column on sm+ */}
+              {/* Right: price + status */}
               <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-1.5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/30">
                 <span className="text-xs font-medium text-muted-foreground">
-                  {plan.price}
+                  {displayPrice}
                 </span>
                 {isActive ? (
-                  <span className="text-[11px] font-medium text-primary">
-                    Active
-                  </span>
-                ) : plan.upcoming ? (
-                  <span className="text-[11px] text-muted-foreground">
-                    Locked
-                  </span>
+                  <div className="flex flex-col items-center sm:items-end gap-1">
+                    <span className="text-[11px] font-semibold text-primary">
+                      Active
+                    </span>
+                    {plan.storageMb !== 5 * 1024 && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation(); // Avoid row navigation trigger
+                          handleCancel();
+                        }}
+                        className="text-[10px] font-semibold text-red-500 hover:text-red-400 cursor-pointer mt-0.5 underline underline-offset-2"
+                      >
+                        Cancel Plan
+                      </button>
+                    )}
+                  </div>
                 ) : isPending ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+                ) : isDisabled ? (
+                  <span className="text-[11px] font-medium text-zinc-500">
+                    Redeemed
+                  </span>
                 ) : (
                   <span className="text-[11px] font-medium text-foreground/70 flex items-center gap-0.5">
                     Select
@@ -177,6 +171,17 @@ export function StoragePlans() {
           );
         })}
       </div>
+
+      {/* Confirmation Dialog */}
+      <ConfirmCancellationDialog
+        isOpen={isConfirmOpen}
+        onOpenChange={setIsConfirmOpen}
+        onConfirm={() => {
+          setIsConfirmOpen(false);
+          updateStorage.mutate({ limitMb: 5 * 1024 });
+        }}
+        isPending={updateStorage.isPending}
+      />
     </div>
   );
 }

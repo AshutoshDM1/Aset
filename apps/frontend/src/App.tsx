@@ -11,6 +11,9 @@ import MyFiles from './pages/MyFiles/MyFiles';
 import DashboardStats from './pages/Dashboard/DashboardStats';
 import RequireDashboardAccess from './shared/auth/RequireDashboardAccess';
 import FontChanger, { FontInitializer } from './shared/FontChanger/FontChanger';
+import SignInPage from './pages/SignIn/SignIn';
+import PricingPage from './pages/Pricing/Pricing';
+import BillingPage from './pages/Billing/Billing';
 
 const FontStudio = import.meta.env.DEV
   ? { FontInitializer, FontChanger }
@@ -27,6 +30,7 @@ function App() {
       )}
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/sign-in" element={<SignInPage />} />
         <Route element={<RequireDashboardAccess />}>
           <Route path="/dashboard" element={<Dashboard />}>
             <Route index element={<DashboardStats />} />
@@ -38,6 +42,8 @@ function App() {
             <Route path="trash" element={<Trash />} />
             <Route path="*" element={<ErrorPage />} />
           </Route>
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/billing" element={<BillingPage />} />
         </Route>
         <Route path="*" element={<ErrorPage />} />
       </Routes>

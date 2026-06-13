@@ -6,6 +6,8 @@ import { fileRouter } from './routers/file/file.route';
 import { statsRouter } from './routers/stats/stats.route';
 import { notificationRouter } from './routers/notification/notification.route';
 import { apiKeyRouter } from './routers/apiKey/apiKey.route';
+import { couponRouter } from './routers/coupon/coupon.route';
+import { pricingRouter } from './routers/pricing/pricing.route';
 
 export const appRouter = router({
   health: healthRouter,
@@ -15,6 +17,8 @@ export const appRouter = router({
   stats: statsRouter,
   notification: notificationRouter,
   apiKey: apiKeyRouter,
+  coupon: couponRouter,
+  pricing: pricingRouter,
 });
 
 export type AppRouter = typeof appRouter;
