@@ -67,7 +67,7 @@ const Workflow: React.FC = () => {
                     <h3 className="text-xl font-semibold text-zinc-900 dark:text-white ">
                       {step.title}
                     </h3>
-                    <p className="text-sm md:text-lg font-medium  text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                    <p className="text-sm md:text-base font-medium  text-zinc-500 dark:text-zinc-400 leading-relaxed">
                       {step.description}
                     </p>
                   </div>
@@ -79,8 +79,14 @@ const Workflow: React.FC = () => {
 
         {/* Right side: Mockup Canvas Screen */}
         <FadeIn direction="left" delay={0.15}>
-          <div className="w-full flex justify-center">
-            <WorkflowWireframe />
+          <div className="w-full flex justify-center items-center">
+            <div className="p-4 rounded-3xl border border-zinc-200/60 dark:border-zinc-800/60 bg-linear-to-b from-white/60 to-white/20 dark:from-zinc-950/60 dark:to-zinc-950/20 shadow-2xl shadow-zinc-200/50 dark:shadow-black/40 backdrop-blur-md flex items-center justify-center transition-all duration-300 hover:border-primary/20 dark:hover:border-primary/30">
+              <img
+                src="/feature/image4.png"
+                alt="feature4"
+                className="object-cover w-[350px] border border-zinc-100 dark:border-zinc-800 rounded-2xl shadow-sm transition-transform duration-500 hover:scale-[1.02]"
+              />
+            </div>
           </div>
         </FadeIn>
       </div>

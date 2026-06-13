@@ -6,7 +6,9 @@ import { Link } from 'react-router';
 interface PricingPlan {
   name: string;
   subtitle: string;
+  monthdiscount: number;
   monthlyPrice: number;
+  yeardiscount: number;
   yearlyPrice: number;
   features: string[];
   isPro?: boolean;
@@ -17,16 +19,40 @@ interface PricingCardsProps {
   billingCycle: 'monthly' | 'yearly';
 }
 
+const getDisplayPrice = (plan: PricingPlan, cycle: 'monthly' | 'yearly') => {
+  if (cycle === 'monthly') {
+    return {
+      price: plan.monthlyPrice,
+      original: plan.monthdiscount > 0 ? plan.monthdiscount : null,
+    };
+  } else {
+    // If yearlyPrice is much larger than monthlyPrice, treat it as annual total
+    const isAnnualTotal = plan.yearlyPrice > plan.monthlyPrice;
+    const price = isAnnualTotal
+      ? Math.round(plan.yearlyPrice / 12)
+      : plan.yearlyPrice;
+    const original =
+      plan.yeardiscount > 0
+        ? isAnnualTotal
+          ? Math.round(plan.yeardiscount / 12)
+          : plan.yeardiscount
+        : null;
+    return { price, original };
+  }
+};
+
 const PricingCards: React.FC<PricingCardsProps> = ({ billingCycle }) => {
   const plans: PricingPlan[] = [
     {
       name: 'Starter plan',
       subtitle: 'For individuals & new creators',
+      monthdiscount: 0,
       monthlyPrice: 0,
+      yeardiscount: 0,
       yearlyPrice: 0,
       btnText: 'Start Free',
       features: [
-        '10 GB secure cloud storage',
+        '5 GB secure cloud storage',
         'Basic file & folder sharing',
         'Max file upload size: 100 MB',
         'Standard collaboration tools',
@@ -37,11 +63,13 @@ const PricingCards: React.FC<PricingCardsProps> = ({ billingCycle }) => {
     {
       name: 'Pro plan',
       subtitle: 'For freelancers & small teams',
-      monthlyPrice: 20,
+      monthdiscount: 10,
+      monthlyPrice: 5,
+      yeardiscount: 58,
+      yearlyPrice: 50,
       btnText: 'Get Started (Free Trial)',
-      yearlyPrice: 16,
       features: [
-        '20 GB high-speed storage',
+        '400 GB high-speed storage',
         'Everything in Starter +',
         'Max file upload size: 2 GB',
         'Password-protected shared links',
@@ -53,11 +81,13 @@ const PricingCards: React.FC<PricingCardsProps> = ({ billingCycle }) => {
     {
       name: 'Business plan',
       subtitle: 'For growing teams & agencies',
-      monthlyPrice: 40,
+      monthdiscount: 25,
+      monthlyPrice: 20,
+      yeardiscount: 20,
+      yearlyPrice: 16,
       btnText: 'Contact Us',
-      yearlyPrice: 32,
       features: [
-        '100 GB premium cloud storage',
+        '1 TB premium cloud storage',
         'Everything in Pro +',
         'Unlimited file upload size',
         'Granular access control & roles',
@@ -70,8 +100,7 @@ const PricingCards: React.FC<PricingCardsProps> = ({ billingCycle }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 items-stretch">
       {plans.map((plan) => {
-        const price =
-          billingCycle === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice;
+        const { price, original } = getDisplayPrice(plan, billingCycle);
 
         return (
           <div
@@ -95,18 +124,20 @@ const PricingCards: React.FC<PricingCardsProps> = ({ billingCycle }) => {
                       {plan.subtitle}
                     </p>
                   </div>
-                  <div className="flex items-baseline text-zinc-900 dark:text-white shrink-0">
-                    {plan.isPro && (
-                      <span className="text-base md:text-lg font-semibold text-zinc-400 dark:text-zinc-500 line-through mr-1.5">
+                  <div className="flex flex-col items-end text-zinc-900 dark:text-white shrink-0">
+                    <div className="flex items-baseline">
+                      <span className="text-2xl md:text-3xl lg:text-4xl font-semibold tracking-tight">
                         ${price}
                       </span>
+                      <span className="text-xs md:text-sm text-zinc-500 font-medium ml-1">
+                        /month
+                      </span>
+                    </div>
+                    {original !== null && original > 0 && (
+                      <span className="text-xs md:text-sm font-semibold text-zinc-400 dark:text-zinc-500 line-through mt-0.5">
+                        ${original}
+                      </span>
                     )}
-                    <span className="text-2xl md:text-3xl lg:text-4xl font-semibold tracking-tight">
-                      ${plan.isPro ? 0 : price}
-                    </span>
-                    <span className="text-xs md:text-sm text-zinc-500 font-medium ml-1">
-                      /month
-                    </span>
                   </div>
                 </div>
               </div>
