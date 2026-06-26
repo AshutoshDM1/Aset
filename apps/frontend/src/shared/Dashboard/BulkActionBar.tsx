@@ -10,6 +10,7 @@ import {
   Loader2,
   ShieldAlert,
   RotateCcw,
+  CheckSquare,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -31,8 +32,34 @@ export function BulkActionBar() {
   const [isMoveOpen, setIsMoveOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
-  const { selectedFolderIds, selectedFileIds, clearSelection } =
-    useSelectionStore();
+  const {
+    selectedFolderIds,
+    selectedFileIds,
+    clearSelection,
+    selectFolders,
+    selectFiles,
+  } = useSelectionStore();
+
+  const handleSelectAll = () => {
+    const elements = document.querySelectorAll('[data-selectable-id]');
+    const folderIds: string[] = [];
+    const fileIds: string[] = [];
+
+    elements.forEach((el) => {
+      const itemId = el.getAttribute('data-selectable-id');
+      const itemType = el.getAttribute('data-selectable-type');
+      if (itemId && itemType) {
+        if (itemType === 'folder') {
+          folderIds.push(itemId);
+        } else if (itemType === 'file') {
+          fileIds.push(itemId);
+        }
+      }
+    });
+
+    selectFolders(folderIds);
+    selectFiles(fileIds);
+  };
 
   const totalCount = selectedFolderIds.length + selectedFileIds.length;
   const active = totalCount > 0;
@@ -211,8 +238,21 @@ export function BulkActionBar() {
             onClick={clearSelection}
             disabled={isPending}
             className="size-7 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors cursor-pointer"
+            title="Clear Selection"
           >
             <X className="size-4" />
+          </Button>
+
+          {/* Select All Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleSelectAll}
+            disabled={isPending}
+            className="h-7 px-2.5 rounded-full text-xs font-semibold text-primary hover:bg-primary/5 transition-all cursor-pointer flex items-center gap-1"
+          >
+            <CheckSquare className="size-3.5" />
+            Select All
           </Button>
         </div>
 

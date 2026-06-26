@@ -1,6 +1,6 @@
 import { useUser } from '@clerk/react';
 import { useTheme } from '@/components/theme-provider';
-import { Sun, Moon, Monitor, User, Mail, Shield, Calendar } from 'lucide-react';
+import { Sun, Moon, Monitor, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function ProfileSettings() {

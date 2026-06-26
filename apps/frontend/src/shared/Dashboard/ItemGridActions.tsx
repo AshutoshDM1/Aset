@@ -8,6 +8,7 @@ import {
   Download,
   Info,
   Loader2,
+  CheckSquare,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { trpc } from '@/utils/trpc';
@@ -196,6 +197,8 @@ export function ItemGridActions({
       >
         <Checkbox
           checked={checked}
+          data-selectable-id={id}
+          data-selectable-type={type}
           onCheckedChange={() => {
             if (type === 'folder') {
               toggleFolder(id);
@@ -227,6 +230,22 @@ export function ItemGridActions({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-44">
+            <DropdownMenuItem
+              onSelect={(e) => {
+                e.preventDefault();
+                if (type === 'folder') {
+                  toggleFolder(id);
+                } else {
+                  toggleFile(id);
+                }
+              }}
+            >
+              <CheckSquare
+                className={cn('size-3.5 mr-2', checked && 'text-primary')}
+              />
+              {checked ? 'Deselect' : 'Select'}
+            </DropdownMenuItem>
+
             <DropdownMenuItem
               onSelect={(e) => {
                 e.preventDefault();
