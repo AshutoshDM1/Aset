@@ -1,5 +1,5 @@
-import type { ImagePreviewProps } from '@/components/ImagePreview';
-import { ImagePreview } from '@/components/ImagePreview';
+import { ImagePreview } from './ImagePreview';
+import type { ImagePreviewProps } from './types';
 
 export type ImagePreviewDialogProps = ImagePreviewProps;
 

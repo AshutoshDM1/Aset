@@ -15,7 +15,7 @@ export default function Dashboard() {
       <main className="flex-1 min-h-dvh min-w-0 lg:pl-70 pb-16 lg:pb-0">
         <div className="min-h-dvh flex flex-col">
           <DashboardNavbar />
-          <div className="flex-1 p-3 sm:p-6">
+          <div className="flex-1 p-4 md:p-6">
             <Outlet />
           </div>
         </div>

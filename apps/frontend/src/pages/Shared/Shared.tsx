@@ -3,7 +3,7 @@ import { FolderList } from '@/shared/Dashboard/FolderList';
 
 export default function Shared() {
   return (
-    <div className="w-full rounded-lg bg-background p-4 shadow-sm ring-1 ring-border/60">
+    <div className="w-full ">
       <DashboardHeader
         folderId={0}
         folderName="Shared with me"

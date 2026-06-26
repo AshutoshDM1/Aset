@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { ImageIcon } from 'lucide-react';
-import { ImagePreviewDialog } from '../../components/ImagePreview/ImagePreviewDialog';
 import { ItemGridActions } from './ItemGridActions';
+import { ImagePreviewDialog } from '@/components/Preview/ImagePreview/ImagePreviewDialog';
 
 type SiblingImage = {
   id: string;

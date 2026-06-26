@@ -18,13 +18,13 @@ import {
 } from '@/utils/file/file-utils';
 import { useState, useMemo, useCallback } from 'react';
 import { ItemRowActions } from './ItemRowActions';
-import { ImagePreviewDialog } from '../../components/ImagePreview/ImagePreviewDialog';
 import { PdfPreviewDialog } from './PdfPreviewDialog';
-import { VideoPreview } from '@/components/videoPreview';
-import { TextPreview } from '@/components/textPreview';
+import { TextPreview } from '@/components/Preview/TextPreview';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useSelectionStore } from '@/store/selectionStore';
 import { cn } from '@/lib/utils';
+import { ImagePreviewDialog } from '@/components/Preview/ImagePreview/ImagePreviewDialog';
+import { VideoPreview } from '@/components/Preview/VideoPreview';
 
 type FileItem = {
   id: string;
@@ -274,7 +274,7 @@ export function FileTable({ files, onRefetch }: FileTableProps) {
         trashed={preview?.trashed}
         onRefetch={onRefetch}
         optimizationStats={optimizationStats}
-        onOptimizeSuccess={(stats) => {
+        onOptimizeSuccess={(stats: any) => {
           setOptimizationStats(stats);
           const currentPreview = preview;
           setPreview(null);

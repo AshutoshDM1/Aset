@@ -60,7 +60,7 @@ export default function SingleFolder() {
     }
 
     return (
-      <div className="w-full rounded-lg bg-background p-4 shadow-sm ring-1 ring-border/60">
+      <div className="w-full ">
         <p className="text-sm text-destructive font-medium">{errorMsg}</p>
         <Button variant="outline" size="sm" className="mt-4" asChild>
           <Link to="/dashboard/my-files">Back to My files</Link>
@@ -86,7 +86,7 @@ export default function SingleFolder() {
   }
 
   return (
-    <div className="w-full rounded-lg bg-background p-2 sm:p-4 shadow-sm ring-1 ring-border/60">
+    <div className="w-full">
       <DashboardHeader
         folderId={folder.id}
         folderName={folder.name}

@@ -39,7 +39,7 @@ export function StatCard({
   const TrendIcon = trendIcons[trend];
 
   return (
-    <div className="rounded-lg bg-background p-4 shadow-sm ring-1 ring-border/60">
+    <div className="">
       <div className="flex items-start justify-between gap-3">
         <p className="text-sm text-muted-foreground">{label}</p>
         {icon ? <span className="text-muted-foreground">{icon}</span> : null}

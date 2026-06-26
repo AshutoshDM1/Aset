@@ -29,6 +29,13 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { trpc } from '@/utils/trpc';
 
 export function DeveloperSettings() {
@@ -117,8 +124,8 @@ export function DeveloperSettings() {
           Create New API Key
         </h3>
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
+          <div className="flex-1 flex flex-col gap-1.5 min-w-0">
             <Label htmlFor="key-name" className="text-xs">
               Key Name
             </Label>
@@ -131,34 +138,44 @@ export function DeveloperSettings() {
             />
           </div>
 
-          <div className="flex flex-col gap-1.5">
+          <div className="flex-1 flex flex-col gap-1.5 min-w-0">
             <Label htmlFor="key-folder" className="text-xs">
               Restricted Folder
             </Label>
-            <select
-              id="key-folder"
-              value={folderId}
-              onChange={(e) => setFolderId(e.target.value)}
-              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-xs shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
+            <Select
+              value={folderId || 'unrestricted'}
+              onValueChange={(val) =>
+                setFolderId(val === 'unrestricted' ? '' : val)
+              }
             >
-              <option value="">Full Drive Access (Unrestricted)</option>
-              {folders?.map((folder) => (
-                <option key={folder.id} value={folder.id}>
-                  Only Folder: {folder.name}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger
+                id="key-folder"
+                className="w-full h-9 text-xs justify-between cursor-pointer"
+              >
+                <SelectValue placeholder="Full Drive Access (Unrestricted)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="unrestricted">
+                  Full Drive Access (Unrestricted)
+                </SelectItem>
+                {folders?.map((folder) => (
+                  <SelectItem key={folder.id} value={folder.id}>
+                    Only Folder: {folder.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-        </div>
 
-        <Button
-          type="submit"
-          size="sm"
-          className="self-end cursor-pointer h-8.5 px-4 font-medium text-xs gap-1.5"
-          disabled={generateKey.isPending}
-        >
-          Generate Key
-        </Button>
+          <Button
+            type="submit"
+            size="sm"
+            className="cursor-pointer h-9 px-4 font-medium text-xs gap-1.5 shrink-0"
+            disabled={generateKey.isPending}
+          >
+            Generate Key
+          </Button>
+        </div>
       </form>
 
       {/* Existing Keys */}

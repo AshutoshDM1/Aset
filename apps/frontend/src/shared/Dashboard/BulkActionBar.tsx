@@ -191,7 +191,7 @@ export function BulkActionBar() {
     <>
       <div
         className={cn(
-          'fixed bottom-24 lg:bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col sm:flex-row items-center gap-4 px-4 py-3 sm:py-2.5 rounded-2xl sm:rounded-full border border-border/80 bg-background/80 dark:bg-background/70 backdrop-blur-xl shadow-2xl transition-all duration-300 transform w-11/12',
+          'fixed bottom-24 lg:bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col sm:flex-row items-center gap-4 px-4 py-3 sm:py-2.5 rounded-2xl sm:rounded-full border border-border/80 bg-background/80 dark:bg-background/70 backdrop-blur-xl shadow-2xl transition-all duration-300 transform w-11/12 max-w-xl',
           active
             ? 'translate-y-0 opacity-100 scale-100'
             : 'translate-y-12 opacity-0 scale-95 pointer-events-none',

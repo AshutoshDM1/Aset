@@ -1,8 +1,8 @@
 import { useState, useMemo, useCallback } from 'react';
 import { Video, Play } from 'lucide-react';
-import { VideoPreview } from '@/components/videoPreview';
 import { ItemGridActions } from './ItemGridActions';
 import { motion } from 'motion/react';
+import { VideoPreview } from '@/components/Preview/VideoPreview';
 
 type SiblingVideo = {
   id: string;

@@ -145,18 +145,18 @@ function DashboardNavbar({ className }: { className?: string }) {
         )}
       >
         <div className="flex items-center justify-between gap-4 px-4 py-2.5 sm:px-6 sm:py-4 border-b">
+          <Link
+            to="/dashboard"
+            className="flex lg:hidden items-center gap-2 lock"
+          >
+            <Logo className="size-8" />
+            <h1 className="text-lg font-bold">Aset</h1>
+          </Link>
           <BreadcrumbComponent
             className="hidden md:block min-w-0 flex-1 mr-4"
             items={breadcrumbItems}
             allFolders={allFolders}
           />
-          <Link
-            to="/dashboard"
-            className="md:hidden flex items-center gap-2 lock"
-          >
-            <Logo className="size-8" />
-            <h1 className="text-lg font-bold">Aset</h1>
-          </Link>
           <div className="flex items-center justify-end gap-4">
             <DashboardNavbarSearch className="flex-1" />
             <DashboardNavbarActions />

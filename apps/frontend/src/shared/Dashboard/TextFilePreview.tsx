@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FileText } from 'lucide-react';
-import { TextPreview } from '@/components/textPreview';
+import { TextPreview } from '@/components/Preview/TextPreview';
 import { ItemGridActions } from './ItemGridActions';
 
 type TextFilePreviewProps = {
