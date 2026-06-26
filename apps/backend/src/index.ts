@@ -12,7 +12,6 @@ import {
   optixRegisterTracksHandler,
 } from './webhooks/optix';
 import { sdkRouter } from './routers/sdk';
-import { db } from './utils/db';
 import { startStaleDecodingsCleaner } from './jobs/cleaner';
 
 const app = express();
