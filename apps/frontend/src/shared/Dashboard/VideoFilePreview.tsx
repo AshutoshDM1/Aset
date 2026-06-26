@@ -1,8 +1,19 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Video, Play } from 'lucide-react';
 import { VideoPreview } from '@/components/videoPreview';
 import { ItemGridActions } from './ItemGridActions';
 import { motion } from 'motion/react';
+
+type SiblingVideo = {
+  id: string;
+  name: string;
+  url: string;
+  starred?: boolean;
+  trashed?: boolean;
+  createdAt?: Date | string;
+  sizeMb?: number;
+  processingStatus?: string | null;
+};
 
 type VideoFilePreviewProps = {
   fileId: string;
@@ -14,6 +25,7 @@ type VideoFilePreviewProps = {
   createdAt?: Date | string;
   sizeMb?: number;
   processingStatus?: string | null;
+  allVideos?: SiblingVideo[];
 };
 
 const VideoFilePreview = ({
@@ -26,9 +38,57 @@ const VideoFilePreview = ({
   createdAt,
   sizeMb,
   processingStatus,
+  allVideos,
 }: VideoFilePreviewProps) => {
   const [open, setOpen] = useState(false);
   const [thumbnailErrored, setThumbnailErrored] = useState(false);
+  const [activeFile, setActiveFile] = useState<{
+    id: string;
+    name: string;
+    url: string;
+    starred?: boolean;
+    trashed?: boolean;
+    createdAt?: Date | string;
+    sizeMb?: number;
+    processingStatus?: string | null;
+  } | null>(null);
+
+  const currentVideoIndex = useMemo(() => {
+    if (!activeFile || !allVideos) return -1;
+    return allVideos.findIndex((v) => v.id === activeFile.id);
+  }, [activeFile, allVideos]);
+
+  const handlePrev = useCallback(() => {
+    if (allVideos && currentVideoIndex > 0) {
+      const prevVideo = allVideos[currentVideoIndex - 1];
+      setActiveFile({
+        id: prevVideo.id,
+        name: prevVideo.name,
+        url: prevVideo.url,
+        starred: prevVideo.starred,
+        trashed: prevVideo.trashed,
+        createdAt: prevVideo.createdAt,
+        sizeMb: prevVideo.sizeMb,
+        processingStatus: prevVideo.processingStatus,
+      });
+    }
+  }, [currentVideoIndex, allVideos]);
+
+  const handleNext = useCallback(() => {
+    if (allVideos && currentVideoIndex < allVideos.length - 1) {
+      const nextVideo = allVideos[currentVideoIndex + 1];
+      setActiveFile({
+        id: nextVideo.id,
+        name: nextVideo.name,
+        url: nextVideo.url,
+        starred: nextVideo.starred,
+        trashed: nextVideo.trashed,
+        createdAt: nextVideo.createdAt,
+        sizeMb: nextVideo.sizeMb,
+        processingStatus: nextVideo.processingStatus,
+      });
+    }
+  }, [currentVideoIndex, allVideos]);
 
   const dot = name.lastIndexOf('.');
   const base = dot > 0 ? name.slice(0, dot) : name;
@@ -51,7 +111,19 @@ const VideoFilePreview = ({
         />
         <button
           type="button"
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            setActiveFile({
+              id: fileId,
+              name,
+              url,
+              starred,
+              trashed,
+              createdAt,
+              sizeMb,
+              processingStatus,
+            });
+            setOpen(true);
+          }}
           aria-label={`Preview video ${name}`}
           title={name}
           className="flex flex-col items-center rounded-2xl p-2 transition-transform duration-200 group-hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer"
@@ -93,10 +165,19 @@ const VideoFilePreview = ({
 
       <VideoPreview
         open={open}
-        onClose={() => setOpen(false)}
-        fileName={name}
-        fileUrl={url}
-        fileId={fileId}
+        onClose={() => {
+          setOpen(false);
+          setActiveFile(null);
+        }}
+        fileName={activeFile?.name ?? name}
+        fileUrl={activeFile?.url ?? url}
+        fileId={activeFile?.id ?? fileId}
+        onPrev={allVideos && currentVideoIndex > 0 ? handlePrev : undefined}
+        onNext={
+          allVideos && currentVideoIndex < allVideos.length - 1
+            ? handleNext
+            : undefined
+        }
       />
     </>
   );

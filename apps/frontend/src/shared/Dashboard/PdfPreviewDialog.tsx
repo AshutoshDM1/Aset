@@ -1,12 +1,5 @@
 import { PdfPreviewDialog as ModularPdfPreviewDialog } from '@/components/Pdf-Preview';
-
-interface PdfPreviewDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  fileName: string;
-  fileUrl: string;
-  fileId: string;
-}
+import type { PdfPreviewDialogProps } from '@/components/Pdf-Preview';
 
 export function PdfPreviewDialog(props: PdfPreviewDialogProps) {
   return <ModularPdfPreviewDialog {...props} />;

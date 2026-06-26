@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { useSettingStore, type SettingTab } from './Storage/settingStore';
 
 const NAV_ITEMS: { id: SettingTab; label: string }[] = [
+  { id: 'profile', label: 'Profile' },
   { id: 'storage', label: 'Storage' },
   { id: 'developer', label: 'Developer SDK' },
   { id: 'decoding', label: 'Video Decoding' },
@@ -23,6 +24,9 @@ export function SettingSidebar() {
       py-2 sm:py-4 px-2 gap-0.5
       scrollbar-none
     "
+      style={{
+        scrollbarWidth: 'none',
+      }}
     >
       {NAV_ITEMS.map((item) => (
         <button

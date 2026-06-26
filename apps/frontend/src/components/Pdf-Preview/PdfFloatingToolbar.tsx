@@ -5,7 +5,6 @@ import {
   RefreshCw,
   ChevronLeft,
   ChevronRight,
-  Minimize2,
   Eye,
   EyeOff,
   MoreVertical,
@@ -13,6 +12,7 @@ import {
   BookOpen,
   Rows3,
   Download,
+  X,
 } from 'lucide-react';
 import type { PdfState } from './types';
 import { cn } from '@/lib/utils';
@@ -32,7 +32,6 @@ export function PdfFloatingToolbar({ state }: PdfFloatingToolbarProps) {
     pageNumber,
     setPageNumber,
     numPages,
-    setIsFullscreen,
     viewMode,
     setViewMode,
     showControls,
@@ -42,6 +41,7 @@ export function PdfFloatingToolbar({ state }: PdfFloatingToolbarProps) {
     handleReset,
     handleDownload,
     isDownloading,
+    handleClose,
   } = state;
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -123,6 +123,17 @@ export function PdfFloatingToolbar({ state }: PdfFloatingToolbarProps) {
 
   return (
     <>
+      {/* Close Button (Top Right, next to 3-dots menu) */}
+      <motion.button
+        className="absolute top-2 right-16 z-50 size-10 rounded-full bg-black/80 hover:bg-black/90 text-white/80 hover:text-white border border-white/10 shadow-lg backdrop-blur-md flex items-center justify-center select-none cursor-pointer transition-colors duration-300"
+        onClick={handleClose}
+        title="Close Preview"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <X className="size-5" />
+      </motion.button>
+
       {/* 3-Dots Menu Trigger Button (Top Right) */}
       <motion.button
         className={cn(
@@ -298,11 +309,11 @@ export function PdfFloatingToolbar({ state }: PdfFloatingToolbarProps) {
 
               <motion.button
                 className="w-full justify-start gap-2.5 h-9 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl px-2.5 cursor-pointer flex items-center transition-colors duration-200"
-                onClick={() => setIsFullscreen(false)}
+                onClick={handleClose}
                 whileTap={{ scale: 0.98 }}
               >
-                <Minimize2 className="size-4 text-red-400/70" />
-                <span>Exit Fullscreen</span>
+                <X className="size-4 text-red-400/70" />
+                <span>Close Preview</span>
               </motion.button>
             </div>
           </div>

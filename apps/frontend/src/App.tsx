@@ -24,8 +24,8 @@ function App() {
     <>
       {FontStudio && (
         <>
-          <FontStudio.FontInitializer />
-          <FontStudio.FontChanger />
+          {/* <FontStudio.FontInitializer />
+          <FontStudio.FontChanger /> */}
         </>
       )}
       <Routes>

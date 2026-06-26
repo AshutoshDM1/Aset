@@ -10,6 +10,8 @@ import {
   Maximize,
   Minimize,
   ChevronDown,
+  SkipBack,
+  SkipForward,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
@@ -55,6 +57,8 @@ interface VideoControlsProps {
   selectedTextTrackId: string;
   selectTextTrack: (trackId: string) => void;
   isTracksLoading?: boolean;
+  onPrev?: () => void;
+  onNext?: () => void;
 }
 
 export function VideoControls({
@@ -87,6 +91,8 @@ export function VideoControls({
   selectedTextTrackId,
   selectTextTrack,
   isTracksLoading = false,
+  onPrev,
+  onNext,
 }: VideoControlsProps) {
   const [expandedSection, setExpandedSection] = useState<
     'audio' | 'subtitles' | 'skip' | null
@@ -162,7 +168,7 @@ export function VideoControls({
             onClick={togglePlay}
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.92 }}
-            className="size-10 md:size-11 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-white flex items-center justify-center cursor-pointer shadow-lg transition-colors"
+            className="size-10 md:size-11 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-white flex items-center justify-center cursor-pointer shadow-lg transition-colors shrink-0"
             title={isPlaying ? 'Pause' : 'Play'}
           >
             {isPlaying ? (
@@ -170,6 +176,30 @@ export function VideoControls({
             ) : (
               <Play className="size-5 fill-current " />
             )}
+          </motion.button>
+
+          <motion.button
+            type="button"
+            onClick={onPrev}
+            disabled={!onPrev}
+            whileHover={onPrev ? { scale: 1.05 } : {}}
+            whileTap={onPrev ? { scale: 0.95 } : {}}
+            className="size-9 md:size-10 rounded-xl bg-white/5 border border-white/5 text-white/80 flex items-center justify-center cursor-pointer shrink-0 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            title="Previous Video (Left Arrow)"
+          >
+            <SkipBack className="size-4.5 fill-current" />
+          </motion.button>
+
+          <motion.button
+            type="button"
+            onClick={onNext}
+            disabled={!onNext}
+            whileHover={onNext ? { scale: 1.05 } : {}}
+            whileTap={onNext ? { scale: 0.95 } : {}}
+            className="size-9 md:size-10 rounded-xl bg-white/5 border border-white/5 text-white/80 flex items-center justify-center cursor-pointer shrink-0 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            title="Next Video (Right Arrow)"
+          >
+            <SkipForward className="size-4.5 fill-current" />
           </motion.button>
 
           <motion.button

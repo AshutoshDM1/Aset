@@ -1,7 +1,17 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { ImageIcon } from 'lucide-react';
-import { ImagePreviewDialog } from './ImagePreviewDialog';
+import { ImagePreviewDialog } from '../../components/ImagePreview/ImagePreviewDialog';
 import { ItemGridActions } from './ItemGridActions';
+
+type SiblingImage = {
+  id: string;
+  name: string;
+  url: string;
+  starred?: boolean;
+  trashed?: boolean;
+  createdAt?: Date | string;
+  sizeMb?: number;
+};
 
 type ImageFilePreviewProps = {
   fileId: string;
@@ -12,6 +22,7 @@ type ImageFilePreviewProps = {
   onRefetch?: () => void;
   createdAt?: Date | string;
   sizeMb?: number;
+  allImages?: SiblingImage[];
 };
 
 const ImageFilePreview = ({
@@ -23,6 +34,7 @@ const ImageFilePreview = ({
   onRefetch,
   createdAt,
   sizeMb,
+  allImages,
 }: ImageFilePreviewProps) => {
   const [open, setOpen] = useState(false);
   const [errored, setErrored] = useState(false);
@@ -31,6 +43,52 @@ const ImageFilePreview = ({
     newSize: number;
     savedPercent: number;
   } | null>(null);
+  const [activeFile, setActiveFile] = useState<{
+    id: string;
+    name: string;
+    url: string;
+    starred?: boolean;
+    trashed?: boolean;
+    createdAt?: Date | string;
+    sizeMb?: number;
+  } | null>(null);
+
+  const currentImageIndex = useMemo(() => {
+    if (!activeFile || !allImages) return -1;
+    return allImages.findIndex((img) => img.id === activeFile.id);
+  }, [activeFile, allImages]);
+
+  const handlePrev = useCallback(() => {
+    if (allImages && currentImageIndex > 0) {
+      const prevImg = allImages[currentImageIndex - 1];
+      setActiveFile({
+        id: prevImg.id,
+        name: prevImg.name,
+        url: prevImg.url,
+        starred: prevImg.starred,
+        trashed: prevImg.trashed,
+        createdAt: prevImg.createdAt,
+        sizeMb: prevImg.sizeMb,
+      });
+      setOptimizationStats(null);
+    }
+  }, [currentImageIndex, allImages]);
+
+  const handleNext = useCallback(() => {
+    if (allImages && currentImageIndex < allImages.length - 1) {
+      const nextImg = allImages[currentImageIndex + 1];
+      setActiveFile({
+        id: nextImg.id,
+        name: nextImg.name,
+        url: nextImg.url,
+        starred: nextImg.starred,
+        trashed: nextImg.trashed,
+        createdAt: nextImg.createdAt,
+        sizeMb: nextImg.sizeMb,
+      });
+      setOptimizationStats(null);
+    }
+  }, [currentImageIndex, allImages]);
 
   const dot = name.lastIndexOf('.');
   const base = dot > 0 ? name.slice(0, dot) : name;
@@ -40,6 +98,7 @@ const ImageFilePreview = ({
     setOpen(isOpen);
     if (!isOpen) {
       setOptimizationStats(null);
+      setActiveFile(null);
     }
   };
 
@@ -59,7 +118,18 @@ const ImageFilePreview = ({
         />
         <button
           type="button"
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            setActiveFile({
+              id: fileId,
+              name,
+              url,
+              starred,
+              trashed,
+              createdAt,
+              sizeMb,
+            });
+            setOpen(true);
+          }}
           aria-label={`Preview ${name}`}
           title={name}
           className="flex flex-col items-center rounded-2xl p-2 transition-transform duration-200 group-hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer"
@@ -89,22 +159,33 @@ const ImageFilePreview = ({
       <ImagePreviewDialog
         open={open}
         onOpenChange={handleOpenChange}
-        fileName={name}
-        imageUrl={url}
-        fileId={fileId}
-        sizeMb={sizeMb}
-        createdAt={createdAt}
-        starred={starred}
-        trashed={trashed}
+        fileName={activeFile?.name ?? name}
+        imageUrl={activeFile?.url ?? url}
+        fileId={activeFile?.id ?? fileId}
+        sizeMb={activeFile?.sizeMb ?? sizeMb}
+        createdAt={activeFile?.createdAt ?? createdAt}
+        starred={activeFile?.starred ?? starred}
+        trashed={activeFile?.trashed ?? trashed}
         onRefetch={onRefetch}
         optimizationStats={optimizationStats}
         onOptimizeSuccess={(stats) => {
           setOptimizationStats(stats);
+          const currentActive = activeFile;
           setOpen(false);
           setTimeout(() => {
+            if (allImages && currentActive) {
+              const updated = allImages.find((f) => f.id === currentActive.id);
+              setActiveFile(updated || currentActive);
+            }
             setOpen(true);
           }, 600);
         }}
+        onPrev={allImages && currentImageIndex > 0 ? handlePrev : undefined}
+        onNext={
+          allImages && currentImageIndex < allImages.length - 1
+            ? handleNext
+            : undefined
+        }
       />
     </>
   );

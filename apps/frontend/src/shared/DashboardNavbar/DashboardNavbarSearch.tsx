@@ -18,22 +18,34 @@ export function DashboardNavbarSearch({ className }: { className?: string }) {
   }, [openSearch]);
 
   return (
-    <button
-      type="button"
-      onClick={openSearch}
-      className={cn(
-        'relative flex h-11 w-full items-center justify-start rounded-xl border border-input/50 bg-background pl-10 text-sm text-muted-foreground shadow-sm transition-colors hover:bg-muted/40 cursor-pointer select-none text-left outline-none focus-visible:ring-1 focus-visible:ring-ring',
-        className,
-      )}
-    >
-      <Search
-        aria-hidden
-        className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground opacity-80"
-      />
-      <span className="truncate pr-10">Search files, folders...</span>
-      <kbd className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded border bg-muted/60 px-1.5 py-0.5 text-[9px] font-medium text-muted-foreground sm:block">
-        ⌘ <span className="text-[11px]">K</span>
-      </kbd>
-    </button>
+    <>
+      <button
+        className="block 2xl:hidden cursor-pointer"
+        type="button"
+        onClick={openSearch}
+      >
+        <Search
+          aria-hidden
+          className="size-4 text-muted-foreground opacity-80"
+        />
+      </button>
+      <button
+        type="button"
+        onClick={openSearch}
+        className={cn(
+          'relative hidden 2xl:flex h-11 w-full items-center justify-start rounded-xl border border-input/50 bg-background px-10  text-sm text-muted-foreground shadow-sm transition-colors hover:bg-muted/40 cursor-pointer select-none text-left outline-none focus-visible:ring-1 focus-visible:ring-ring',
+          className,
+        )}
+      >
+        <Search
+          aria-hidden
+          className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground opacity-80"
+        />
+        <span className="truncate pr-10">Search files, folders...</span>
+        <kbd className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded border bg-muted/60 px-1.5 py-0.5 text-[9px] font-medium text-muted-foreground sm:block">
+          ⌘ <span className="text-[11px]">K</span>
+        </kbd>
+      </button>
+    </>
   );
 }

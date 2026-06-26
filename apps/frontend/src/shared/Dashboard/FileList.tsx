@@ -54,6 +54,18 @@ export function FileList({ mode = 'recent' }: FileListProps) {
     );
   }, [files, sortField, sortOrder]);
 
+  const imageFiles = React.useMemo(() => {
+    return sortedFiles.filter((f) => isImageFileName(f.name));
+  }, [sortedFiles]);
+
+  const pdfFiles = React.useMemo(() => {
+    return sortedFiles.filter((f) => isPdfFileName(f.name));
+  }, [sortedFiles]);
+
+  const videoFiles = React.useMemo(() => {
+    return sortedFiles.filter((f) => isVideoFileName(f.name));
+  }, [sortedFiles]);
+
   if (isLoading) {
     return (
       <div className="py-10">
@@ -107,6 +119,7 @@ export function FileList({ mode = 'recent' }: FileListProps) {
               onRefetch={refetch}
               createdAt={file.createdAt}
               sizeMb={file.sizeMb}
+              allImages={imageFiles}
             />
           ) : isPdfFileName(file.name) ? (
             <PdfFilePreview
@@ -118,6 +131,7 @@ export function FileList({ mode = 'recent' }: FileListProps) {
               onRefetch={refetch}
               createdAt={file.createdAt}
               sizeMb={file.sizeMb}
+              allPdfs={pdfFiles}
             />
           ) : isVideoFileName(file.name) ? (
             <VideoFilePreview
@@ -130,6 +144,7 @@ export function FileList({ mode = 'recent' }: FileListProps) {
               createdAt={file.createdAt}
               sizeMb={file.sizeMb}
               processingStatus={file.processingStatus}
+              allVideos={videoFiles}
             />
           ) : isTextCodeFileName(file.name) ? (
             <TextFilePreview

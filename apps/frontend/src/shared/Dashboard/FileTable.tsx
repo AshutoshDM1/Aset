@@ -16,9 +16,9 @@ import {
   isVideoFileName,
   isTextCodeFileName,
 } from '@/utils/file/file-utils';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { ItemRowActions } from './ItemRowActions';
-import { ImagePreviewDialog } from './ImagePreviewDialog';
+import { ImagePreviewDialog } from '../../components/ImagePreview/ImagePreviewDialog';
 import { PdfPreviewDialog } from './PdfPreviewDialog';
 import { VideoPreview } from '@/components/videoPreview';
 import { TextPreview } from '@/components/textPreview';
@@ -51,6 +51,71 @@ export function FileTable({ files, onRefetch }: FileTableProps) {
   } | null>(null);
   const { selectedFileIds, toggleFile, selectFiles, clearSelection } =
     useSelectionStore();
+
+  const imageFiles = useMemo(
+    () => files.filter((f) => isImageFileName(f.name)),
+    [files],
+  );
+  const currentImageIndex = useMemo(() => {
+    if (!preview) return -1;
+    return imageFiles.findIndex((f) => f.id === preview.id);
+  }, [preview, imageFiles]);
+
+  const handlePrevImage = useCallback(() => {
+    if (currentImageIndex > 0) {
+      setPreview(imageFiles[currentImageIndex - 1]);
+      setOptimizationStats(null);
+    }
+  }, [currentImageIndex, imageFiles]);
+
+  const handleNextImage = useCallback(() => {
+    if (currentImageIndex < imageFiles.length - 1) {
+      setPreview(imageFiles[currentImageIndex + 1]);
+      setOptimizationStats(null);
+    }
+  }, [currentImageIndex, imageFiles]);
+
+  const pdfFiles = useMemo(
+    () => files.filter((f) => isPdfFileName(f.name)),
+    [files],
+  );
+  const currentPdfIndex = useMemo(() => {
+    if (!preview) return -1;
+    return pdfFiles.findIndex((f) => f.id === preview.id);
+  }, [preview, pdfFiles]);
+
+  const handlePrevPdf = useCallback(() => {
+    if (currentPdfIndex > 0) {
+      setPreview(pdfFiles[currentPdfIndex - 1]);
+    }
+  }, [currentPdfIndex, pdfFiles]);
+
+  const handleNextPdf = useCallback(() => {
+    if (currentPdfIndex < pdfFiles.length - 1) {
+      setPreview(pdfFiles[currentPdfIndex + 1]);
+    }
+  }, [currentPdfIndex, pdfFiles]);
+
+  const videoFiles = useMemo(
+    () => files.filter((f) => isVideoFileName(f.name)),
+    [files],
+  );
+  const currentVideoIndex = useMemo(() => {
+    if (!preview) return -1;
+    return videoFiles.findIndex((f) => f.id === preview.id);
+  }, [preview, videoFiles]);
+
+  const handlePrevVideo = useCallback(() => {
+    if (currentVideoIndex > 0) {
+      setPreview(videoFiles[currentVideoIndex - 1]);
+    }
+  }, [currentVideoIndex, videoFiles]);
+
+  const handleNextVideo = useCallback(() => {
+    if (currentVideoIndex < videoFiles.length - 1) {
+      setPreview(videoFiles[currentVideoIndex + 1]);
+    }
+  }, [currentVideoIndex, videoFiles]);
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
@@ -218,6 +283,12 @@ export function FileTable({ files, onRefetch }: FileTableProps) {
             setPreview(updated || currentPreview);
           }, 600);
         }}
+        onPrev={currentImageIndex > 0 ? handlePrevImage : undefined}
+        onNext={
+          currentImageIndex < imageFiles.length - 1
+            ? handleNextImage
+            : undefined
+        }
       />
       <PdfPreviewDialog
         open={!!preview && isPdfFileName(preview.name)}
@@ -225,6 +296,10 @@ export function FileTable({ files, onRefetch }: FileTableProps) {
         fileName={preview?.name ?? ''}
         fileUrl={preview?.url ?? ''}
         fileId={preview?.id ?? ''}
+        onPrev={currentPdfIndex > 0 ? handlePrevPdf : undefined}
+        onNext={
+          currentPdfIndex < pdfFiles.length - 1 ? handleNextPdf : undefined
+        }
       />
       <VideoPreview
         open={!!preview && isVideoFileName(preview.name)}
@@ -232,6 +307,12 @@ export function FileTable({ files, onRefetch }: FileTableProps) {
         fileName={preview?.name ?? ''}
         fileUrl={preview?.url ?? ''}
         fileId={preview?.id}
+        onPrev={currentVideoIndex > 0 ? handlePrevVideo : undefined}
+        onNext={
+          currentVideoIndex < videoFiles.length - 1
+            ? handleNextVideo
+            : undefined
+        }
       />
       <TextPreview
         open={!!preview && isTextCodeFileName(preview.name)}

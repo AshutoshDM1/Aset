@@ -157,8 +157,8 @@ function DashboardNavbar({ className }: { className?: string }) {
             <Logo className="size-8" />
             <h1 className="text-lg font-bold">Aset</h1>
           </Link>
-          <div className="flex items-center justify-between gap-4 w-fit md:w-full md:max-w-xl">
-            <DashboardNavbarSearch className="flex-1 hidden md:block" />
+          <div className="flex items-center justify-end gap-4">
+            <DashboardNavbarSearch className="flex-1" />
             <DashboardNavbarActions />
           </div>
         </div>

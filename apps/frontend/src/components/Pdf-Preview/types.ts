@@ -8,6 +8,8 @@ export interface PdfPreviewDialogProps {
   fileName: string;
   fileUrl: string;
   fileId?: string;
+  onPrev?: () => void;
+  onNext?: () => void;
 }
 
 export interface PdfState {
@@ -30,4 +32,5 @@ export interface PdfState {
   handleReset: () => void;
   handleDownload: () => void;
   isDownloading: boolean;
+  handleClose: () => void;
 }

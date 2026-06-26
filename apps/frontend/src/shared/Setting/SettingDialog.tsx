@@ -12,12 +12,17 @@ import { StorageOverview } from './Storage/StorageOverview';
 import { StoragePlans } from './Storage/StoragePlans';
 import { DeveloperSettings } from './Developer/DeveloperSettings';
 import { VideoDecodingSettings } from './VideoDecodingSettings';
+import { ProfileSettings } from './ProfileSettings';
 
 function RightPanel() {
   const { activeTab, storageView } = useSettingStore();
 
   if (activeTab === 'storage') {
     return storageView === 'plans' ? <StoragePlans /> : <StorageOverview />;
+  }
+
+  if (activeTab === 'profile') {
+    return <ProfileSettings />;
   }
 
   if (activeTab === 'developer') {

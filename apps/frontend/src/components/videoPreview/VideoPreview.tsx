@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useFileDownload } from '@/hooks/useFileDownload';
 import { toast } from 'sonner';
@@ -17,6 +17,8 @@ interface VideoPreviewProps {
   fileName: string;
   fileUrl: string;
   fileId?: string;
+  onPrev?: () => void;
+  onNext?: () => void;
 }
 
 export function VideoPreview({
@@ -25,6 +27,8 @@ export function VideoPreview({
   fileName,
   fileUrl,
   fileId,
+  onPrev,
+  onNext,
 }: VideoPreviewProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -96,6 +100,24 @@ export function VideoPreview({
     const secs = Math.floor(timeInSecs % 60);
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
+
+  // Keyboard accessibility: Close on Escape key and navigate on Arrow keys (when unlocked)
+  useEffect(() => {
+    if (!open || isLocked) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      } else if (e.key === 'ArrowLeft' && onPrev) {
+        onPrev();
+      } else if (e.key === 'ArrowRight' && onNext) {
+        onNext();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [open, isLocked, onPrev, onNext, onClose]);
 
   if (!open) return null;
 
@@ -209,6 +231,8 @@ export function VideoPreview({
               selectedTextTrackId={selectedTextTrackId}
               selectTextTrack={selectTextTrack}
               isTracksLoading={isTracksLoading}
+              onPrev={onPrev}
+              onNext={onNext}
             />
           )}
         </AnimatePresence>

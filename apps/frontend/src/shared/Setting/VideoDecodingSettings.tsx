@@ -44,7 +44,7 @@ export function VideoDecodingSettings() {
             />
           </div>
           <div className="min-w-0">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+            <span className="text-[10px] font-bold text-muted-foreground tracking-wider block">
               Active Decodings
             </span>
             <span className="text-xl font-bold text-foreground mt-0.5 block">
@@ -57,7 +57,7 @@ export function VideoDecodingSettings() {
 
       {/* Queue List */}
       <div className="space-y-3">
-        <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
+        <span className="text-xs text-muted-foreground tracking-wider block">
           Current Processing Queue
         </span>
 

@@ -146,6 +146,7 @@ export function FolderContents({
             starred={item.starred}
             trashed={item.trashed}
             onRefetch={onRefetch}
+            allImages={imageFiles}
           />
         </li>
       ))}
@@ -158,6 +159,7 @@ export function FolderContents({
             starred={item.starred}
             trashed={item.trashed}
             onRefetch={onRefetch}
+            allPdfs={pdfFiles}
           />
         </li>
       ))}
@@ -171,6 +173,7 @@ export function FolderContents({
             trashed={item.trashed}
             onRefetch={onRefetch}
             processingStatus={item.processingStatus}
+            allVideos={videoFiles}
           />
         </li>
       ))}

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type SettingTab = 'storage' | 'developer' | 'decoding';
+export type SettingTab = 'storage' | 'developer' | 'decoding' | 'profile';
 export type StorageView = 'overview' | 'plans';
 
 interface SettingStore {
