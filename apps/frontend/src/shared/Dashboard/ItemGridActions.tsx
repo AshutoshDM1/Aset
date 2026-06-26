@@ -180,7 +180,7 @@ export function ItemGridActions({
   return (
     <>
       {checked && (
-        <div className="absolute inset-0 pointer-events-none rounded-2xl ring-2 ring-primary/40 bg-primary/3 z-0" />
+        <div className="absolute inset-0 pointer-events-none rounded-2xl bg-muted/50 z-0" />
       )}
       <div
         className={cn(

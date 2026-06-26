@@ -42,7 +42,7 @@ const FolderComponent = ({
   const href = to ?? `/dashboard/folder/${folderId}`;
 
   return (
-    <div className="group relative">
+    <div className="group relative h-full">
       <ItemGridActions
         id={folderId}
         type="folder"
@@ -54,10 +54,7 @@ const FolderComponent = ({
         sizeMb={sizeMb}
         createdAt={createdAt}
       />
-      <Link
-        to={href}
-        className="block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
+      <Link to={href} className="block rounded-2xl h-full relative z-0">
         <div
           className={cn(
             'flex flex-col items-center rounded-2xl p-2 transition-transform duration-200 group-hover:-translate-y-1',

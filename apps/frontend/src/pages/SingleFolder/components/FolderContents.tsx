@@ -124,7 +124,7 @@ export function FolderContents({
   }
 
   return (
-    <ul className="grid grid-cols-3 md:grid-cols-8 xl:grid-cols-10 justify-evenly">
+    <ul className="grid grid-cols-3 md:grid-cols-8 xl:grid-cols-10 gap-2 justify-evenly">
       {sortedFolders.map((item, index) => (
         <li key={`f-${item.id}`}>
           <FolderComponent
@@ -138,7 +138,7 @@ export function FolderContents({
         </li>
       ))}
       {imageFiles.map((item) => (
-        <li key={`file-${item.id}`} className="flex">
+        <li key={`file-${item.id}`}>
           <ImageFilePreview
             fileId={item.id}
             name={item.name}
@@ -151,7 +151,7 @@ export function FolderContents({
         </li>
       ))}
       {pdfFiles.map((item) => (
-        <li key={`file-${item.id}`} className="flex">
+        <li key={`file-${item.id}`}>
           <PdfFilePreview
             fileId={item.id}
             name={item.name}
@@ -164,7 +164,7 @@ export function FolderContents({
         </li>
       ))}
       {videoFiles.map((item) => (
-        <li key={`file-${item.id}`} className="flex">
+        <li key={`file-${item.id}`}>
           <VideoFilePreview
             fileId={item.id}
             name={item.name}
@@ -178,7 +178,7 @@ export function FolderContents({
         </li>
       ))}
       {textFiles.map((item) => (
-        <li key={`file-${item.id}`} className="flex">
+        <li key={`file-${item.id}`}>
           <TextFilePreview
             fileId={item.id}
             name={item.name}
@@ -190,7 +190,7 @@ export function FolderContents({
         </li>
       ))}
       {otherFiles.map((item) => (
-        <li key={`file-${item.id}`} className="flex">
+        <li key={`file-${item.id}`}>
           <OtherFileTile
             fileId={item.id}
             name={item.name}

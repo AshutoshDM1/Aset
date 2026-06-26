@@ -163,7 +163,7 @@ function DashboardNavbar({ className }: { className?: string }) {
           </div>
         </div>
         {!isDashboardRoot && (
-          <div className="block sm:hidden text-sm px-3 mt-2">
+          <div className="block sm:hidden text-sm px-3 mt-4">
             <Button
               onClick={() => {
                 window.history.back();

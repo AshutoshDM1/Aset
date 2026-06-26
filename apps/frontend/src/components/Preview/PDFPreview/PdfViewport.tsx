@@ -3,7 +3,7 @@ import Loader from '@/shared/PageLoader/Loader';
 import { motion } from 'motion/react';
 import type { PdfState } from './types';
 import { cn } from '@/lib/utils';
-import { useCallback, useRef, useEffect } from 'react';
+import { useCallback, useRef, useEffect, useState } from 'react';
 import { PdfVerticalView } from './PdfVerticalView';
 
 // Crucial: Import react-pdf styles to overlay text and link annotations correctly,
@@ -35,6 +35,24 @@ export function PdfViewport({ state, fileUrl }: PdfViewportProps) {
 
   // Track scale in a ref for safe use inside gesture handlers
   const scaleRef = useRef(scale);
+
+  const [windowHeight, setWindowHeight] = useState(
+    typeof window !== 'undefined' ? window.innerHeight : 800,
+  );
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleResize = () => {
+      setWindowHeight(window.innerHeight);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const RENDER_SCALE = 4;
+  const targetHeight = (isFullscreen ? 0.92 : 0.6) * windowHeight;
+  const cssScale = scale / RENDER_SCALE;
+
   useEffect(() => {
     scaleRef.current = scale;
   }, [scale]);
@@ -134,25 +152,22 @@ export function PdfViewport({ state, fileUrl }: PdfViewportProps) {
     setNumPages(numPages);
   }
 
-  // Determine standard page height limits
-  const pageHeightClass = isFullscreen ? 'h-[92dvh]' : 'h-[60dvh]';
-
   // 2. Single Page Mode: Renders one page with drag panning support
   const renderSingleView = () => (
     <motion.div
       drag
       dragMomentum={false}
       dragElastic={0.5}
-      style={{ x, y, scale, rotate }}
+      style={{ x, y, scale: cssScale, rotate }}
       className="flex items-center justify-center cursor-grab active:cursor-grabbing bg-white p-2 shadow-2xl ring-1 ring-border/20 rounded-2xl transform-gpu"
     >
       <div className="overflow-hidden rounded-xl border border-border/10">
         <Page
           pageNumber={pageNumber}
-          scale={1}
+          height={targetHeight}
+          scale={RENDER_SCALE}
           renderTextLayer
           renderAnnotationLayer
-          className={pageHeightClass}
           loading={
             <div className="flex items-center justify-center w-75 h-112.5">
               <Loader />
@@ -169,17 +184,17 @@ export function PdfViewport({ state, fileUrl }: PdfViewportProps) {
       drag
       dragMomentum={false}
       dragElastic={0.5}
-      style={{ x, y, scale, rotate }}
+      style={{ x, y, scale: cssScale, rotate }}
       className="flex items-center justify-center cursor-grab active:cursor-grabbing bg-white p-2 shadow-2xl ring-1 ring-border/20 rounded-2xl transform-gpu gap-4"
     >
       {/* First Page */}
       <div className="overflow-hidden rounded-xl border border-border/10">
         <Page
           pageNumber={pageNumber}
-          scale={1}
+          height={targetHeight}
+          scale={RENDER_SCALE}
           renderTextLayer
           renderAnnotationLayer
-          className={pageHeightClass}
           loading={
             <div className="flex items-center justify-center w-75 h-112.5">
               <Loader />
@@ -193,10 +208,10 @@ export function PdfViewport({ state, fileUrl }: PdfViewportProps) {
         <div className="overflow-hidden rounded-xl border border-border/10">
           <Page
             pageNumber={pageNumber + 1}
-            scale={1}
+            height={targetHeight}
+            scale={RENDER_SCALE}
             renderTextLayer
             renderAnnotationLayer
-            className={pageHeightClass}
             loading={
               <div className="flex items-center justify-center w-75 h-112.5">
                 <Loader />
