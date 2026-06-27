@@ -53,27 +53,14 @@ export const userRouter = router({
   }),
 
   updateStorageLimit: protectedProcedure
-    .input(z.object({ limitMb: z.number().positive() }))
+    .input(z.object({ planId: z.enum(['free', 'trial', 'pro', 'business']) }))
     .mutation(async ({ ctx, input }) => {
-      const allowedLimits = [
-        5 * 1024, // Starter (Free) / Downgrade limit
-        20 * 1024, // Trial limit
-        400 * 1024, // Pro limit
-        1024 * 1024, // Business limit
-      ];
-
-      if (!allowedLimits.includes(input.limitMb)) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'Invalid storage limit requested.',
-        });
-      }
-
+      let limitMb = 5 * 1024;
       let planName = 'free';
       let trialExpiresAt: Date | null = null;
       let setHasUsedTrial = false;
 
-      if (input.limitMb === 20 * 1024) {
+      if (input.planId === 'trial') {
         const storageRecord = await ctx.db.userStorage.findUnique({
           where: { userId: ctx.auth.userId },
         });
@@ -85,13 +72,16 @@ export const userRouter = router({
           });
         }
 
+        limitMb = 20 * 1024;
         planName = 'trial';
         trialExpiresAt = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
         setHasUsedTrial = true;
-      } else if (input.limitMb === 400 * 1024) {
+      } else if (input.planId === 'pro') {
+        limitMb = 500 * 1024; // 500 GB
         planName = 'pro';
         setHasUsedTrial = true;
-      } else if (input.limitMb === 1024 * 1024) {
+      } else if (input.planId === 'business') {
+        limitMb = 1024 * 1024; // 1 TB
         planName = 'business';
         setHasUsedTrial = true;
       }
@@ -99,14 +89,14 @@ export const userRouter = router({
       const storage = await ctx.db.userStorage.upsert({
         where: { userId: ctx.auth.userId },
         update: {
-          totalStorage: input.limitMb,
+          totalStorage: limitMb,
           plan: planName,
           trialExpiresAt,
           ...(setHasUsedTrial ? { hasUsedTrial: true } : {}),
         },
         create: {
           userId: ctx.auth.userId,
-          totalStorage: input.limitMb,
+          totalStorage: limitMb,
           usedStorage: 0,
           plan: planName,
           trialExpiresAt,

@@ -67,7 +67,7 @@ function SidebarNavItem({ item }: { item: SidebarItem }) {
   );
 }
 
-import { useSettingStore } from '@/shared/Setting/Storage/settingStore';
+import { useBillingStore } from '@/store/billingStore';
 
 const MB_PER_GB = 1024;
 
@@ -77,7 +77,7 @@ function mbToGb(valueMb: number) {
 
 function SidebarStorageCard() {
   const { data, isPending } = useQuery(trpc.user.me.queryOptions());
-  const openSettings = useSettingStore((state) => state.openDialog);
+  const openPricing = useBillingStore((state) => state.openPricing);
 
   const storage = data?.storage;
   const totalMb = storage?.totalStorage ?? 0;
@@ -121,7 +121,7 @@ function SidebarStorageCard() {
           className="w-full cursor-pointer"
           variant="secondary"
           size="sm"
-          onClick={openSettings}
+          onClick={() => openPricing('monthly')}
         >
           Upgrade Plan
         </Button>

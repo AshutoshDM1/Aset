@@ -1,10 +1,12 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import BrandButton from '@/shared/BrandButton/BrandButton';
-import { Link } from 'react-router';
+import { useNavigate } from 'react-router';
+import { useUser } from '@clerk/react';
 import { useQuery } from '@tanstack/react-query';
 import { trpc } from '@/utils/trpc';
 import { Loader2 } from 'lucide-react';
+import { useBillingStore } from '@/store/billingStore';
 
 interface PricingPlan {
   name: string;
@@ -45,6 +47,9 @@ const getDisplayPrice = (plan: PricingPlan, cycle: 'monthly' | 'yearly') => {
 };
 
 const PricingCards: React.FC<PricingCardsProps> = ({ billingCycle }) => {
+  const navigate = useNavigate();
+  const { isSignedIn } = useUser();
+  const openBilling = useBillingStore((state) => state.openBilling);
   const { data: plansData, isPending } = useQuery(
     trpc.pricing.getPlans.queryOptions(),
   );
@@ -76,9 +81,18 @@ const PricingCards: React.FC<PricingCardsProps> = ({ billingCycle }) => {
       {plans.map((plan) => {
         const { price, original } = getDisplayPrice(plan, billingCycle);
         const isFree = plan.monthlyPrice === 0 && plan.yearlyPrice === 0;
-        const targetUrl = isFree
-          ? '/dashboard/my-files'
-          : `/billing?plan=${encodeURIComponent(plan.name)}&cycle=${billingCycle}`;
+
+        const handlePlanClick = () => {
+          if (!isSignedIn) {
+            navigate('/sign-in');
+            return;
+          }
+          if (isFree) {
+            navigate('/dashboard/my-files');
+          } else {
+            openBilling(plan.name, billingCycle);
+          }
+        };
 
         return (
           <div
@@ -98,7 +112,7 @@ const PricingCards: React.FC<PricingCardsProps> = ({ billingCycle }) => {
                     <h3 className="text-lg md:text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
                       {plan.name}
                     </h3>
-                    <p className="text-xs md:text-sm font-medium text-zinc-500 dark:text-zinc-400 leading-snug">
+                    <p className="text-xs md:text-sm font-medium text-zinc-500 dark:text-zinc-450 leading-snug">
                       {plan.subtitle}
                     </p>
                   </div>
@@ -122,20 +136,19 @@ const PricingCards: React.FC<PricingCardsProps> = ({ billingCycle }) => {
 
               <div className="mt-8">
                 {plan.isPro ? (
-                  <Link to={targetUrl} className="block w-full">
-                    <button
-                      className={cn(
-                        'w-full text-sm md:text-base text-primary-foreground bg-linear-to-b from-indigo-600 via-indigo-500 to-indigo-400 hover:bg-indigo-500/70 rounded-4xl px-4 py-3 font-semibold shadow-[0_3px_17px_rgba(0,0,0,0.2)] shadow-[#5E43F3] ',
-                        'ring-1 ring-indigo-600/90 hover:ring-indigo-500/70',
-                        'transition-all duration-300 ease-in-out cursor-pointer text-white text-center flex justify-center items-center',
-                      )}
-                    >
-                      {plan.btnText}
-                    </button>
-                  </Link>
+                  <button
+                    onClick={handlePlanClick}
+                    className={cn(
+                      'w-full text-sm md:text-base text-primary-foreground bg-linear-to-b from-indigo-600 via-indigo-500 to-indigo-400 hover:bg-indigo-500/70 rounded-4xl px-4 py-3 font-semibold shadow-[0_3px_17px_rgba(0,0,0,0.2)] shadow-[#5E43F3] ',
+                      'ring-1 ring-indigo-600/90 hover:ring-indigo-500/70',
+                      'transition-all duration-300 ease-in-out cursor-pointer text-white text-center flex justify-center items-center',
+                    )}
+                  >
+                    {plan.btnText}
+                  </button>
                 ) : (
                   <BrandButton
-                    to={targetUrl}
+                    onClick={handlePlanClick}
                     label={plan.btnText}
                     className="w-full text-center flex justify-center py-3 text-sm md:text-base cursor-pointer"
                   />

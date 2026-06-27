@@ -2,12 +2,17 @@ import React, { useState } from 'react';
 import SectionHeading from '@/shared/SectionHeading/SectionHeading';
 import PricingCards from './PricingCards';
 import { cn } from '@/lib/utils';
-import { Link } from 'react-router';
+import { useNavigate } from 'react-router';
+import { useUser } from '@clerk/react';
+import { useBillingStore } from '@/store/billingStore';
 
 export const Pricing: React.FC = () => {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>(
     'monthly',
   );
+  const openBilling = useBillingStore((state) => state.openBilling);
+  const navigate = useNavigate();
+  const { isSignedIn } = useUser();
 
   return (
     <div className="space-y-10 max-w-6xl mx-auto">
@@ -75,12 +80,18 @@ export const Pricing: React.FC = () => {
       <div className="text-center">
         <p className="text-sm text-zinc-500 dark:text-zinc-450 font-medium">
           Still confused?{' '}
-          <Link
-            to="/billing?plan=trial"
-            className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 font-semibold underline underline-offset-4 cursor-pointer"
+          <button
+            onClick={() => {
+              if (!isSignedIn) {
+                navigate('/sign-in');
+              } else {
+                openBilling('trial', 'monthly');
+              }
+            }}
+            className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 font-semibold underline underline-offset-4 cursor-pointer bg-transparent border-none p-0 inline align-baseline"
           >
             Start your free trial now
-          </Link>
+          </button>
         </p>
       </div>
     </div>

@@ -18,7 +18,7 @@ export default function RequireDashboardAccess() {
 
       <ClerkLoaded>
         {!isSignedIn ? (
-          <Navigate to="/" replace state={{ from: location.pathname }} />
+          <Navigate to="/sign-in" replace state={{ from: location.pathname }} />
         ) : !isLoaded ? (
           <PageLoader />
         ) : !user ? (

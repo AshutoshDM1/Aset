@@ -14,6 +14,8 @@ import FontChanger, { FontInitializer } from './shared/FontChanger/FontChanger';
 import SignInPage from './pages/SignIn/SignIn';
 import PricingPage from './pages/Pricing/Pricing';
 import BillingPage from './pages/Billing/Billing';
+import { PricingDailog } from '@/shared/BillingDailog/PricingDailog';
+import { BillingDailog } from '@/shared/BillingDailog/BillingDailog';
 
 const FontStudio = import.meta.env.DEV
   ? { FontInitializer, FontChanger }
@@ -22,6 +24,8 @@ const FontStudio = import.meta.env.DEV
 function App() {
   return (
     <>
+      <PricingDailog />
+      <BillingDailog />
       {FontStudio && (
         <>
           {/* <FontStudio.FontInitializer />

@@ -2,19 +2,19 @@ import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { ChevronRight, Loader2, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router';
 
 import { Badge } from '@/components/ui/badge';
 import { trpc, queryClient } from '@/utils/trpc';
 import { cn } from '@/lib/utils';
 import { useSettingStore } from './settingStore';
 import { ConfirmCancellationDialog } from './ConfirmCancellationDialog';
+import { useBillingStore } from '../../../store/billingStore';
 
 export function StoragePlans() {
-  const navigate = useNavigate();
   const { setStorageView, closeDialog } = useSettingStore();
   const { data: userData } = useQuery(trpc.user.me.queryOptions());
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const openBilling = useBillingStore((state) => state.openBilling);
 
   // Fetch centralized pricing plans
   const { data: plans, isPending: isPlansLoading } = useQuery(
@@ -50,10 +50,10 @@ export function StoragePlans() {
       // Downgrading to Free plan (Cancelling plan)
       handleCancel();
     } else {
-      // Upgrading to Pro, Business or Trial redirects to billing flow
+      // Upgrading to Pro, Business or Trial opens the billing dialog directly
       closeDialog();
       const planParam = limitMb === 20 * 1024 ? 'trial' : plan.name;
-      navigate(`/billing?plan=${encodeURIComponent(planParam)}`);
+      openBilling(planParam, 'monthly');
     }
   };
 
@@ -94,9 +94,14 @@ export function StoragePlans() {
           const isActive = currentMb === plan.storageMb;
           const isDisabled = isTrialPlan && hasUsedTrial && !isActive;
 
+          let targetPlanId = 'free';
+          if (plan.storageMb === 20 * 1024) targetPlanId = 'trial';
+          else if (plan.storageMb === 500 * 1024) targetPlanId = 'pro';
+          else if (plan.storageMb === 1024 * 1024) targetPlanId = 'business';
+
           const isPending =
             updateStorage.isPending &&
-            updateStorage.variables?.limitMb === plan.storageMb;
+            updateStorage.variables?.planId === targetPlanId;
 
           const displayPrice =
             plan.monthlyPrice === 0 ? 'Free' : `$${plan.monthlyPrice} / mo`;
@@ -178,7 +183,7 @@ export function StoragePlans() {
         onOpenChange={setIsConfirmOpen}
         onConfirm={() => {
           setIsConfirmOpen(false);
-          updateStorage.mutate({ limitMb: 5 * 1024 });
+          updateStorage.mutate({ planId: 'free' });
         }}
         isPending={updateStorage.isPending}
       />

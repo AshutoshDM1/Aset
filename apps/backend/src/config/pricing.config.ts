@@ -1,4 +1,5 @@
 export interface PricingPlan {
+  id: string;
   name: string;
   subtitle: string;
   storage: string;
@@ -15,6 +16,7 @@ export interface PricingPlan {
 
 export const PRICING_PLANS: PricingPlan[] = [
   {
+    id: '31150500-345f-448d-8404-74206f1e9c73',
     name: 'Starter plan',
     subtitle: 'For individuals & new creators',
     storage: '5 GB secure',
@@ -34,6 +36,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     ],
   },
   {
+    id: '687427d3-b43d-44f8-8361-4035ed1c1a4b',
     name: '15-day Free Trial',
     subtitle: 'Test drive Aset premium storage',
     storage: '20 GB high-speed',
@@ -51,6 +54,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     ],
   },
   {
+    id: '52fbdb35-dc80-41ce-bf80-d6ee3779a82a',
     name: 'Pro plan',
     subtitle: 'For freelancers & small teams',
     storage: '500 GB high-speed',
@@ -73,6 +77,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     isPro: true,
   },
   {
+    id: 'ac966cc4-cb5a-49bf-bdfb-c3890a553136',
     name: 'Business plan',
     subtitle: 'For growing teams & agencies',
     storage: '1 TB premium',

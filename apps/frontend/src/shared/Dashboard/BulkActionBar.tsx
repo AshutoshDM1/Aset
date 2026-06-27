@@ -6,11 +6,11 @@ import {
   Star,
   Trash2,
   FolderInput,
-  X,
   Loader2,
   ShieldAlert,
   RotateCcw,
   CheckSquare,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -218,7 +218,7 @@ export function BulkActionBar() {
     <>
       <div
         className={cn(
-          'fixed bottom-24 lg:bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col sm:flex-row items-center gap-4 px-4 py-3 sm:py-2.5 rounded-2xl sm:rounded-full border border-border/80 bg-background/80 dark:bg-background/70 backdrop-blur-xl shadow-2xl transition-all duration-300 transform w-11/12 max-w-xl',
+          'fixed bottom-24 lg:bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col sm:flex-row items-center gap-4 px-4 py-3 sm:py-2.5 rounded-2xl sm:rounded-full border border-border/80 bg-background/80 dark:bg-background/70 backdrop-blur-xl shadow-2xl transition-all duration-300 transform w-11/12 max-w-2xl justify-center',
           active
             ? 'translate-y-0 opacity-100 scale-100'
             : 'translate-y-12 opacity-0 scale-95 pointer-events-none',
@@ -234,13 +234,14 @@ export function BulkActionBar() {
           </span>
           <Button
             variant="ghost"
-            size="icon"
+            size="sm"
             onClick={clearSelection}
             disabled={isPending}
-            className="size-7 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors cursor-pointer"
-            title="Clear Selection"
+            className="h-7 px-2.5 rounded-full text-xs font-semibold text-destructive hover:bg-destructive/5 hover:text-destructive transition-all cursor-pointer flex items-center gap-1"
+            title="Deselect All"
           >
-            <X className="size-4" />
+            <X className="size-3.5" />
+            Deselect All
           </Button>
 
           {/* Select All Button */}
@@ -256,11 +257,8 @@ export function BulkActionBar() {
           </Button>
         </div>
 
-        {/* Action divider line */}
-        <div className="hidden sm:block h-6 w-px bg-border/60" />
-
         {/* Action buttons */}
-        <div className="flex items-center gap-1.5 w-full justify-center">
+        <div className="flex items-center gap-1.5 justify-center">
           {isTrash ? (
             <>
               {/* Restore permanently */}

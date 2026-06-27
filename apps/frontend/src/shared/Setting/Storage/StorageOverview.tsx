@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { trpc } from '@/utils/trpc';
 import { useSettingStore } from './settingStore';
+import { useBillingStore } from '../../../store/billingStore';
 
 const MB_PER_GB = 1024;
 
@@ -26,7 +27,8 @@ function getPlanLabel(plan: string | undefined, totalMb: number) {
 }
 
 export function StorageOverview() {
-  const { setStorageView } = useSettingStore();
+  const { setStorageView, closeDialog } = useSettingStore();
+  const openPricing = useBillingStore((state) => state.openPricing);
   const { data, isPending } = useQuery(trpc.user.me.queryOptions());
 
   const storage = data?.storage;
@@ -102,7 +104,10 @@ export function StorageOverview() {
       {/* Upgrade CTA */}
       <Button
         className="w-full cursor-pointer"
-        onClick={() => setStorageView('plans')}
+        onClick={() => {
+          closeDialog();
+          openPricing();
+        }}
       >
         Upgrade Storage
         <ArrowRight className="h-4 w-4 ml-1" />

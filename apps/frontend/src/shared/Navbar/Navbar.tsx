@@ -34,12 +34,12 @@ const Navbar = () => {
   return (
     <Section className="py-4 w-full">
       <div className="flex justify-between items-center">
-        <div className="flex gap-2 items-center">
+        <Link to="/" className="flex gap-2 items-center">
           <Logo className="w-10 h-10" />
           <span className="text-2xl text-black dark:text-white font-bold mt-1.5">
             Aset
           </span>
-        </div>
+        </Link>
         <div className="hidden md:flex items-center justify-center gap-6">
           {navItems.map((item) =>
             item.href.startsWith('/') && !item.href.includes('#') ? (
