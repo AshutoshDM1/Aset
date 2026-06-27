@@ -6,6 +6,8 @@ services:
     image: postgres:16-alpine
     container_name: aset_postgres_db
     restart: unless-stopped
+    profiles:
+      - postgres
     env_file:
       - .env
     environment:
@@ -24,27 +26,49 @@ services:
       timeout: 5s
       retries: 5
 
-  # api:
-  #   build:
-  #     context: ../..
-  #     dockerfile: apps/backend/Dockerfile
-  #   image: aset-backend:local
-  #   container_name: aset_backend
-  #   restart: unless-stopped
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     NODE_ENV: production
-  #     PORT: ${PORT:-5000}
-  #     # Reach postgres over the compose network, not the host.
-  #     # Password is URL-encoded: `aset@db&123` -> `aset%40db%26123`.
-  #     DATABASE_URL: postgresql://asetdev:aset%40db%26123@postgres:5432/aset
-  #   ports:
-  #     - '${PORT:-5000}:${PORT:-5000}'
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
+  redis:
+    image: redis:7-alpine
+    container_name: aset_redis_db
+    restart: unless-stopped
+    profiles:
+      - redis
+    ports:
+      - '127.0.0.1:${REDIS_PORT:-6379}:6379'
+    volumes:
+      - aset_redis_data:/data
+    command: redis-server --requirepass ${REDIS_PASSWORD:-redis_local_pwd}
+    healthcheck:
+      test:
+        ['CMD', 'redis-cli', '-a', '${REDIS_PASSWORD:-redis_local_pwd}', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ../..
+      dockerfile: apps/backend/Dockerfile
+    image: aset-backend:local
+    container_name: aset_backend
+    restart: unless-stopped
+    profiles:
+      - backend
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: ${PORT:-5000}
+      # Reach postgres over the compose network, not the host.
+      # Password is URL-encoded: `aset@db&123` -> `aset%40db%26123`.
+      DATABASE_URL: postgresql://asetdev:aset%40db%26123@postgres:5432/aset
+    ports:
+      - '${PORT:-5000}:${PORT:-5000}'
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   aset_postgres_data:
+    driver: local
+  aset_redis_data:
     driver: local
