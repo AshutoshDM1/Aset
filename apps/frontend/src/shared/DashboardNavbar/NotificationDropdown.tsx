@@ -90,7 +90,7 @@ export function NotificationDropdown() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        align="end"
+        align="start"
         className="w-80 p-2 rounded-2xl bg-popover text-popover-foreground shadow-2xl border"
       >
         <div className="flex items-center justify-between px-3 py-1.5">
