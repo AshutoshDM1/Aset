@@ -33,4 +33,6 @@ export interface PdfState {
   handleDownload: () => void;
   isDownloading: boolean;
   handleClose: () => void;
+  readability: number;
+  setReadability: React.Dispatch<React.SetStateAction<number>>;
 }

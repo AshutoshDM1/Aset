@@ -28,6 +28,18 @@ export function PdfPreviewDialog({
   const [viewMode, setViewMode] = useState<PdfViewMode>('single');
   const [showControls, setShowControls] = useState<boolean>(true);
 
+  const [readability, setReadability] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('pdf-readability');
+      return saved ? Number(saved) : 0;
+    }
+    return 0;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('pdf-readability', String(readability));
+  }, [readability]);
+
   const handleDownload = () => {
     if (fileId) {
       download(fileId, fileName, fileUrl);
@@ -43,6 +55,7 @@ export function PdfPreviewDialog({
   const handleReset = () => {
     setScale(defaultScale);
     setRotate(0);
+    setReadability(0);
     x.set(0);
     y.set(0);
     setShowControls(true);
@@ -112,6 +125,8 @@ export function PdfPreviewDialog({
     handleDownload,
     isDownloading,
     handleClose,
+    readability,
+    setReadability,
   };
 
   if (!open) return null;

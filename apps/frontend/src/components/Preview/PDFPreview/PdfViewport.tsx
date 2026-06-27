@@ -31,6 +31,7 @@ export function PdfViewport({ state, fileUrl }: PdfViewportProps) {
     viewMode,
     x,
     y,
+    readability,
   } = state;
 
   // Track scale in a ref for safe use inside gesture handlers
@@ -49,7 +50,12 @@ export function PdfViewport({ state, fileUrl }: PdfViewportProps) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const RENDER_SCALE = 4;
+  const BASE_RENDER_SCALE = 2.0; // Default base value from which we multiply
+  const multiplier =
+    readability >= 0
+      ? 1 + readability * 0.25
+      : Math.max(0.1, 1 + readability * 0.16);
+  const RENDER_SCALE = BASE_RENDER_SCALE * multiplier;
   const targetHeight = (isFullscreen ? 0.92 : 0.6) * windowHeight;
   const cssScale = scale / RENDER_SCALE;
 

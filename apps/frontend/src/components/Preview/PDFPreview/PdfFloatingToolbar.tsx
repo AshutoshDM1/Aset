@@ -42,6 +42,8 @@ export function PdfFloatingToolbar({ state }: PdfFloatingToolbarProps) {
     handleDownload,
     isDownloading,
     handleClose,
+    readability,
+    setReadability,
   } = state;
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -272,6 +274,33 @@ export function PdfFloatingToolbar({ state }: PdfFloatingToolbarProps) {
                   <span>Reset</span>
                 </motion.button>
               )}
+            </div>
+
+            {/* Readability Adjustment */}
+            <div className="flex flex-col gap-2 px-1 pt-2.5 border-t border-white/5">
+              <div className="flex justify-between text-[11px] text-white/70 font-semibold items-center">
+                <span className="flex items-center gap-1.5">
+                  <Eye className="size-3.5 text-white/50" />
+                  Readability (Sharpness)
+                </span>
+                <span className="text-primary font-mono">
+                  {readability > 0 ? `+${readability}` : readability} (
+                  {(readability >= 0
+                    ? 1 + readability * 0.25
+                    : Math.max(0.1, 1 + readability * 0.16)
+                  ).toFixed(2)}
+                  x)
+                </span>
+              </div>
+              <input
+                type="range"
+                min="-5"
+                max="5"
+                step="1"
+                value={readability}
+                onChange={(e) => setReadability(Number(e.target.value))}
+                className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-primary focus:outline-none"
+              />
             </div>
           </div>
 
