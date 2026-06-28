@@ -202,31 +202,33 @@ export function VideoControls({
             <SkipForward className="size-4.5 fill-current" />
           </motion.button>
 
-          <motion.button
-            type="button"
-            onClick={handleSkipBackward}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="size-9 md:size-10 rounded-xl bg-white/5 hover:bg-white/15 border border-white/5 text-white/80 hover:text-white flex items-center justify-center cursor-pointer"
-            title={`Skip Backward ${skipAmount}s`}
-          >
-            <RotateCcw className="size-4.5" />
-          </motion.button>
+          <div className="hidden items-center gap-1.5 md:gap-3 landscape:flex md:flex">
+            <motion.button
+              type="button"
+              onClick={handleSkipBackward}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="size-9 md:size-10 rounded-xl bg-white/5 hover:bg-white/15 border border-white/5 text-white/80 hover:text-white flex items-center justify-center cursor-pointer"
+              title={`Skip Backward ${skipAmount}s`}
+            >
+              <RotateCcw className="size-4.5" />
+            </motion.button>
 
-          <span className="text-xs font-semibold text-white/50 select-none">
-            {skipAmount}s
-          </span>
+            <span className="text-xs font-semibold text-white/50 select-none">
+              {skipAmount}s
+            </span>
 
-          <motion.button
-            type="button"
-            onClick={handleSkipForward}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="size-9 md:size-10 rounded-xl bg-white/5 hover:bg-white/15 border border-white/5 text-white/80 hover:text-white flex items-center justify-center cursor-pointer"
-            title={`Skip Forward ${skipAmount}s`}
-          >
-            <RotateCw className="size-4.5" />
-          </motion.button>
+            <motion.button
+              type="button"
+              onClick={handleSkipForward}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="size-9 md:size-10 rounded-xl bg-white/5 hover:bg-white/15 border border-white/5 text-white/80 hover:text-white flex items-center justify-center cursor-pointer"
+              title={`Skip Forward ${skipAmount}s`}
+            >
+              <RotateCw className="size-4.5" />
+            </motion.button>
+          </div>
 
           {/* Customizable Jump Options Panel Settings Dropdown */}
           <div className="relative">
@@ -568,7 +570,8 @@ export function VideoControls({
             className="w-16 sm:w-24 h-1 rounded-lg appearance-none cursor-pointer focus:outline-none transition-all
               bg-white/20 hover:bg-white/35
               [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:size-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:hover:scale-125 [&::-webkit-slider-thumb]:transition-transform
-              [&::-moz-range-thumb]:size-3 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:hover:scale-125 [&::-moz-range-thumb]:transition-transform"
+              [&::-moz-range-thumb]:size-3 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:hover:scale-125 [&::-moz-range-thumb]:transition-transform
+              hidden landscape:block md:block"
             style={{
               background: `linear-gradient(to right, #fff 0%, #fff ${(isMuted ? 0 : volume) * 100}%, rgba(255, 255, 255, 0.2) ${(isMuted ? 0 : volume) * 100}%, rgba(255, 255, 255, 0.2) 100%)`,
             }}

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { trpc } from '@/utils/trpc';
 import {
@@ -8,6 +9,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 function formatDuration(ms: number) {
   if (ms < 1000) return `${ms}ms`;
@@ -16,6 +18,10 @@ function formatDuration(ms: number) {
 }
 
 export function VideoDecodingSettings() {
+  const [activeMobileTab, setActiveMobileTab] = useState<'current' | 'history'>(
+    'current',
+  );
+
   // Poll every 5 seconds to keep progress updated
   const { data: processingFiles, isLoading: isLoadingQueue } = useQuery({
     ...trpc.file.getProcessingFiles.queryOptions(),
@@ -42,7 +48,7 @@ export function VideoDecodingSettings() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 w-full min-w-0 flex flex-col">
-      <div className="space-y-1.5">
+      <div>
         <h3 className="text-base font-bold text-foreground">
           Video Decoding Status
         </h3>
@@ -66,7 +72,7 @@ export function VideoDecodingSettings() {
             <span className="text-[10px] font-bold text-muted-foreground tracking-wider block">
               Active Decodings
             </span>
-            <span className="text-xl font-bold text-foreground mt-0.5 block">
+            <span className="text-base md:text-xl font-bold text-foreground mt-0.5 block">
               {activeTasks.length}{' '}
               {activeTasks.length === 1 ? 'Video' : 'Videos'}
             </span>
@@ -74,25 +80,58 @@ export function VideoDecodingSettings() {
         </div>
       </div>
 
+      {/* Mobile Tab Selector */}
+      <div className="flex md:hidden p-0.5 rounded-xl bg-muted/65 border border-border/60">
+        <button
+          type="button"
+          onClick={() => setActiveMobileTab('current')}
+          className={cn(
+            'flex-1 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer',
+            activeMobileTab === 'current'
+              ? 'bg-background text-foreground shadow-xs'
+              : 'text-muted-foreground hover:text-foreground',
+          )}
+        >
+          Current ({activeTasks.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveMobileTab('history')}
+          className={cn(
+            'flex-1 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer',
+            activeMobileTab === 'history'
+              ? 'bg-background text-foreground shadow-xs'
+              : 'text-muted-foreground hover:text-foreground',
+          )}
+        >
+          History ({history.length})
+        </button>
+      </div>
+
       {/* Queue List */}
-      <div className="space-y-3">
+      <div
+        className={cn(
+          'space-y-3',
+          activeMobileTab !== 'current' && 'hidden md:block',
+        )}
+      >
         <span className="text-xs text-muted-foreground tracking-wider block">
           Current Processing Queue
         </span>
 
         {activeTasks.length === 0 ? (
-          <div className="border border-dashed border-border/60 rounded-2xl p-8 flex flex-col items-center justify-center text-center text-muted-foreground bg-muted/5">
+          <div className="border border-dashed border-border/60 rounded-2xl p-4 md:p-8 flex flex-col items-center justify-center text-center text-muted-foreground bg-muted/5">
             <CheckCircle2 className="size-8 text-muted-foreground/50 mb-2.5" />
             <span className="text-sm font-semibold text-foreground">
               No Active Tasks
             </span>
-            <span className="text-xs text-muted-foreground/80 mt-1 max-w-xs leading-normal">
+            <span className="hidden md:block text-xs text-muted-foreground/80 mt-1 max-w-xs leading-normal">
               All videos are fully decoded or skipped. Newly uploaded videos
               will appear here during processing.
             </span>
           </div>
         ) : (
-          <div className="h-[200px] overflow-y-auto custom-scrollbar pr-1 w-full min-w-0">
+          <div className="h-[140px] md:h-[200px] overflow-y-auto custom-scrollbar pr-1 w-full min-w-0">
             <div className="border border-border/60 rounded-2xl divide-y divide-border/60 bg-muted/5">
               {activeTasks.map((task) => (
                 <div
@@ -127,7 +166,12 @@ export function VideoDecodingSettings() {
       </div>
 
       {/* Decoding History */}
-      <div className="space-y-3">
+      <div
+        className={cn(
+          'space-y-3',
+          activeMobileTab !== 'history' && 'hidden md:block',
+        )}
+      >
         <span className="text-xs text-muted-foreground tracking-wider block">
           Decoding History
         </span>

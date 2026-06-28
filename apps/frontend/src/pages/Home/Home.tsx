@@ -21,25 +21,25 @@ const Home = () => {
             <Herosection />
           </Section>
         </div>
-        <Section id="integration" className="pt-10 md:pt-32">
+        <Section id="integration" className="pt-20 md:pt-32">
           <UnlimitedIntegrations />
         </Section>
-        <Section id="feature" className="pt-10 md:pt-32">
+        <Section id="feature" className="pt-20 md:pt-32">
           <Feature />
         </Section>
-        <Section id="workflow" className="pt-10 md:pt-32">
+        <Section id="workflow" className="pt-20 md:pt-32">
           <Workflow />
         </Section>
-        <Section id="usecase" className="pt-10 md:pt-32">
+        <Section id="usecase" className="pt-20 md:pt-32">
           <BentoGrid />
         </Section>
-        <Section id="pricing" className="pt-10 md:pt-32">
+        <Section id="pricing" className="pt-20 md:pt-32">
           <Pricing />
         </Section>
-        <Section id="faq" className="pt-10 md:pt-32 ">
+        <Section id="faq" className="pt-20 md:pt-32 ">
           <Faq />
         </Section>
-        <Section id="cta" className="py-10">
+        <Section id="cta" className="pt-20">
           <CTA />
         </Section>
         <Footer />

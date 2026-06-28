@@ -45,8 +45,7 @@ const Feature: React.FC = () => {
   ];
 
   return (
-    <section className="py-20 px-4 max-w-7xl mx-auto">
-      {/* Centered Heading */}
+    <>
       <SectionHeading
         badge="Features"
         title="Raw Performance. Sealed Security."
@@ -74,7 +73,7 @@ const Feature: React.FC = () => {
                   <img
                     src={feature.image}
                     alt={feature.title}
-                    className="size-60 object-contain rounded-2xl "
+                    className="size-40 scale-125 md:scale-100 md:size-60 object-contain rounded-2xl "
                   />
                 </div>
                 {/* Feature Details */}
@@ -89,7 +88,7 @@ const Feature: React.FC = () => {
           })}
         </div>
       </FadeIn>
-    </section>
+    </>
   );
 };
 

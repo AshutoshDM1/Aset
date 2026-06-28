@@ -4,7 +4,9 @@ import { useUser } from '@clerk/react';
 import { toast } from 'sonner';
 import {
   ArrowBigLeftDash,
+  ArrowLeft,
   Check,
+  ChevronRight,
   Loader2,
   ShieldCheck,
   Ticket,
@@ -19,6 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { trpc, queryClient } from '@/utils/trpc';
 import { useBillingStore } from '../../store/billingStore';
+import { cn } from '@/lib/utils';
 
 export const BillingDailog: React.FC = () => {
   const {
@@ -32,6 +35,7 @@ export const BillingDailog: React.FC = () => {
 
   const { user } = useUser();
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [step, setStep] = useState<1 | 2>(1);
 
   // Currency state
   const [currency, setCurrency] = useState<'INR' | 'USD'>('USD');
@@ -62,6 +66,9 @@ export const BillingDailog: React.FC = () => {
       setPaymentSuccess(false);
       setAppliedCoupon(null);
       setCouponInput('');
+      setStep(1);
+    } else {
+      setStep(1);
     }
   }, [isBillingOpen]);
 
@@ -283,7 +290,12 @@ export const BillingDailog: React.FC = () => {
         showCloseButton={false}
       >
         {/* Left Side: Summary Panel */}
-        <div className="md:w-1/2 bg-muted/30 p-6 md:p-8 flex flex-col justify-between select-none">
+        <div
+          className={cn(
+            'md:w-1/2 bg-muted/30 p-6 md:p-8 flex flex-col justify-between select-none',
+            step !== 1 && 'hidden md:flex',
+          )}
+        >
           <div className="space-y-6">
             {/* Back to plans trigger */}
             <button
@@ -373,53 +385,72 @@ export const BillingDailog: React.FC = () => {
           </div>
 
           {/* Pricing Breakdown */}
-          <div className="space-y-2.5 text-xs font-semibold text-muted-foreground pt-6 border-t border-border">
-            <div className="flex justify-between">
-              <span>Subtotal</span>
-              <span className="text-foreground/90">
-                {currencySymbol}
-                {subtotal.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </span>
-            </div>
-
-            {appliedCoupon && (
-              <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-normal">
-                <span className="flex items-center gap-1">
-                  <Ticket className="size-3.5" />
-                  Discount ({appliedCoupon.code})
-                </span>
-                <span>
-                  -{currencySymbol}
-                  {discountAmount.toLocaleString(undefined, {
+          <div className="flex flex-col gap-4 pt-6 border-t border-border">
+            <div className="space-y-2.5 text-xs font-semibold text-muted-foreground">
+              <div className="flex justify-between">
+                <span>Subtotal</span>
+                <span className="text-foreground/90">
+                  {currencySymbol}
+                  {subtotal.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })}
                 </span>
               </div>
-            )}
 
-            <Separator className="bg-border" />
+              {appliedCoupon && (
+                <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-normal">
+                  <span className="flex items-center gap-1">
+                    <Ticket className="size-3.5" />
+                    Discount ({appliedCoupon.code})
+                  </span>
+                  <span>
+                    -{currencySymbol}
+                    {discountAmount.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+              )}
 
-            <div className="flex justify-between items-baseline text-xs pt-1">
-              <span className="text-foreground/90 font-normal">
-                Total due today
-              </span>
-              <span className="text-base text-foreground font-medium">
-                {currencySymbol}
-                {totalPrice.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </span>
+              <Separator className="bg-border" />
+
+              <div className="flex justify-between items-baseline text-xs pt-1">
+                <span className="text-foreground/90 font-normal">
+                  Total due today
+                </span>
+                <span className="text-base text-foreground font-medium">
+                  {currencySymbol}
+                  {totalPrice.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
+              </div>
+            </div>
+
+            {/* Mobile Continue Button */}
+            <div className="md:hidden">
+              <Button
+                type="button"
+                onClick={() => setStep(2)}
+                className="w-full text-xs font-normal rounded-xl py-5 bg-primary hover:bg-primary/95 text-primary-foreground flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                Continue to Billing
+                <ChevronRight className="size-4" />
+              </Button>
             </div>
           </div>
         </div>
 
         {/* Right Side: Form / Success Panel */}
-        <div className="md:w-1/2 p-6 md:p-8 flex flex-col justify-between border-t md:border-t-0 md:border-l border-border bg-background">
+        <div
+          className={cn(
+            'md:w-1/2 p-6 md:p-8 flex flex-col justify-between border-t md:border-t-0 md:border-l border-border bg-background',
+            step !== 2 && 'hidden md:flex',
+          )}
+        >
           {paymentSuccess ? (
             <div className="flex-1 flex flex-col items-center justify-center py-12 text-center space-y-4">
               <div className="size-14 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-500 flex items-center justify-center animate-bounce">
@@ -440,9 +471,19 @@ export const BillingDailog: React.FC = () => {
             >
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-normal text-muted-foreground">
-                    Billing Details
-                  </h3>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setStep(1)}
+                      className="md:hidden text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted transition-colors cursor-pointer"
+                      aria-label="Back to summary"
+                    >
+                      <ArrowLeft className="size-4" />
+                    </button>
+                    <h3 className="text-xs font-normal text-muted-foreground">
+                      Billing Details
+                    </h3>
+                  </div>
                   <button
                     type="button"
                     onClick={closeBilling}

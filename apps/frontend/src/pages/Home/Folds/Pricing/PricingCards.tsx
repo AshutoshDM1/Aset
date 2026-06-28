@@ -105,7 +105,7 @@ const PricingCards: React.FC<PricingCardsProps> = ({ billingCycle }) => {
             )}
           >
             {/* Top Card Section: Info, Price, Button */}
-            <div className="p-8 md:p-9 flex flex-col justify-between min-h-[230px] bg-white dark:bg-zinc-950 border-b border-zinc-100 dark:border-zinc-900">
+            <div className="p-5 md:p-9 flex flex-col justify-between min-h-[100px] md:min-h-[230px] bg-white dark:bg-zinc-950 border-b border-zinc-100 dark:border-zinc-900">
               <div>
                 <div className="flex justify-between items-start gap-4">
                   <div className="space-y-1">
@@ -157,7 +157,7 @@ const PricingCards: React.FC<PricingCardsProps> = ({ billingCycle }) => {
             </div>
 
             {/* Bottom Card Section: Features List */}
-            <div className="p-8 md:p-9 flex-1 bg-zinc-50/50 dark:bg-zinc-900/10 flex flex-col gap-4 text-left">
+            <div className="p-5 md:p-9 flex-1 bg-zinc-50/50 dark:bg-zinc-900/10 flex flex-col gap-4 text-left">
               <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 select-none">
                 Included features:
               </span>

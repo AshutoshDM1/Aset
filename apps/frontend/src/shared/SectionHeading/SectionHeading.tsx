@@ -50,7 +50,7 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
 
         {/* Main Title Heading */}
         {displayTitle && (
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-zinc-900 dark:text-white leading-tight ">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-zinc-900 dark:text-white  ">
             {displayTitle}
           </h2>
         )}

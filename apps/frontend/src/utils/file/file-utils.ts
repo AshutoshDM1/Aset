@@ -27,7 +27,7 @@ export function formatFileSize(mb: number) {
   return `${mb.toFixed(1)} MB`;
 }
 
-export function truncateFileName(name: string, totalLimit = 13) {
+export function truncateFileName(name: string, totalLimit = 11) {
   const dot = name.lastIndexOf('.');
   if (dot <= 0) {
     if (name.length <= totalLimit) return name;

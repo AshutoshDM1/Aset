@@ -31,7 +31,7 @@ const FaqItemComponent: React.FC<{
         onClick={onClick}
         className="w-full flex items-center justify-between text-left p-2 md:p-4 gap-4 cursor-pointer focus:outline-hidden"
       >
-        <span className="text-base md:text-lg font-semibold text-zinc-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors duration-200">
+        <span className="text-xs md:text-lg font-semibold text-zinc-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors duration-200">
           {question}
         </span>
         <div
@@ -59,7 +59,7 @@ const FaqItemComponent: React.FC<{
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
             <div className="px-6 pb-6 md:px-7 md:pb-7 ">
-              <p className="text-sm md:text-base font-medium text-zinc-600 dark:text-zinc-400 leading-relaxed">
+              <p className="text-xs md:text-base font-medium text-zinc-600 dark:text-zinc-400 leading-relaxed">
                 {answer}
               </p>
             </div>

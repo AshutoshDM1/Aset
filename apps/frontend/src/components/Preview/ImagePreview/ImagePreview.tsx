@@ -127,23 +127,23 @@ export function ImagePreview({
             initial={{ opacity: 0, y: -15, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.4, ease: 'easeOut' }}
-            className="absolute top-16 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:w-auto md:max-w-xl z-50 flex items-center justify-between gap-4 p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 backdrop-blur-md shadow-sm select-none"
+            className="absolute top-16 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:w-auto md:max-w-xl z-50 flex items-center justify-between gap-4 p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/90 dark:bg-emerald-950/95 backdrop-blur-md shadow-lg select-none"
           >
             <div className="flex items-center gap-3">
-              <div className="flex size-9 items-center justify-center rounded-lg bg-emerald-500/25 text-emerald-500 border border-emerald-500/30">
+              <div className="flex size-9 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
                 <Sparkles className="size-5 animate-pulse" />
               </div>
               <div className="flex flex-col gap-0.5">
-                <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                <span className="text-sm font-semibold text-emerald-100">
                   Image Optimized successfully!
                 </span>
-                <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                <span className="text-xs text-emerald-300 font-medium">
                   Reduced by{' '}
-                  <span className="font-bold text-sm text-emerald-800 dark:text-emerald-200">
+                  <span className="font-bold text-sm text-emerald-100">
                     {optimizationStats.savedPercent.toFixed(1)}%
                   </span>{' '}
                   · Saved{' '}
-                  <span className="font-semibold">
+                  <span className="font-semibold text-emerald-200">
                     {(
                       (optimizationStats.oldSize - optimizationStats.newSize) /
                       1024

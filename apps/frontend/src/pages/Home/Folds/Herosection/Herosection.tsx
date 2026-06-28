@@ -14,24 +14,52 @@ const Herosection = () => {
     <>
       <div className="max-w-5xl mx-auto text-center py-14 md:py-28">
         <HeroBadge />
-        <h1 className="text-3xl md:text-7xl font-bold tracking-tight text-zinc-900 dark:text-white mb-6 leading-tight">
-          <BlurShimmerText
-            as={motion.span}
-            text="Upload, organize, and share"
-            className=""
-            blur={8}
-            transition={{ duration: 0.8 }}
-          />
-          <br className="hidden md:block" />
-          <BlurShimmerText
-            as={motion.span}
-            text="files without the chaos."
-            className=""
-            blur={8}
-            delay={1}
-            transition={{ duration: 0.8 }}
-            interval={3.5}
-          />
+        <h1>
+          <span className="hidden md:block text-3xl md:text-7xl font-bold tracking-tight text-zinc-900 dark:text-white mb-6 leading-tight">
+            <BlurShimmerText
+              as={motion.span}
+              text="Upload, organize, and share"
+              className=""
+              blur={8}
+              transition={{ duration: 0.8 }}
+            />
+            <br className="hidden md:block" />
+            <BlurShimmerText
+              as={motion.span}
+              text="files without the chaos."
+              className=""
+              blur={8}
+              delay={1}
+              transition={{ duration: 0.8 }}
+              interval={3.5}
+            />
+          </span>
+          <span className="block md:hidden text-3xl md:text-7xl font-bold tracking-tight text-zinc-900 dark:text-white mb-6 leading-tight">
+            <BlurShimmerText
+              as={motion.span}
+              text="Upload, organize "
+              className=""
+              blur={8}
+              transition={{ duration: 0.8 }}
+            />
+            <BlurShimmerText
+              as={motion.span}
+              text="and share"
+              className=""
+              blur={8}
+              delay={1}
+              transition={{ duration: 0.8 }}
+            />
+            <BlurShimmerText
+              as={motion.span}
+              text="files without the chaos."
+              className=""
+              blur={8}
+              delay={1.6}
+              transition={{ duration: 0.8 }}
+              interval={3.5}
+            />
+          </span>
         </h1>
         <HeroSubheadline />
         <HeroCTA />

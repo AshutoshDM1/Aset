@@ -39,7 +39,7 @@ const Workflow: React.FC = () => {
         description="Discover how Aset simplifies cloud backups, directory organization, and secure sharing in one sleek, unified interface."
         align="center"
       />
-      <div className="grid grid-cols-1 lg:grid-cols-2  gap-6 py-16 px-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 py-16 ">
         <FadeIn direction="right" delay={0.15}>
           <div className="w-full flex flex-col items-center lg:items-start text-left gap-8 max-w-xl mx-auto lg:ml-auto">
             <h2 className="text-xl md:text-3xl font-semibold tracking-tight text-zinc-900 dark:text-white leading-tight">
@@ -48,13 +48,13 @@ const Workflow: React.FC = () => {
             </h2>
 
             {/* Steps List */}
-            <div className="flex flex-col gap-6 w-full ">
+            <div className="flex flex-col gap-6 w-full py-4 md:py-0">
               {steps.map((step, index) => (
                 <motion.div
                   key={index}
                   whileHover={{ x: 6 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                  className="group flex gap-4 p-4 rounded-2xl "
+                  className="group flex gap-4 py-2 md:p-4 rounded-2xl "
                 >
                   {/* Step Number Badge */}
                   <div className="size-10 shrink-0 rounded-sm bg-zinc-200/50 dark:bg-zinc-900 flex items-center justify-center text-lg font-semibold text-zinc-700 dark:text-zinc-300 ">
@@ -63,10 +63,10 @@ const Workflow: React.FC = () => {
 
                   {/* Step content */}
                   <div className="flex flex-col gap-1.5">
-                    <h3 className="text-xl font-semibold text-zinc-900 dark:text-white ">
+                    <h3 className="text-base md:text-xl font-semibold text-zinc-900 dark:text-white ">
                       {step.title}
                     </h3>
-                    <p className="text-sm md:text-base font-medium  text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                    <p className="text-xs md:text-base font-medium  text-zinc-500 dark:text-zinc-400 leading-relaxed">
                       {step.description}
                     </p>
                   </div>

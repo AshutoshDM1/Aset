@@ -155,7 +155,7 @@ const ImageFilePreview = ({
                   fallbackColorClass="text-muted-foreground"
                 />
               </div>
-              <p className="text-xs text-foreground text-center w-20 mt-1.5 px-0.5">
+              <p className="text-xs text-foreground text-center w-20 mt-1.5 px-0.5 ">
                 {truncateFileName(name)}
               </p>
             </button>

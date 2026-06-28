@@ -46,12 +46,7 @@ export function useOptimizeImage() {
 
       setState('done');
 
-      const oldKb = result.oldSize / 1024;
-      const newKb = result.newSize / 1024;
-      const savedKb = oldKb - newKb;
-
       toast.success('Image optimized successfully!', {
-        description: `Reduced by ${result.savedPercent.toFixed(1)}% · Saved ${savedKb.toFixed(1)} KB (${oldKb.toFixed(1)} KB → ${newKb.toFixed(1)} KB)`,
         duration: 6000,
       });
 

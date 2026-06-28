@@ -67,7 +67,7 @@ export function ProfileSettings() {
           </div>
         </div>
 
-        <div className="border-t border-border/50 pt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+        <div className="hidden border-t border-border/50 pt-4 md:grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
           <div className="space-y-1">
             <span className="font-semibold text-muted-foreground flex items-center gap-1.5">
               User ID
@@ -105,7 +105,7 @@ export function ProfileSettings() {
                 key={item.id}
                 onClick={() => setTheme(item.id as 'light' | 'dark' | 'system')}
                 className={cn(
-                  'flex flex-col items-center justify-center p-4 rounded-2xl border transition-all cursor-pointer text-center gap-2 group',
+                  'flex flex-col items-center justify-center p-2 rounded-2xl border transition-all cursor-pointer text-center gap-2 group',
                   isSelected
                     ? 'bg-primary/5 border-primary/30 text-primary font-semibold'
                     : 'border-border/20 bg-muted/5 text-muted-foreground hover:bg-muted/15 hover:text-foreground',
