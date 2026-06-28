@@ -16,8 +16,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o optix-api ./cmd/server
 # Minimal Alpine image with ffmpeg + ffprobe installed.
 FROM alpine:3.20
 
-# Install ffmpeg (includes ffprobe) and CA certs (needed for HTTPS/TLS connections)
-RUN apk add --no-cache ffmpeg ca-certificates
+# Install ffmpeg (includes ffprobe), poppler-utils (for pdftoppm), and CA certs (needed for HTTPS/TLS connections)
+RUN apk add --no-cache ffmpeg poppler-utils ca-certificates
 
 WORKDIR /app
 

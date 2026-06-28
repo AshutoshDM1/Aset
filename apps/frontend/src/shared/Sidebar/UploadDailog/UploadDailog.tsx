@@ -17,7 +17,8 @@ import FileSelectionStage from './FileSelectionStage';
 import FileListPanel from './FileListPanel';
 import UploadProgressStage from './UploadProgressStage';
 import MinimizedPill from './MinimizedPill';
-import { Upload, X, Minus } from 'lucide-react';
+import { Upload, X, Minus, Info } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import {
   Tooltip,
   TooltipContent,
@@ -33,6 +34,7 @@ export default function UploadDailog() {
     files,
     isUploading,
     persistStructure,
+    setPersistStructure,
     minimizeDialog,
     setFiles,
     updateFileProgress,
@@ -368,11 +370,37 @@ export default function UploadDailog() {
                   )}
                 >
                   <FolderSelectionStage />
+                  {localFiles.some((f) => {
+                    const path = (f as any).filepath || '';
+                    return path.includes('/') && path.split('/').length > 1;
+                  }) && (
+                    <div className="flex items-center justify-between shrink-0 border border-border/60 rounded-xl px-3 py-2 bg-muted/5 animate-in slide-in-from-top-1 duration-200">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <label
+                            htmlFor="folder-structure-switch"
+                            className="flex items-center gap-1.5 text-xs font-medium text-foreground cursor-pointer select-none"
+                          >
+                            <Info className="size-3 text-muted-foreground" />
+                            Preserve subfolders
+                          </label>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-60 text-xs">
+                          Recreate folder and directory structures in
+                          destination. If disabled, all selected files will be
+                          uploaded directly into the folder.
+                        </TooltipContent>
+                      </Tooltip>
+                      <Switch
+                        id="folder-structure-switch"
+                        checked={persistStructure}
+                        onCheckedChange={setPersistStructure}
+                        className="scale-90"
+                      />
+                    </div>
+                  )}
                   {folderId !== null && folderId !== undefined && (
-                    <FileSelectionStage
-                      localFiles={localFiles}
-                      setLocalFiles={setLocalFiles}
-                    />
+                    <FileSelectionStage setLocalFiles={setLocalFiles} />
                   )}
                 </div>
 

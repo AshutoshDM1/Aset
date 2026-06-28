@@ -1,17 +1,9 @@
 import * as React from 'react';
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { formatBytes, useUploadStore } from './uploadStore';
+import { formatBytes } from './uploadStore';
 import { cn } from '@/lib/utils';
-import {
-  Upload,
-  FileIcon,
-  FolderIcon,
-  Archive,
-  Settings,
-  FolderPlus,
-  Info,
-} from 'lucide-react';
+import { Upload, FileIcon, Archive, FolderPlus } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -29,13 +21,12 @@ import JSZip from 'jszip';
 import { toast } from 'sonner';
 
 interface FileSelectionStageProps {
-  localFiles: File[];
   setLocalFiles: React.Dispatch<React.SetStateAction<File[]>>;
 }
 
 interface PendingZip {
   file: File;
-  id: string;
+  zipEntries: any[];
 }
 
 // Simple mime-type resolver based on file extension
@@ -156,14 +147,12 @@ const traverseFileTree = async (entry: any, path = ''): Promise<File[]> => {
 };
 
 export default function FileSelectionStage({
-  localFiles,
   setLocalFiles,
 }: FileSelectionStageProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const [pendingZips, setPendingZips] = useState<PendingZip[]>([]);
-  const { persistStructure, setPersistStructure } = useUploadStore();
 
   const processFilesBeforeAdding = async (files: File[]) => {
     const zips = files.filter((f) => f.name.toLowerCase().endsWith('.zip'));
@@ -176,19 +165,45 @@ export default function FileSelectionStage({
           value: file.name,
           writable: true,
           configurable: true,
+          enumerable: true,
         });
       }
     });
 
-    if (zips.length > 0) {
-      const newPending = zips.map((zip) => ({
-        file: zip,
-        id: Math.random().toString(36).substring(2, 9),
-      }));
-      setPendingZips((prev) => [...prev, ...newPending]);
+    // Scanned non-zip files
+    if (nonZips.length > 0) {
+      setLocalFiles((prev) => {
+        const unique = [...prev];
+        nonZips.forEach((f) => {
+          if (!unique.some((u) => u.name === f.name && u.size === f.size)) {
+            unique.push(f);
+          }
+        });
+        return unique;
+      });
     }
 
-    setLocalFiles((prev) => [...prev, ...nonZips]);
+    // Scanned zip files
+    if (zips.length > 0) {
+      const loadZip = await import('jszip').then((m) => m.default);
+      for (const zipFile of zips) {
+        try {
+          const zip = await loadZip.loadAsync(zipFile);
+          const zipEntries: any[] = [];
+          zip.forEach((_relativePath, entry) => {
+            if (!entry.dir) {
+              zipEntries.push(entry);
+            }
+          });
+          if (zipEntries.length > 0) {
+            setPendingZips((prev) => [...prev, { file: zipFile, zipEntries }]);
+          }
+        } catch (err) {
+          console.error(err);
+          toast.error(`Could not read zip archive: ${zipFile.name}`);
+        }
+      }
+    }
   };
 
   const handleFileSelect = (pickedFiles: FileList | null) => {
@@ -200,7 +215,6 @@ export default function FileSelectionStage({
     const pickedFiles = e.target.files;
     if (!pickedFiles) return;
     const array = Array.from(pickedFiles).map((file) => {
-      // In folder input, file.webkitRelativePath contains the full relative path e.g. "my_folder/sub/file.txt"
       const path = file.webkitRelativePath || file.name;
       Object.defineProperty(file, 'filepath', {
         value: path,
@@ -227,27 +241,22 @@ export default function FileSelectionStage({
     setDragOver(false);
 
     const items = e.dataTransfer.items;
-    if (!items) {
-      if (e.dataTransfer.files) {
-        processFilesBeforeAdding(Array.from(e.dataTransfer.files));
-      }
-      return;
-    }
+    if (!items || items.length === 0) return;
 
     const entries: any[] = [];
     for (let i = 0; i < items.length; i++) {
-      const entry = items[i].webkitGetAsEntry();
+      const item = items[i];
+      const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
       if (entry) {
         entries.push(entry);
       }
     }
 
-    const loadToast = toast.loading('Parsing dropped items recursively...');
+    const loadToast = toast.loading('Parsing dropped items...');
     try {
       const filesPromises = entries.map((entry) => traverseFileTree(entry));
       const filesArray = (await Promise.all(filesPromises)).flat();
       await processFilesBeforeAdding(filesArray);
-      toast.success('Successfully scanned and added folder files!');
     } catch (err) {
       console.error(err);
       toast.error('Error scanning folder contents');
@@ -255,12 +264,6 @@ export default function FileSelectionStage({
       toast.dismiss(loadToast);
     }
   };
-
-  // Determine if we have selected files with subfolder paths
-  const hasFolders = localFiles.some((f) => {
-    const path = (f as any).filepath || '';
-    return path.includes('/') && path.split('/').length > 1;
-  });
 
   return (
     <div className="space-y-3 animate-in fade-in duration-300 flex-1 ">
@@ -344,100 +347,6 @@ export default function FileSelectionStage({
           </Button>
         </div>
       </div>
-
-      {/* Persist vs Flatten Settings Panel */}
-      {hasFolders && (
-        <TooltipProvider>
-          <div className="border border-border bg-muted/20 rounded-2xl p-4.5 space-y-3.5 animate-in slide-in-from-top-2 duration-300">
-            <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
-              <Settings className="size-4 text-primary" />
-              <span>Folder Upload Configuration</span>
-            </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              We detected directory structures in your selection. Choose how
-              Aset should organize these files:
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              <div
-                onClick={() => setPersistStructure(true)}
-                className={cn(
-                  'flex items-center justify-between p-1 px-3 rounded-xl border text-left transition-all duration-200 cursor-pointer select-none',
-                  persistStructure
-                    ? 'border-primary/40 bg-primary/5 shadow-xs'
-                    : 'border-border/60 bg-transparent hover:bg-muted/10',
-                )}
-              >
-                <div className="flex items-center gap-2 font-semibold text-xs text-foreground">
-                  <FolderIcon
-                    className={cn(
-                      'size-4',
-                      persistStructure
-                        ? 'text-primary'
-                        : 'text-muted-foreground',
-                    )}
-                  />
-                  <span>Preserve Subfolders</span>
-                </div>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div
-                      className="text-muted-foreground hover:text-foreground p-1 rounded-md cursor-pointer transition-colors"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                      }}
-                    >
-                      <Info className="size-4" />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent side="top">
-                    Automatically recreate directory hierarchies and
-                    subdirectories.
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-              <div
-                onClick={() => setPersistStructure(false)}
-                className={cn(
-                  'flex items-center justify-between p-2 rounded-xl border text-left transition-all duration-200 cursor-pointer select-none',
-                  !persistStructure
-                    ? 'border-primary/40 bg-primary/5 shadow-xs'
-                    : 'border-border/60 bg-transparent hover:bg-muted/10',
-                )}
-              >
-                <div className="flex items-center gap-2 font-semibold text-xs text-foreground">
-                  <FileIcon
-                    className={cn(
-                      'size-4',
-                      !persistStructure
-                        ? 'text-primary'
-                        : 'text-muted-foreground',
-                    )}
-                  />
-                  <span>Flatten (Files Only)</span>
-                </div>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div
-                      className="text-muted-foreground hover:text-foreground p-1 rounded-md cursor-pointer transition-colors"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                      }}
-                    >
-                      <Info className="size-4" />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent side="top">
-                    Discard folder paths. Upload all files into the root
-                    destination directory.
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            </div>
-          </div>
-        </TooltipProvider>
-      )}
 
       {/* ZIP Prompt Modal */}
       {pendingZips.length > 0 && (
