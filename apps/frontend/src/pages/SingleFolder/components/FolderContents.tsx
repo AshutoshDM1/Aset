@@ -38,6 +38,7 @@ type FileItem = {
   starred?: boolean;
   trashed?: boolean;
   processingStatus?: string | null;
+  thumbnailUrl?: string | null;
 };
 
 type FolderContentsProps = {
@@ -146,6 +147,7 @@ export function FolderContents({
             starred={item.starred}
             trashed={item.trashed}
             onRefetch={onRefetch}
+            thumbnailUrl={item.thumbnailUrl}
             allImages={imageFiles}
           />
         </li>
@@ -159,6 +161,7 @@ export function FolderContents({
             starred={item.starred}
             trashed={item.trashed}
             onRefetch={onRefetch}
+            thumbnailUrl={item.thumbnailUrl}
             allPdfs={pdfFiles}
           />
         </li>
@@ -173,6 +176,7 @@ export function FolderContents({
             trashed={item.trashed}
             onRefetch={onRefetch}
             processingStatus={item.processingStatus}
+            thumbnailUrl={item.thumbnailUrl}
             allVideos={videoFiles}
           />
         </li>
@@ -198,6 +202,7 @@ export function FolderContents({
             starred={item.starred}
             trashed={item.trashed}
             onRefetch={onRefetch}
+            thumbnailUrl={item.thumbnailUrl}
           />
         </li>
       ))}

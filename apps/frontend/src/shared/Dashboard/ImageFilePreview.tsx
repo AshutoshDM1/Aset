@@ -2,6 +2,8 @@ import { useState, useMemo, useCallback } from 'react';
 import { ImageIcon } from 'lucide-react';
 import { ItemGridActions } from './ItemGridActions';
 import { ImagePreviewDialog } from '@/components/Preview/ImagePreview/ImagePreviewDialog';
+import FileThumbnail from './FileThumbnail';
+import { cn } from '@/lib/utils';
 
 type SiblingImage = {
   id: string;
@@ -11,6 +13,7 @@ type SiblingImage = {
   trashed?: boolean;
   createdAt?: Date | string;
   sizeMb?: number;
+  thumbnailUrl?: string | null;
 };
 
 type ImageFilePreviewProps = {
@@ -22,6 +25,7 @@ type ImageFilePreviewProps = {
   onRefetch?: () => void;
   createdAt?: Date | string;
   sizeMb?: number;
+  thumbnailUrl?: string | null;
   allImages?: SiblingImage[];
 };
 
@@ -34,10 +38,10 @@ const ImageFilePreview = ({
   onRefetch,
   createdAt,
   sizeMb,
+  thumbnailUrl,
   allImages,
 }: ImageFilePreviewProps) => {
   const [open, setOpen] = useState(false);
-  const [errored, setErrored] = useState(false);
   const [optimizationStats, setOptimizationStats] = useState<{
     oldSize: number;
     newSize: number;
@@ -134,18 +138,20 @@ const ImageFilePreview = ({
           title={name}
           className="w-full flex flex-col items-center rounded-2xl p-2 transition-transform duration-200 group-hover:-translate-y-1 cursor-pointer relative z-0"
         >
-          <div className="flex size-20 items-center justify-center overflow-hidden rounded-2xl bg-muted/40 ring-1 ring-border/60">
-            {url && !errored ? (
-              <img
-                src={url}
-                alt=""
-                loading="lazy"
-                className="size-full object-cover"
-                onError={() => setErrored(true)}
-              />
-            ) : (
-              <ImageIcon className="size-8 text-muted-foreground" aria-hidden />
+          <div
+            className={cn(
+              'flex size-20 items-center justify-center overflow-hidden ',
+              thumbnailUrl
+                ? 'bg-muted/40 ring-1 ring-border/60 rounded-2xl'
+                : '',
             )}
+          >
+            <FileThumbnail
+              name={name}
+              thumbnailUrl={thumbnailUrl}
+              fallbackIcon={ImageIcon}
+              fallbackColorClass="text-muted-foreground"
+            />
           </div>
           <p className="text-sm text-foreground text-center w-20">
             <span className="truncate inline-block align-bottom max-w-12.5">

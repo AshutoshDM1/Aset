@@ -119,6 +119,7 @@ export function FileList({ mode = 'recent' }: FileListProps) {
               onRefetch={refetch}
               createdAt={file.createdAt}
               sizeMb={file.sizeMb}
+              thumbnailUrl={file.thumbnailUrl}
               allImages={imageFiles}
             />
           ) : isPdfFileName(file.name) ? (
@@ -131,6 +132,7 @@ export function FileList({ mode = 'recent' }: FileListProps) {
               onRefetch={refetch}
               createdAt={file.createdAt}
               sizeMb={file.sizeMb}
+              thumbnailUrl={file.thumbnailUrl}
               allPdfs={pdfFiles}
             />
           ) : isVideoFileName(file.name) ? (
@@ -144,6 +146,7 @@ export function FileList({ mode = 'recent' }: FileListProps) {
               createdAt={file.createdAt}
               sizeMb={file.sizeMb}
               processingStatus={file.processingStatus}
+              thumbnailUrl={file.thumbnailUrl}
               allVideos={videoFiles}
             />
           ) : isTextCodeFileName(file.name) ? (
@@ -167,6 +170,7 @@ export function FileList({ mode = 'recent' }: FileListProps) {
               onRefetch={refetch}
               createdAt={file.createdAt}
               sizeMb={file.sizeMb}
+              thumbnailUrl={file.thumbnailUrl}
             />
           )}
         </li>

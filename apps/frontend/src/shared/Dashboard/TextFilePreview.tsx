@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { FileText } from 'lucide-react';
 import { TextPreview } from '@/components/Preview/TextPreview';
 import { ItemGridActions } from './ItemGridActions';
+import FileThumbnail from './FileThumbnail';
 
 type TextFilePreviewProps = {
   fileId: string;
@@ -51,8 +52,12 @@ const TextFilePreview = ({
           title={name}
           className="w-full flex flex-col items-center rounded-2xl p-2 transition-transform duration-200 group-hover:-translate-y-1 cursor-pointer relative z-0"
         >
-          <div className="flex size-20 items-center justify-center overflow-hidden rounded-2xl bg-muted/40 ring-1 ring-border/60 relative">
-            <FileText className="size-8 text-amber-500" aria-hidden />
+          <div className="flex size-20 items-center justify-center overflow-hidden relative">
+            <FileThumbnail
+              name={name}
+              fallbackIcon={FileText}
+              fallbackColorClass="text-amber-500"
+            />
           </div>
           <p className="text-sm text-foreground text-center w-20">
             <span className="truncate inline-block align-bottom max-w-12.5">

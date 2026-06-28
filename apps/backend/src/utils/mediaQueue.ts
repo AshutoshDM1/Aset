@@ -58,3 +58,22 @@ export async function enqueueMediaProcess(payload: MediaJobPayload) {
     console.error('[MediaQueue] Failed to enqueue job:', err);
   }
 }
+
+/**
+ * Enqueues a thumbnail processing task to the Redis task list.
+ */
+export async function enqueueThumbnailProcess(payload: MediaJobPayload) {
+  try {
+    const client = getRedisClient();
+    const queueKey = 'aset:thumbnail_tasks';
+    const data = JSON.stringify(payload);
+
+    // We push to the right of the list (RPUSH)
+    await client.rpush(queueKey, data);
+    console.log(
+      `[MediaQueue] Enqueued thumbnail process job for file ${payload.fileId}`,
+    );
+  } catch (err) {
+    console.error('[MediaQueue] Failed to enqueue thumbnail job:', err);
+  }
+}

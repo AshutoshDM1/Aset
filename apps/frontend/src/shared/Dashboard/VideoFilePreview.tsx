@@ -3,6 +3,8 @@ import { Video, Play } from 'lucide-react';
 import { ItemGridActions } from './ItemGridActions';
 import { motion } from 'motion/react';
 import { VideoPreview } from '@/components/Preview/VideoPreview';
+import FileThumbnail from './FileThumbnail';
+import { cn } from '@/lib/utils';
 
 type SiblingVideo = {
   id: string;
@@ -13,6 +15,7 @@ type SiblingVideo = {
   createdAt?: Date | string;
   sizeMb?: number;
   processingStatus?: string | null;
+  thumbnailUrl?: string | null;
 };
 
 type VideoFilePreviewProps = {
@@ -25,6 +28,7 @@ type VideoFilePreviewProps = {
   createdAt?: Date | string;
   sizeMb?: number;
   processingStatus?: string | null;
+  thumbnailUrl?: string | null;
   allVideos?: SiblingVideo[];
 };
 
@@ -38,10 +42,10 @@ const VideoFilePreview = ({
   createdAt,
   sizeMb,
   processingStatus,
+  thumbnailUrl,
   allVideos,
 }: VideoFilePreviewProps) => {
   const [open, setOpen] = useState(false);
-  const [thumbnailErrored, setThumbnailErrored] = useState(false);
   const [activeFile, setActiveFile] = useState<{
     id: string;
     name: string;
@@ -128,30 +132,29 @@ const VideoFilePreview = ({
           title={name}
           className="w-full flex flex-col items-center rounded-2xl p-2 transition-transform duration-200 group-hover:-translate-y-1 cursor-pointer relative z-0"
         >
-          <div className="flex size-20 items-center justify-center overflow-hidden rounded-2xl bg-muted/40 ring-1 ring-border/60 relative">
-            {url && !thumbnailErrored ? (
-              <>
-                <video
-                  src={`${url}#t=0.1`}
-                  preload="metadata"
-                  muted
-                  playsInline
-                  className="size-full object-cover opacity-80 group-hover:opacity-100 transition-opacity pointer-events-none"
-                  onError={() => setThumbnailErrored(true)}
-                />
-                {/* Immersive Play overlay on card hover */}
-                <div className="absolute inset-0 bg-black/25 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <motion.div
-                    initial={{ scale: 1 }}
-                    className="size-9 rounded-full bg-white/20 backdrop-blur-xs border border-white/30 flex items-center justify-center text-white"
-                  >
-                    <Play className="size-3.5 fill-current translate-x-0.5" />
-                  </motion.div>
-                </div>
-              </>
-            ) : (
-              <Video className="size-8 text-indigo-500" aria-hidden />
+          <div
+            className={cn(
+              'flex size-20 items-center justify-center overflow-hidden relative',
+              thumbnailUrl
+                ? 'bg-muted/40 ring-1 ring-border/60 rounded-2xl'
+                : '',
             )}
+          >
+            <FileThumbnail
+              name={name}
+              thumbnailUrl={thumbnailUrl}
+              fallbackIcon={Video}
+              fallbackColorClass="text-indigo-500"
+            />
+            {/* Immersive Play overlay on card hover */}
+            <div className="absolute inset-0 bg-black/25 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <motion.div
+                initial={{ scale: 1 }}
+                className="size-9 rounded-full bg-white/20 backdrop-blur-xs border border-white/30 flex items-center justify-center text-white"
+              >
+                <Play className="size-3.5 fill-current translate-x-0.5" />
+              </motion.div>
+            </div>
           </div>
           <p className="text-sm text-foreground text-center w-20">
             <span className="truncate inline-block align-bottom max-w-12.5">

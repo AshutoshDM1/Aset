@@ -1,6 +1,9 @@
 import { TRPCError } from '@trpc/server';
 import type { Context } from '../../../context';
-import { enqueueMediaProcess } from '../../../utils/mediaQueue';
+import {
+  enqueueMediaProcess,
+  enqueueThumbnailProcess,
+} from '../../../utils/mediaQueue';
 import {
   objectKeyPrefix,
   storageUrlForKey,
@@ -80,6 +83,15 @@ export const createHandler = async ({
   const decodingRequested = input.decodingEnabled !== false; // default to true
   const shouldDecodeVideo = isVideo && decodingRequested;
 
+  const isImage =
+    nameLower.endsWith('.jpg') ||
+    nameLower.endsWith('.jpeg') ||
+    nameLower.endsWith('.png') ||
+    nameLower.endsWith('.webp') ||
+    nameLower.endsWith('.gif');
+  const isPdf = nameLower.endsWith('.pdf');
+  const shouldCreateThumbnail = isVideo || isImage || isPdf;
+
   const [file] = await ctx.db.$transaction([
     ctx.db.file.create({
       data: {
@@ -109,6 +121,21 @@ export const createHandler = async ({
     }).catch((err) => {
       console.error(
         `[FileRoute] Failed to enqueue background media processing for ${file.id}:`,
+        err,
+      );
+    });
+  }
+
+  if (shouldCreateThumbnail) {
+    enqueueThumbnailProcess({
+      fileId: file.id,
+      s3Url: file.s3Url,
+      fileName: file.name,
+      ownerId: ctx.auth.userId,
+      folderId: input.folderId,
+    }).catch((err) => {
+      console.error(
+        `[FileRoute] Failed to enqueue thumbnail processing for ${file.id}:`,
         err,
       );
     });

@@ -18,6 +18,7 @@ export const getStarredHandler = async ({
       starred: true,
       trashed: true,
       processingStatus: true,
+      thumbnailUrl: true,
     },
   });
   return rows.map((f) => ({
@@ -29,5 +30,6 @@ export const getStarredHandler = async ({
     trashed: f.trashed,
     processingStatus: f.processingStatus,
     url: resolvePublicFileUrl(f.s3Url),
+    thumbnailUrl: f.thumbnailUrl ? resolvePublicFileUrl(f.thumbnailUrl) : null,
   }));
 };

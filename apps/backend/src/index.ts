@@ -10,6 +10,7 @@ import { clerkWebhookHandler } from './webhooks/clerk';
 import {
   optixUpdateFileHandler,
   optixRegisterTracksHandler,
+  optixRegisterThumbnailHandler,
 } from './webhooks/optix';
 import { sdkRouter } from './routers/sdk';
 import { startStaleDecodingsCleaner } from './jobs/cleaner';
@@ -36,6 +37,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // Secure internal routes for Optix
 app.post('/api/optix/update-file', optixUpdateFileHandler);
 app.post('/api/optix/register-tracks', optixRegisterTracksHandler);
+app.post('/api/optix/register-thumbnail', optixRegisterThumbnailHandler);
 
 // Mount SDK Router for API keys and external programmatic access
 app.use('/api/sdk', sdkRouter);

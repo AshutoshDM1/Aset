@@ -96,6 +96,7 @@ model File {
   trashed Boolean @default(false)
   processingStatus String? // "processing", "completed", "failed" or null if not a video
   decodingEnabled Boolean @default(true)
+  thumbnailUrl String?
 
   downloads FileDownload[]
   subtitles SubtitleTrack[]

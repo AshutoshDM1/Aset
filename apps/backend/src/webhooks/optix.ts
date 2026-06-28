@@ -161,3 +161,53 @@ export async function optixRegisterTracksHandler(req: Request, res: Response) {
     res.status(500).json({ error: error.message || 'Internal server error' });
   }
 }
+
+export async function optixRegisterThumbnailHandler(
+  req: Request,
+  res: Response,
+) {
+  const secret = req.headers['x-optix-secret'];
+  const expectedSecret = process.env.OPTIX_SECRET || 'optix-super-secret-key';
+
+  if (secret !== expectedSecret) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+
+  const { fileId, thumbnailUrl } = req.body;
+  if (!fileId || !thumbnailUrl) {
+    res.status(400).json({ error: 'Missing required fields' });
+    return;
+  }
+
+  try {
+    const file = await db.file.findUnique({
+      where: { id: fileId },
+    });
+
+    if (!file) {
+      res.status(404).json({ error: 'File not found' });
+      return;
+    }
+
+    // Update the thumbnailUrl of the file
+    const updatedFile = await db.file.update({
+      where: { id: fileId },
+      data: {
+        thumbnailUrl,
+      },
+    });
+
+    console.log(
+      `[Optix Webhook] Successfully registered thumbnail for file ${fileId}: ${thumbnailUrl}`,
+    );
+    res.status(200).json({
+      success: true,
+      fileId: updatedFile.id,
+      thumbnailUrl: updatedFile.thumbnailUrl,
+    });
+  } catch (error: any) {
+    console.error('[Optix Register Thumbnail Callback Error]:', error);
+    res.status(500).json({ error: error.message || 'Internal server error' });
+  }
+}

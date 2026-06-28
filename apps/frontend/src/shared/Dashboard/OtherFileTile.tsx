@@ -1,5 +1,7 @@
 import { FileIcon } from 'lucide-react';
 import { ItemGridActions } from './ItemGridActions';
+import FileThumbnail from './FileThumbnail';
+import { cn } from '@/lib/utils';
 
 interface OtherFileTileProps {
   fileId: string;
@@ -10,6 +12,7 @@ interface OtherFileTileProps {
   onRefetch?: () => void;
   createdAt?: Date | string;
   sizeMb?: number;
+  thumbnailUrl?: string | null;
 }
 
 export function OtherFileTile({
@@ -21,6 +24,7 @@ export function OtherFileTile({
   onRefetch,
   createdAt,
   sizeMb,
+  thumbnailUrl,
 }: OtherFileTileProps) {
   const dot = name.lastIndexOf('.');
   const base = dot > 0 ? name.slice(0, dot) : name;
@@ -44,8 +48,18 @@ export function OtherFileTile({
         title={name}
         className="w-full flex flex-col items-center rounded-2xl p-2 transition-transform duration-200 group-hover:-translate-y-1 cursor-pointer relative z-0"
       >
-        <div className="flex size-20 items-center justify-center overflow-hidden rounded-2xl bg-muted/40 ring-1 ring-border/60">
-          <FileIcon className="size-8 text-muted-foreground" aria-hidden />
+        <div
+          className={cn(
+            'flex size-20 items-center justify-center overflow-hidden ',
+            thumbnailUrl ? 'bg-muted/40 ring-1 ring-border/60 rounded-2xl' : '',
+          )}
+        >
+          <FileThumbnail
+            name={name}
+            thumbnailUrl={thumbnailUrl}
+            fallbackIcon={FileIcon}
+            fallbackColorClass="text-muted-foreground"
+          />
         </div>
         <p className="text-sm text-foreground text-center w-20">
           <span className="truncate inline-block align-bottom max-w-[50px]">

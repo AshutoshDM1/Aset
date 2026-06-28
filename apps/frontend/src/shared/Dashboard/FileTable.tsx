@@ -1,6 +1,5 @@
 import { format } from 'date-fns';
 import { FileIcon, ImageIcon, FileText, Video } from 'lucide-react';
-import { Document, Page } from 'react-pdf';
 import {
   Table,
   TableBody,
@@ -25,6 +24,7 @@ import { useSelectionStore } from '@/store/selectionStore';
 import { cn } from '@/lib/utils';
 import { ImagePreviewDialog } from '@/components/Preview/ImagePreview/ImagePreviewDialog';
 import { VideoPreview } from '@/components/Preview/VideoPreview';
+import FileThumbnail from './FileThumbnail';
 
 type FileItem = {
   id: string;
@@ -35,6 +35,7 @@ type FileItem = {
   starred?: boolean;
   trashed?: boolean;
   processingStatus?: string | null;
+  thumbnailUrl?: string | null;
 };
 
 type FileTableProps = {
@@ -189,46 +190,30 @@ export function FileTable({ files, onRefetch }: FileTableProps) {
                       onClick={() => handleFileClick(file)}
                     >
                       <div className="flex size-10 items-center justify-center overflow-hidden rounded-lg bg-muted/40 text-muted-foreground ring-1 ring-border/60 group-hover/item:ring-primary/40 transition-all">
-                        {isImageFileName(file.name) && file.url ? (
-                          <img
-                            src={file.url}
-                            alt=""
-                            className="size-full object-cover"
-                          />
-                        ) : isImageFileName(file.name) ? (
-                          <ImageIcon className="size-5" />
-                        ) : isPdfFileName(file.name) && file.url ? (
-                          <Document
-                            file={file.url}
-                            loading={
-                              <FileText className="size-5 text-red-500/50" />
-                            }
-                          >
-                            <Page
-                              pageNumber={1}
-                              width={40}
-                              renderTextLayer={false}
-                              renderAnnotationLayer={false}
-                              loading={null}
-                            />
-                          </Document>
-                        ) : isPdfFileName(file.name) ? (
-                          <FileText className="size-5 text-red-500" />
-                        ) : isVideoFileName(file.name) && file.url ? (
-                          <video
-                            src={`${file.url}#t=0.1`}
-                            preload="metadata"
-                            muted
-                            playsInline
-                            className="size-full object-cover"
-                          />
-                        ) : isVideoFileName(file.name) ? (
-                          <Video className="size-5 text-indigo-500" />
-                        ) : isTextCodeFileName(file.name) ? (
-                          <FileText className="size-5 text-amber-500" />
-                        ) : (
-                          <FileIcon className="size-5" />
-                        )}
+                        <FileThumbnail
+                          name={file.name}
+                          thumbnailUrl={file.thumbnailUrl}
+                          fallbackIcon={
+                            isImageFileName(file.name)
+                              ? ImageIcon
+                              : isPdfFileName(file.name)
+                                ? FileText
+                                : isVideoFileName(file.name)
+                                  ? Video
+                                  : isTextCodeFileName(file.name)
+                                    ? FileText
+                                    : FileIcon
+                          }
+                          fallbackColorClass={
+                            isPdfFileName(file.name)
+                              ? 'text-red-500'
+                              : isVideoFileName(file.name)
+                                ? 'text-indigo-500'
+                                : isTextCodeFileName(file.name)
+                                  ? 'text-amber-500'
+                                  : 'text-muted-foreground'
+                          }
+                        />
                       </div>
                       <span className="truncate group-hover/item:text-primary transition-colors">
                         {file.name}

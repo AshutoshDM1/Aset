@@ -95,6 +95,7 @@ func StartWorkerPool(ctx context.Context, redisURL string, concurrency int) {
 	}
 
 	jobsChan := make(chan MediaJob, 100)
+	thumbJobsChan := make(chan MediaJob, 100)
 
 	// Spawn workers
 	for i := 1; i <= concurrency; i++ {
@@ -108,6 +109,23 @@ func StartWorkerPool(ctx context.Context, redisURL string, concurrency int) {
 					log.Printf("[MediaWorker] Worker %d started processing file %s", workerID, job.FileID)
 					processJob(ctx, r2Client, job)
 					log.Printf("[MediaWorker] Worker %d finished processing file %s", workerID, job.FileID)
+				}
+			}
+		}(i)
+	}
+
+	// Spawn thumbnail workers (lightweight task queue, double concurrency)
+	for i := 1; i <= concurrency*2; i++ {
+		go func(workerID int) {
+			log.Printf("[ThumbnailWorker] Spawned worker goroutine %d", workerID)
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case job := <-thumbJobsChan:
+					log.Printf("[ThumbnailWorker] Worker %d started processing file %s", workerID, job.FileID)
+					ProcessThumbnailJob(ctx, r2Client, job)
+					log.Printf("[ThumbnailWorker] Worker %d finished processing file %s", workerID, job.FileID)
 				}
 			}
 		}(i)
@@ -147,6 +165,42 @@ func StartWorkerPool(ctx context.Context, redisURL string, concurrency int) {
 
 				log.Printf("[MediaWorker] Received queue job for file %s", job.FileID)
 				jobsChan <- job
+			}
+		}
+	}()
+
+	// Thumbnail queue poller loop
+	go func() {
+		queueKey := "aset:thumbnail_tasks"
+		log.Printf("[ThumbnailWorker] Starting queue poller on queue: %s", queueKey)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				results, err := rdb.BLPop(ctx, 0, queueKey).Result()
+				if err != nil {
+					if err == context.Canceled {
+						return
+					}
+					log.Printf("[ThumbnailWorker] Redis BLPop error: %v, sleeping for 2s...", err)
+					time.Sleep(2 * time.Second)
+					continue
+				}
+
+				if len(results) < 2 {
+					continue
+				}
+
+				jobJSON := results[1]
+				var job MediaJob
+				if err := json.Unmarshal([]byte(jobJSON), &job); err != nil {
+					log.Printf("[ThumbnailWorker] Failed to parse job payload: %v", err)
+					continue
+				}
+
+				log.Printf("[ThumbnailWorker] Received thumbnail job for file %s", job.FileID)
+				thumbJobsChan <- job
 			}
 		}
 	}()
