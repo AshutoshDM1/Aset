@@ -7,7 +7,6 @@ import {
   Clock,
   CheckCircle2,
   XCircle,
-  Loader,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
