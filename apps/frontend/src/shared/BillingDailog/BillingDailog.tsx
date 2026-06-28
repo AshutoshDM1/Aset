@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   Check,
   ChevronRight,
+  Loader,
   Loader2,
   ShieldCheck,
   Ticket,
@@ -286,7 +287,7 @@ export const BillingDailog: React.FC = () => {
       onOpenChange={(open) => !open && closeBilling()}
     >
       <DialogContent
-        className="p-0 overflow-hidden flex flex-col md:flex-row rounded-3xl border border-border bg-background shadow-2xl w-[calc(100vw-2rem)] md:max-w-3xl max-h-[90vh] md:max-h-[85vh]"
+        className="p-0 overflow-hidden flex flex-col md:flex-row rounded-3xl border border-border bg-background shadow-2xl w-[calc(100vw-2rem)] md:max-w-3xl max-h-[90vh] md:max-h-[85vh] gap-0"
         showCloseButton={false}
       >
         {/* Left Side: Summary Panel */}
@@ -308,15 +309,10 @@ export const BillingDailog: React.FC = () => {
 
             {/* Plan Info */}
             <div className="space-y-3">
-              <span className="text-[10px] font-medium text-primary">
-                Subscription Details
-              </span>
               <h3 className="text-xl font-medium text-foreground">
                 {selectedPlan?.name}
               </h3>
-              <p className="text-xs text-primary font-semibold">
-                {selectedPlan?.storage} cloud storage
-              </p>
+              <p className="text-sm">{selectedPlan?.storage} cloud storage</p>
             </div>
 
             {/* Currency Selector */}
@@ -453,7 +449,7 @@ export const BillingDailog: React.FC = () => {
         >
           {paymentSuccess ? (
             <div className="flex-1 flex flex-col items-center justify-center py-12 text-center space-y-4">
-              <div className="size-14 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-500 flex items-center justify-center animate-bounce">
+              <div className="size-14 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-500 flex items-center justify-center ">
                 <ShieldCheck className="size-8 stroke-2" />
               </div>
               <h3 className="text-lg font-normal text-foreground tracking-tight">
@@ -625,24 +621,24 @@ export const BillingDailog: React.FC = () => {
                   disabled={isCheckoutLoading || paymentSuccess}
                   className={`w-full text-xs font-normal rounded-xl py-5 transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer ${
                     totalPrice > 0
-                      ? 'bg-muted text-muted-foreground cursor-not-allowed border border-border'
-                      : 'bg-primary hover:bg-primary/95 text-primary-foreground'
+                      ? 'bg-muted hover:bg-muted text-muted-foreground cursor-not-allowed border border-border'
+                      : 'bg-black hover:bg-black hover:opacity-80 text-white'
                   }`}
                 >
                   {isCheckoutLoading ? (
                     <>
-                      <Loader2 className="size-3.5 animate-spin" />
+                      <Loader className="size-3.5 animate-spin" />
                       Activating plan...
                     </>
                   ) : totalPrice > 0 ? (
-                    'Activate Storage'
+                    'Confirm'
                   ) : (
-                    'Activate Storage'
+                    'Confirm'
                   )}
                 </Button>
 
                 {totalPrice > 0 ? (
-                  <p className="text-[9px] text-amber-600 dark:text-amber-500 leading-relaxed font-semibold text-center select-none bg-amber-500/5 border border-amber-550/15 p-2 rounded-xl">
+                  <p className="hidden text-[9px] text-primary leading-relaxed font-semibold text-center select-none bg-amber-500/5 border border-amber-550/15 p-2 rounded-xl">
                     Payments are locked. Use a 100% discount promo code to
                     activate.
                   </p>

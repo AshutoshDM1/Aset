@@ -80,8 +80,16 @@ export const createHandler = async ({
     nameLower.endsWith('.mp4') ||
     nameLower.endsWith('.mov') ||
     nameLower.endsWith('.webm');
+
+  const storage = await ctx.db.userStorage.findUnique({
+    where: { userId: ctx.auth.userId },
+    select: { plan: true },
+  });
+  const isVideoDecodingAllowed = storage ? storage.plan !== 'free' : false;
+
   const decodingRequested = input.decodingEnabled !== false; // default to true
-  const shouldDecodeVideo = isVideo && decodingRequested;
+  const shouldDecodeVideo =
+    isVideo && decodingRequested && isVideoDecodingAllowed;
 
   const isImage =
     nameLower.endsWith('.jpg') ||

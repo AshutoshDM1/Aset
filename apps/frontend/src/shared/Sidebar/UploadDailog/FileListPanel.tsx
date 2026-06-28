@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { trpc } from '@/utils/trpc';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import {
@@ -8,6 +11,7 @@ import {
 } from '@/components/ui/tooltip';
 import { FileIcon, Trash2, Info } from 'lucide-react';
 import { formatBytes, useUploadStore } from './uploadStore';
+import { UpgradeRequiredDialog } from '@/shared/BillingDailog/UpgradeRequiredDialog';
 
 interface FileListPanelProps {
   localFiles: File[];
@@ -23,6 +27,11 @@ export default function FileListPanel({
   setDecodeVideos,
 }: FileListPanelProps) {
   const { persistStructure } = useUploadStore();
+  const { data: userData } = useQuery(trpc.user.me.queryOptions());
+  const [isUpgradeOpen, setIsUpgradeOpen] = useState(false);
+
+  const isVideoDecodingAllowed =
+    userData?.storage?.videoDecodingEnabled ?? false;
 
   const videoFiles = localFiles.filter((f) => {
     const n = f.name.toLowerCase();
@@ -143,13 +152,25 @@ export default function FileListPanel({
             </Tooltip>
             <Switch
               id="video-decode-switch"
-              checked={decodeVideos && !isDecodingDisabled}
+              checked={
+                decodeVideos && !isDecodingDisabled && isVideoDecodingAllowed
+              }
               disabled={isDecodingDisabled}
-              onCheckedChange={setDecodeVideos}
+              onCheckedChange={(checked) => {
+                if (!isVideoDecodingAllowed) {
+                  setIsUpgradeOpen(true);
+                  return;
+                }
+                setDecodeVideos(checked);
+              }}
               className="scale-90"
             />
           </div>
         )}
+        <UpgradeRequiredDialog
+          isOpen={isUpgradeOpen}
+          onOpenChange={setIsUpgradeOpen}
+        />
       </div>
     </TooltipProvider>
   );

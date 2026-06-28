@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { Webhook } from 'svix';
 import { db } from '../utils/db';
+import { PRICING_PLANS } from '../config/pricing.config';
 
 const DEFAULT_TOTAL_STORAGE_MB = 10 * 1024;
 
@@ -74,6 +75,12 @@ export async function clerkWebhookHandler(req: Request, res: Response) {
         if (!email) {
           return res.status(400).json({ error: 'No email on Clerk user' });
         }
+
+        const starterPlan = PRICING_PLANS.find((p) =>
+          p.name.toLowerCase().includes('starter'),
+        );
+        const starterStorageMb = starterPlan ? starterPlan.storageMb : 5 * 1024;
+
         await db.user.upsert({
           where: { id: data.id },
           update: { email, name: fullName(data) },
@@ -83,7 +90,7 @@ export async function clerkWebhookHandler(req: Request, res: Response) {
             name: fullName(data),
             storage: {
               create: {
-                totalStorage: 5 * 1024, // 5 GB free limit in MB
+                totalStorage: starterStorageMb,
                 usedStorage: 0,
                 plan: 'free',
                 trialExpiresAt: null,

@@ -20,9 +20,10 @@ export const PricingDailog: React.FC = () => {
   } = useBillingStore();
   const openSettings = useSettingStore((state) => state.openDialog);
 
-  const { data: plansData, isPending: isPlansLoading } = useQuery(
-    trpc.pricing.getPlans.queryOptions(),
-  );
+  const { data: plansData, isPending: isPlansLoading } = useQuery({
+    ...trpc.pricing.getPlans.queryOptions(),
+    enabled: isPricingOpen,
+  });
 
   const { data: userData } = useQuery({
     ...trpc.user.me.queryOptions(),

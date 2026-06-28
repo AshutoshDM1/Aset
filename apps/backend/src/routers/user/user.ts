@@ -1,6 +1,7 @@
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { router, protectedProcedure } from '../../trpc';
+import { PRICING_PLANS } from '../../config/pricing.config';
 
 export const userRouter = router({
   me: protectedProcedure.query(async ({ ctx }) => {
@@ -16,7 +17,26 @@ export const userRouter = router({
       });
     }
 
-    return user;
+    const planName = user.storage?.plan || 'free';
+    const plan = PRICING_PLANS.find(
+      (p) =>
+        p.name.toLowerCase().includes(planName.toLowerCase()) ||
+        (planName.toLowerCase() === 'free' &&
+          p.name.toLowerCase().includes('starter')),
+    );
+    const maxFileUploadSize = plan ? plan.maxFileUploadSize : 100;
+    const videoDecodingEnabled = planName !== 'free';
+
+    return {
+      ...user,
+      storage: user.storage
+        ? {
+            ...user.storage,
+            maxFileUploadSize,
+            videoDecodingEnabled,
+          }
+        : null,
+    };
   }),
 
   activateTrial: protectedProcedure.mutation(async ({ ctx }) => {
@@ -31,17 +51,22 @@ export const userRouter = router({
       });
     }
 
+    const trialPlan = PRICING_PLANS.find((p) =>
+      p.name.toLowerCase().includes('trial'),
+    );
+    const trialLimitMb = trialPlan ? trialPlan.storageMb : 20 * 1024;
+
     const storage = await ctx.db.userStorage.upsert({
       where: { userId: ctx.auth.userId },
       update: {
-        totalStorage: 20 * 1024, // 20 GB trial limit in MB
+        totalStorage: trialLimitMb,
         plan: 'trial',
         trialExpiresAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // 15 days
         hasUsedTrial: true,
       },
       create: {
         userId: ctx.auth.userId,
-        totalStorage: 20 * 1024,
+        totalStorage: trialLimitMb,
         usedStorage: 0,
         plan: 'trial',
         trialExpiresAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
@@ -55,7 +80,27 @@ export const userRouter = router({
   updateStorageLimit: protectedProcedure
     .input(z.object({ planId: z.enum(['free', 'trial', 'pro', 'business']) }))
     .mutation(async ({ ctx, input }) => {
-      let limitMb = 5 * 1024;
+      const starterPlan = PRICING_PLANS.find((p) =>
+        p.name.toLowerCase().includes('starter'),
+      );
+      const trialPlan = PRICING_PLANS.find((p) =>
+        p.name.toLowerCase().includes('trial'),
+      );
+      const proPlan = PRICING_PLANS.find((p) =>
+        p.name.toLowerCase().includes('pro'),
+      );
+      const businessPlan = PRICING_PLANS.find((p) =>
+        p.name.toLowerCase().includes('business'),
+      );
+
+      const starterLimitMb = starterPlan ? starterPlan.storageMb : 5 * 1024;
+      const trialLimitMb = trialPlan ? trialPlan.storageMb : 20 * 1024;
+      const proLimitMb = proPlan ? proPlan.storageMb : 500 * 1024;
+      const businessLimitMb = businessPlan
+        ? businessPlan.storageMb
+        : 1024 * 1024;
+
+      let limitMb = starterLimitMb;
       let planName = 'free';
       let trialExpiresAt: Date | null = null;
       let setHasUsedTrial = false;
@@ -72,16 +117,16 @@ export const userRouter = router({
           });
         }
 
-        limitMb = 20 * 1024;
+        limitMb = trialLimitMb;
         planName = 'trial';
         trialExpiresAt = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
         setHasUsedTrial = true;
       } else if (input.planId === 'pro') {
-        limitMb = 500 * 1024; // 500 GB
+        limitMb = proLimitMb;
         planName = 'pro';
         setHasUsedTrial = true;
       } else if (input.planId === 'business') {
-        limitMb = 1024 * 1024; // 1 TB
+        limitMb = businessLimitMb;
         planName = 'business';
         setHasUsedTrial = true;
       }

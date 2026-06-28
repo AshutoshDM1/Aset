@@ -7,6 +7,7 @@ import {
   Clock,
   CheckCircle2,
   XCircle,
+  Loader,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -72,7 +73,7 @@ export function VideoDecodingSettings() {
             <span className="text-[10px] font-bold text-muted-foreground tracking-wider block">
               Active Decodings
             </span>
-            <span className="text-base md:text-xl font-bold text-foreground mt-0.5 block">
+            <span className="text-base md:text-lg font-bold text-foreground mt-0.5 block">
               {activeTasks.length}{' '}
               {activeTasks.length === 1 ? 'Video' : 'Videos'}
             </span>
@@ -131,7 +132,7 @@ export function VideoDecodingSettings() {
             </span>
           </div>
         ) : (
-          <div className="h-[140px] md:h-[200px] overflow-y-auto custom-scrollbar pr-1 w-full min-w-0">
+          <div className="h-fit overflow-y-auto custom-scrollbar pr-1 w-full min-w-0">
             <div className="border border-border/60 rounded-2xl divide-y divide-border/60 bg-muted/5">
               {activeTasks.map((task) => (
                 <div
@@ -188,7 +189,7 @@ export function VideoDecodingSettings() {
             </span>
           </div>
         ) : (
-          <div className="h-[300px] overflow-y-auto custom-scrollbar pr-1 w-full min-w-0">
+          <div className="h-[200px] md:h-[300px] overflow-y-auto custom-scrollbar pr-1 w-full min-w-0">
             <div className="border border-border/60 rounded-2xl divide-y divide-border/60 bg-muted/5">
               {history.map((job) => (
                 <div

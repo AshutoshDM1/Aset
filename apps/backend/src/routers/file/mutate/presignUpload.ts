@@ -7,6 +7,8 @@ import {
   resolvePublicFileUrl,
 } from '../../../utils/r2';
 
+import { isUploadSizeAllowed } from '../../../config/maxSizeConfig';
+
 export interface PresignUploadInput {
   folderId: string;
   fileName: string;
@@ -64,7 +66,7 @@ export const presignUploadHandler = async ({
 
   const storage = await ctx.db.userStorage.findUnique({
     where: { userId: ctx.auth.userId },
-    select: { totalStorage: true, usedStorage: true },
+    select: { totalStorage: true, usedStorage: true, plan: true },
   });
   if (!storage) {
     throw new TRPCError({
@@ -72,6 +74,15 @@ export const presignUploadHandler = async ({
       message: 'User storage not provisioned',
     });
   }
+
+  const { allowed, maxSize } = isUploadSizeAllowed(storage.plan, input.sizeMb);
+  if (!allowed) {
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: `File size (${input.sizeMb.toFixed(1)} MB) exceeds the maximum upload limit of ${maxSize} MB for your ${storage.plan} plan.`,
+    });
+  }
+
   if (storage.usedStorage + input.sizeMb > storage.totalStorage) {
     throw new TRPCError({
       code: 'FORBIDDEN',

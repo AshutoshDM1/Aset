@@ -10,6 +10,8 @@ import {
   objectKeyPrefix,
 } from '../utils/r2';
 
+import { isUploadSizeAllowed } from '../config/maxSizeConfig';
+
 export const sdkRouter = Router();
 
 // Helper to canonicalize objects by sorting keys to prevent JSON stringification order mismatches
@@ -162,6 +164,17 @@ sdkRouter.post(
         res
           .status(403)
           .json({ error: 'Upload exceeds available storage quota' });
+        return;
+      }
+
+      const { allowed, maxSize } = isUploadSizeAllowed(
+        storage.plan,
+        Number(sizeMb),
+      );
+      if (!allowed) {
+        res.status(400).json({
+          error: `File size (${Number(sizeMb).toFixed(1)} MB) exceeds the maximum upload limit of ${maxSize} MB for your ${storage.plan} plan.`,
+        });
         return;
       }
 

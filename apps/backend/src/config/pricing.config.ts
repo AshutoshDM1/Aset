@@ -8,6 +8,7 @@ export interface PricingPlan {
   yearlyPrice: number; // Total annual price in USD
   monthlyDiscountOriginal?: number;
   yearlyDiscountOriginal?: number;
+  maxFileUploadSize: number;
   btnText: string;
   features: string[];
   isPro?: boolean;
@@ -19,19 +20,18 @@ export const PRICING_PLANS: PricingPlan[] = [
     id: '31150500-345f-448d-8404-74206f1e9c73',
     name: 'Starter plan',
     subtitle: 'For individuals & new creators',
-    storage: '5 GB secure',
-    storageMb: 5 * 1024,
+    storage: '1 GB secure',
+    storageMb: 1 * 1024,
     monthlyPrice: 0,
     yearlyPrice: 0,
     btnText: 'Start Free',
+    maxFileUploadSize: 200,
     description:
       'Starter plan is our standard free tier for safe personal storage.',
     features: [
-      '5 GB secure cloud storage',
+      '1 GB secure cloud storage',
       'Basic file & folder sharing',
-      'Max file upload size: 100 MB',
-      'Standard collaboration tools',
-      'Web-only dashboard access',
+      'Max file upload size: 200 MB',
       'Community support',
     ],
   },
@@ -42,6 +42,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     storage: '20 GB high-speed',
     storageMb: 20 * 1024,
     monthlyPrice: 0,
+    maxFileUploadSize: 2048,
     yearlyPrice: 0,
     btnText: 'Start Trial',
     description: 'Enjoy 20 GB of secure high-speed storage for 15 days.',
@@ -61,6 +62,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     storageMb: 500 * 1024,
     monthlyPrice: 5,
     yearlyPrice: 50,
+    maxFileUploadSize: 2048,
     monthlyDiscountOriginal: 10,
     yearlyDiscountOriginal: 58,
     btnText: 'Get Started',
@@ -70,7 +72,7 @@ export const PRICING_PLANS: PricingPlan[] = [
       '500 GB high-speed storage',
       'Everything in Starter +',
       'Max file upload size: 2 GB',
-      'Password-protected shared links',
+      'Multi-audio track & subtitle extraction',
       'Advanced team collaboration',
       'Priority email & chat support',
     ],
@@ -83,6 +85,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     storage: '1 TB premium',
     storageMb: 1024 * 1024,
     monthlyPrice: 20,
+    maxFileUploadSize: 10024,
     yearlyPrice: 16 * 12, // $192 total
     monthlyDiscountOriginal: 25,
     yearlyDiscountOriginal: 240, // Original yearly total at monthly rate: 20 * 12 = 240
