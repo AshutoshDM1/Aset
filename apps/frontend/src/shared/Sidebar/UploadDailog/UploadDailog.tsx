@@ -10,7 +10,13 @@ import FolderSelectionStage from './FolderSelectionStage';
 import FileSelectionStage from './FileSelectionStage';
 import UploadProgressStage from './UploadProgressStage';
 import MinimizedPill from './MinimizedPill';
-import { UploadCloud, X, Minus } from 'lucide-react';
+import { Upload, X, Minus } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 export default function UploadDailog() {
   const {
@@ -25,6 +31,8 @@ export default function UploadDailog() {
     updateFileProgress,
     updateFileStatus,
     setIsUploading,
+    preloadedFiles,
+    setPreloadedFiles,
     reset,
   } = useUploadStore();
 
@@ -207,6 +215,20 @@ export default function UploadDailog() {
     toast.success('Finished processing upload queue!');
   };
 
+  // Seed localFiles from drag-and-dropped preloaded files when dialog opens
+  useEffect(() => {
+    if (isOpen && preloadedFiles.length > 0) {
+      setLocalFiles((prev) => {
+        const existing = new Set(prev.map((f) => f.name + f.size));
+        const newOnes = preloadedFiles.filter(
+          (f) => !existing.has(f.name + f.size),
+        );
+        return [...prev, ...newOnes];
+      });
+      setPreloadedFiles([]);
+    }
+  }, [isOpen, preloadedFiles, setPreloadedFiles]);
+
   // Reset internal state on close
   useEffect(() => {
     if (!isOpen) {
@@ -227,102 +249,136 @@ export default function UploadDailog() {
     files.length > 0 && successCount + errorCount === files.length;
 
   return (
-    <Dialog
-      open={isOpen && !isMinimized}
-      onOpenChange={(open) => {
-        if (!open) {
-          if (isUploading && !isAllDone) {
-            minimizeDialog();
-          } else {
-            reset();
+    <TooltipProvider delayDuration={400}>
+      <Dialog
+        open={isOpen && !isMinimized}
+        onOpenChange={(open) => {
+          if (!open) {
+            if (isUploading && !isAllDone) {
+              minimizeDialog();
+            } else {
+              reset();
+            }
           }
-        }
-      }}
-    >
-      <DialogContent
-        className="sm:max-w-lg p-0 overflow-hidden flex flex-col max-h-[85vh]"
-        showCloseButton={false}
+        }}
       >
-        {/* Title Bar Header */}
-        <header className="flex items-center justify-between border-b border-border/80 px-6 py-4 bg-muted/20">
-          <div className="flex items-center gap-2">
-            <UploadCloud className="size-5 text-primary" />
-            <DialogTitle className="text-base font-semibold leading-none">
-              Upload Files
-            </DialogTitle>
-          </div>
-          <div className="flex items-center gap-1.5">
-            {isUploading && !isAllDone && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-8 text-muted-foreground hover:bg-muted/80"
-                onClick={minimizeDialog}
-                title="Minimize to Background"
-              >
-                <Minus className="size-4" />
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8 text-muted-foreground hover:bg-muted/80"
-              onClick={isUploading && !isAllDone ? minimizeDialog : reset}
-            >
-              <X className="size-4" />
-            </Button>
-          </div>
-        </header>
-
-        {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-5">
-          {!isUploading ? (
-            <div className="space-y-5">
-              <FolderSelectionStage />
-              {folderId !== null && folderId !== undefined && (
-                <FileSelectionStage
-                  localFiles={localFiles}
-                  setLocalFiles={setLocalFiles}
-                  decodeVideos={decodeVideos}
-                  setDecodeVideos={setDecodeVideos}
-                />
-              )}
+        <DialogContent
+          className="sm:max-w-md p-0 overflow-hidden flex flex-col max-h-[82vh] gap-0"
+          showCloseButton={false}
+        >
+          {/* Compact header */}
+          <header className="flex items-center justify-between px-4 py-3 border-b border-border/60">
+            <div className="flex items-center gap-2">
+              <div className="size-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Upload className="size-3.5 text-primary" strokeWidth={2} />
+              </div>
+              <DialogTitle className="text-sm font-semibold leading-none">
+                Upload
+              </DialogTitle>
             </div>
-          ) : (
-            <UploadProgressStage />
-          )}
-        </div>
-
-        {/* Footer Actions Panel */}
-        <footer className="border-t border-border/80 p-4 bg-muted/10 flex items-center justify-end gap-2 shrink-0">
-          {!isUploading ? (
-            <>
-              <Button variant="ghost" size="sm" onClick={reset}>
-                Cancel
-              </Button>
-              <Button
-                size="sm"
-                disabled={!folderId || localFiles.length === 0}
-                onClick={startUploads}
-              >
-                Upload{' '}
-                {localFiles.length > 0 ? `(${localFiles.length} files)` : ''}
-              </Button>
-            </>
-          ) : (
-            <>
-              {!isAllDone && (
-                <Button variant="secondary" size="sm" onClick={minimizeDialog}>
-                  Run in Background
-                </Button>
+            <div className="flex items-center gap-0.5">
+              {isUploading && !isAllDone && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-7 text-muted-foreground hover:text-foreground"
+                      onClick={minimizeDialog}
+                    >
+                      <Minus className="size-3.5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Run in background</TooltipContent>
+                </Tooltip>
               )}
-              <Button size="sm" disabled={!isAllDone} onClick={reset}>
-                {isAllDone && errorCount > 0 ? 'Done (With Errors)' : 'Done'}
-              </Button>
-            </>
-          )}
-        </footer>
-      </DialogContent>
-    </Dialog>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-7 text-muted-foreground hover:text-foreground"
+                    onClick={isUploading && !isAllDone ? minimizeDialog : reset}
+                  >
+                    <X className="size-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {isUploading && !isAllDone ? 'Minimize' : 'Close'}
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </header>
+
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto custom-scrollbar px-4 py-4 space-y-4">
+            {!isUploading ? (
+              <div className="space-y-4">
+                <FolderSelectionStage />
+                {folderId !== null && folderId !== undefined && (
+                  <FileSelectionStage
+                    localFiles={localFiles}
+                    setLocalFiles={setLocalFiles}
+                    decodeVideos={decodeVideos}
+                    setDecodeVideos={setDecodeVideos}
+                  />
+                )}
+              </div>
+            ) : (
+              <UploadProgressStage />
+            )}
+          </div>
+
+          {/* Footer */}
+          <footer className="border-t border-border/60 px-4 py-3 flex items-center justify-end gap-2 shrink-0">
+            {!isUploading ? (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs h-8"
+                  onClick={reset}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  className="text-xs h-8 gap-1.5"
+                  disabled={!folderId || localFiles.length === 0}
+                  onClick={startUploads}
+                >
+                  <Upload className="size-3.5" />
+                  {localFiles.length > 0
+                    ? `Upload ${localFiles.length}`
+                    : 'Upload'}
+                </Button>
+              </>
+            ) : (
+              <>
+                {!isAllDone && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs h-8"
+                    onClick={minimizeDialog}
+                  >
+                    <Minus className="size-3.5 mr-1" />
+                    Background
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  className="text-xs h-8"
+                  disabled={!isAllDone}
+                  onClick={reset}
+                >
+                  {isAllDone && errorCount > 0 ? '⚠ Done' : 'Done'}
+                </Button>
+              </>
+            )}
+          </footer>
+        </DialogContent>
+      </Dialog>
+    </TooltipProvider>
   );
 }

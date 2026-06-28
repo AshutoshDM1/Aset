@@ -17,6 +17,7 @@ interface UploadStore {
   files: UploadFileState[];
   isUploading: boolean;
   persistStructure: boolean;
+  preloadedFiles: File[];
 
   openDialog: (initialFolderId?: string | null) => void;
   closeDialog: () => void;
@@ -32,6 +33,7 @@ interface UploadStore {
   ) => void;
   setIsUploading: (isUploading: boolean) => void;
   setPersistStructure: (persistStructure: boolean) => void;
+  setPreloadedFiles: (files: File[]) => void;
   reset: () => void;
 }
 
@@ -42,6 +44,7 @@ export const useUploadStore = create<UploadStore>((set) => ({
   files: [],
   isUploading: false,
   persistStructure: true,
+  preloadedFiles: [],
 
   openDialog: (initialFolderId = null) =>
     set({ isOpen: true, isMinimized: false, folderId: initialFolderId }),
@@ -62,6 +65,7 @@ export const useUploadStore = create<UploadStore>((set) => ({
     })),
   setIsUploading: (isUploading) => set({ isUploading }),
   setPersistStructure: (persistStructure) => set({ persistStructure }),
+  setPreloadedFiles: (files) => set({ preloadedFiles: files }),
   reset: () =>
     set({
       isOpen: false,
@@ -70,6 +74,7 @@ export const useUploadStore = create<UploadStore>((set) => ({
       files: [],
       isUploading: false,
       persistStructure: true,
+      preloadedFiles: [],
     }),
 }));
 

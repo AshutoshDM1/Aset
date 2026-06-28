@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { useUploadStore } from './uploadStore';
-import { UploadCloud, Maximize2 } from 'lucide-react';
+import { Maximize2, Upload } from 'lucide-react';
 
 export default function MinimizedPill() {
   const { files, maximizeDialog } = useUploadStore();
@@ -21,7 +21,7 @@ export default function MinimizedPill() {
       className="fixed bottom-5 right-5 z-50 flex items-center gap-3 bg-zinc-950 border border-zinc-800 text-zinc-100 rounded-xl shadow-2xl p-4 cursor-pointer hover:bg-zinc-900 transition-all transform scale-100 hover:scale-105 animate-in slide-in-from-bottom duration-300"
     >
       <div className="flex items-center justify-center size-8 rounded-full bg-primary/15 text-primary">
-        <UploadCloud className="size-4 " />
+        <Upload className="size-4 " />
       </div>
       <div className="flex flex-col min-w-[120px]">
         <span className="text-sm font-semibold">

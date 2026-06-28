@@ -6,6 +6,7 @@ import { trpc } from '@/utils/trpc';
 import { FolderContents } from './components/FolderContents';
 import DashboardHeader from '@/shared/Dashboard/DashboardHeader';
 import Loader from '@/shared/PageLoader/Loader';
+import { FolderDropZone } from '@/shared/Dashboard/FolderDropZone';
 
 export default function SingleFolder() {
   const { user } = useUser();
@@ -86,24 +87,26 @@ export default function SingleFolder() {
   }
 
   return (
-    <div className="w-full">
-      <DashboardHeader
-        folderId={folder.id}
-        folderName={folder.name}
-        folerDescription={folderDescription}
-        canUpload={folder.canUpload}
-        canCreate={isOwner}
-      />
-      <section className="mt-6" aria-label="Folder contents">
-        <FolderContents
-          folders={foldersQuery.data ?? []}
-          files={filesQuery.data ?? []}
-          onRefetch={() => {
-            void foldersQuery.refetch();
-            void filesQuery.refetch();
-          }}
+    <FolderDropZone folderId={folder.id} canUpload={folder.canUpload}>
+      <div className="w-full">
+        <DashboardHeader
+          folderId={folder.id}
+          folderName={folder.name}
+          folerDescription={folderDescription}
+          canUpload={folder.canUpload}
+          canCreate={isOwner}
         />
-      </section>
-    </div>
+        <section className="mt-6" aria-label="Folder contents">
+          <FolderContents
+            folders={foldersQuery.data ?? []}
+            files={filesQuery.data ?? []}
+            onRefetch={() => {
+              void foldersQuery.refetch();
+              void filesQuery.refetch();
+            }}
+          />
+        </section>
+      </div>
+    </FolderDropZone>
   );
 }

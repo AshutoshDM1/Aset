@@ -16,6 +16,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 export default function FolderSelectionStage() {
   const navigate = useNavigate();
@@ -155,42 +161,43 @@ export default function FolderSelectionStage() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-2">
-        <Label className="text-sm font-medium text-foreground/90">
-          Destination Folder
-        </Label>
-        <div className="flex items-center gap-2">
-          <Select
-            value={folderId ? String(folderId) : undefined}
-            onValueChange={(val) => setFolderId(val)}
-            disabled={createFolderMutation.isPending}
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <Select
+          value={folderId ? String(folderId) : undefined}
+          onValueChange={(val) => setFolderId(val)}
+          disabled={createFolderMutation.isPending}
+        >
+          <SelectTrigger className="flex-1 h-9 w-full rounded-lg border-input bg-background text-sm text-foreground font-medium select-none">
+            <SelectValue placeholder="Select a folder…" />
+          </SelectTrigger>
+          <SelectContent
+            position="popper"
+            className="rounded-xl border border-border bg-popover shadow-xl"
           >
-            <SelectTrigger className="flex-1 h-10 w-full rounded-lg border-input bg-background text-sm text-foreground font-medium select-none">
-              <SelectValue placeholder="Select a destination folder" />
-            </SelectTrigger>
-            <SelectContent
-              position="popper"
-              className="rounded-xl border border-border bg-popover shadow-xl"
-            >
-              {folders.map((f) => (
-                <SelectItem key={f.id} value={String(f.id)}>
-                  {f.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button
-            variant="outline"
-            size="icon"
-            className="shrink-0 h-10 w-10"
-            onClick={() => setShowCreateFolder((prev) => !prev)}
-            disabled={createFolderMutation.isPending}
-            title="Create new folder"
-          >
-            <FolderPlus className="size-4" />
-          </Button>
-        </div>
+            {folders.map((f) => (
+              <SelectItem key={f.id} value={String(f.id)}>
+                {f.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <TooltipProvider delayDuration={300}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="shrink-0 h-9 w-9"
+                onClick={() => setShowCreateFolder((prev) => !prev)}
+                disabled={createFolderMutation.isPending}
+              >
+                <FolderPlus className="size-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>New folder</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
       {showCreateFolder && (

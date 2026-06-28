@@ -1,11 +1,10 @@
 import * as React from 'react';
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { formatBytes, useUploadStore } from './uploadStore';
 import { cn } from '@/lib/utils';
 import {
-  UploadCloud,
+  Upload,
   FileIcon,
   Trash2,
   FolderIcon,
@@ -287,21 +286,17 @@ export default function FileSelectionStage({
   });
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-300">
-      <Label className="text-sm font-medium text-foreground/90 block">
-        Select Files to Upload
-      </Label>
-
+    <div className="space-y-3 animate-in fade-in duration-300">
       {/* Drag & Drop Zone */}
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={cn(
-          'border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center text-center transition-all duration-300 relative',
+          'border-2 border-dashed rounded-xl p-5 flex flex-col items-center justify-center text-center transition-all duration-200 relative cursor-default',
           dragOver
-            ? 'border-primary bg-primary/5 scale-[0.98]'
-            : 'border-muted-foreground/20 bg-muted/10 hover:bg-muted/15 hover:border-primary/20',
+            ? 'border-primary bg-primary/5 scale-[0.99]'
+            : 'border-muted-foreground/20 bg-muted/10 hover:bg-muted/15 hover:border-primary/30',
         )}
       >
         <input
@@ -322,15 +317,28 @@ export default function FileSelectionStage({
           onChange={handleFolderSelect}
         />
 
-        <UploadCloud className="size-10 text-muted-foreground/75 mb-3" />
-        <p className="text-sm font-semibold text-foreground">
-          Drag & drop files or folders here, or browse
-        </p>
-        <p className="text-xs text-muted-foreground mt-1 mb-4">
-          Supports recursive directory drops and client-side ZIP extraction
+        <TooltipProvider delayDuration={200}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="size-10 rounded-xl bg-muted flex items-center justify-center mb-3 cursor-default">
+                <Upload
+                  className="size-4 text-muted-foreground"
+                  strokeWidth={1.5}
+                />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="text-xs max-w-56 text-center">
+              Supports files, folders, recursive directory drops and ZIP
+              extraction
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        <p className="text-xs font-medium text-foreground mb-3">
+          Drop files or folders here
         </p>
 
-        <div className="flex flex-wrap items-center justify-center gap-3">
+        <div className="flex items-center gap-2">
           <Button
             type="button"
             variant="outline"
@@ -339,10 +347,10 @@ export default function FileSelectionStage({
               e.stopPropagation();
               fileInputRef.current?.click();
             }}
-            className="gap-2 rounded-xl text-xs h-9 cursor-pointer"
+            className="gap-1.5 text-xs h-7 px-3 cursor-pointer"
           >
-            <FileIcon className="size-4 text-blue-500" />
-            Select Files
+            <FileIcon className="size-3 text-blue-500" />
+            Files
           </Button>
           <Button
             type="button"
@@ -352,10 +360,10 @@ export default function FileSelectionStage({
               e.stopPropagation();
               folderInputRef.current?.click();
             }}
-            className="gap-2 rounded-xl text-xs h-9 cursor-pointer"
+            className="gap-1.5 text-xs h-7 px-3 cursor-pointer"
           >
-            <FolderPlus className="size-4 text-amber-500" />
-            Select Folder
+            <FolderPlus className="size-3 text-amber-500" />
+            Folder
           </Button>
         </div>
       </div>
@@ -456,35 +464,38 @@ export default function FileSelectionStage({
 
       {/* Video Decoding Option */}
       {videoFiles.length > 0 && (
-        <div className="border border-border/80 bg-muted/10 rounded-2xl p-4.5 space-y-2.5 animate-in slide-in-from-top-2 duration-300">
-          <div className="flex items-start justify-between">
-            <div className="space-y-1 pr-4">
-              <label
-                htmlFor="decode-videos"
-                className="text-xs font-semibold text-foreground flex items-center gap-1.5 cursor-pointer"
-              >
-                <span>Enable Video Decoding</span>
-              </label>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Extract subtitle tracks and secondary audio tracks from your
-                uploaded videos to support multi-language play and captions.
-              </p>
-            </div>
-            <input
-              id="decode-videos"
-              type="checkbox"
-              checked={decodeVideos && !isDecodingDisabled}
-              disabled={isDecodingDisabled}
-              onChange={(e) => setDecodeVideos(e.target.checked)}
-              className="size-4.5 rounded border-border text-primary focus:ring-primary/20 cursor-pointer disabled:cursor-not-allowed mt-0.5"
-            />
-          </div>
-          {isDecodingDisabled && (
-            <p className="text-[10px] text-destructive leading-tight font-medium">
-              ⚠️ Video decoding is disabled because you are uploading more than
-              5 videos or a total size exceeding 6 GB.
-            </p>
-          )}
+        <div className="flex items-center justify-between border border-border/60 bg-muted/10 rounded-xl px-3 py-2 animate-in slide-in-from-top-2 duration-300">
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <label
+                  htmlFor="decode-videos"
+                  className="flex items-center gap-1.5 text-xs font-medium text-foreground cursor-pointer"
+                >
+                  <Info className="size-3 text-muted-foreground" />
+                  Video decoding
+                  {isDecodingDisabled && (
+                    <span className="text-destructive ml-1 text-[10px]">
+                      (disabled)
+                    </span>
+                  )}
+                </label>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-60 text-xs">
+                {isDecodingDisabled
+                  ? 'Disabled: more than 5 videos or total size exceeds 6 GB.'
+                  : 'Extract subtitle tracks and secondary audio from videos for multi-language playback.'}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <input
+            id="decode-videos"
+            type="checkbox"
+            checked={decodeVideos && !isDecodingDisabled}
+            disabled={isDecodingDisabled}
+            onChange={(e) => setDecodeVideos(e.target.checked)}
+            className="size-4 rounded border-border text-primary focus:ring-primary/20 cursor-pointer disabled:cursor-not-allowed"
+          />
         </div>
       )}
 
