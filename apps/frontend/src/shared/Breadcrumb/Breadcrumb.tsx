@@ -294,7 +294,7 @@ const BreadcrumbComponent = ({
         {/* Link / Button block */}
         <BreadcrumbItem>
           {isLast ? (
-            <span className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm text-foreground font-semibold bg-accent/15 border border-accent/20 dark:border-accent/10 shadow-3xs transition-all duration-200">
+            <span className="flex items-center gap-1.5 px-2.5 py-1.5 text-sm text-foreground font-semibold transition-all duration-200">
               {getSegmentIcon(item, true)}
               <span className="max-w-[150px] truncate">{item.label}</span>
             </span>

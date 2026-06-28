@@ -148,7 +148,7 @@ func extractVideoThumbnail(ctx context.Context, inputPath, tempDir string) (stri
 
 	// ffmpeg -ss 00:00:01 -i input -vframes 1 -vf scale=150:-1 -y output
 	cmdArgs := []string{
-		"-ss", "00:00:01",
+		"-ss", "00:00:10",
 		"-i", inputPath,
 		"-vframes", "1",
 		"-vf", "scale=150:-1",

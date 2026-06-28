@@ -5,6 +5,8 @@ import { ItemGridActions } from './ItemGridActions';
 import FileThumbnail from './FileThumbnail';
 import { cn } from '@/lib/utils';
 
+import { truncateFileName } from '@/utils/file/file-utils';
+
 import {
   Tooltip,
   TooltipContent,
@@ -128,7 +130,7 @@ const PdfFilePreview = ({
             >
               <div
                 className={cn(
-                  'flex size-20 items-center justify-center overflow-hidden bg-muted/40 ring-1 ring-border/60 rounded-2xl',
+                  'flex size-20 items-center justify-center overflow-hidden bg-muted ring-1 ring-border/60 rounded-2xl',
                 )}
               >
                 <FileThumbnail
@@ -138,8 +140,8 @@ const PdfFilePreview = ({
                   fallbackColorClass="text-red-500"
                 />
               </div>
-              <p className="text-xs text-foreground text-center w-20 truncate mt-1.5 px-0.5">
-                {name}
+              <p className="text-xs text-foreground text-center w-20 mt-1.5 px-0.5">
+                {truncateFileName(name)}
               </p>
             </button>
           </TooltipTrigger>

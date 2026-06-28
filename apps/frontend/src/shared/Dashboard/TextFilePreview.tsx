@@ -4,6 +4,8 @@ import { TextPreview } from '@/components/Preview/TextPreview';
 import { ItemGridActions } from './ItemGridActions';
 import FileThumbnail from './FileThumbnail';
 
+import { truncateFileName } from '@/utils/file/file-utils';
+
 import {
   Tooltip,
   TooltipContent,
@@ -62,8 +64,8 @@ const TextFilePreview = ({
                   fallbackColorClass="text-amber-500"
                 />
               </div>
-              <p className="text-xs text-foreground text-center w-20 truncate mt-1.5 px-0.5">
-                {name}
+              <p className="text-xs text-foreground text-center w-20 mt-1.5 px-0.5">
+                {truncateFileName(name)}
               </p>
             </button>
           </TooltipTrigger>

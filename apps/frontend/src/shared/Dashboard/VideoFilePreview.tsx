@@ -5,6 +5,8 @@ import { motion } from 'motion/react';
 import { VideoPreview } from '@/components/Preview/VideoPreview';
 import FileThumbnail from './FileThumbnail';
 import { cn } from '@/lib/utils';
+import { truncateFileName } from '@/utils/file/file-utils';
+
 import {
   Tooltip,
   TooltipContent,
@@ -155,8 +157,8 @@ const VideoFilePreview = ({
                   </motion.div>
                 </div>
               </div>
-              <p className="text-xs text-foreground text-center w-20 truncate mt-1.5 px-0.5">
-                {name}
+              <p className="text-xs text-foreground text-center w-20 mt-1.5 px-0.5">
+                {truncateFileName(name)}
               </p>
             </button>
           </TooltipTrigger>

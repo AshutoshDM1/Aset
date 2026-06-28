@@ -26,3 +26,25 @@ export function formatFileSize(mb: number) {
   }
   return `${mb.toFixed(1)} MB`;
 }
+
+export function truncateFileName(name: string, totalLimit = 13) {
+  const dot = name.lastIndexOf('.');
+  if (dot <= 0) {
+    if (name.length <= totalLimit) return name;
+    return name.slice(0, totalLimit - 3) + '...';
+  }
+
+  const base = name.slice(0, dot);
+  const ext = name.slice(dot);
+
+  if (name.length <= totalLimit) {
+    return name;
+  }
+
+  const baseLimit = totalLimit - 3 - ext.length;
+  if (baseLimit <= 1) {
+    return base.slice(0, 5) + '...' + ext;
+  }
+
+  return base.slice(0, baseLimit) + '...' + ext;
+}
