@@ -14,16 +14,29 @@ export const deleteManyPermanentlyHandler = async ({
 }) => {
   const files = await ctx.db.file.findMany({
     where: { id: { in: input.ids }, ownerId: ctx.auth.userId },
-    select: { id: true, s3Url: true, sizeMb: true },
+    include: { subtitles: true, audioTracks: true },
   });
   if (files.length === 0) return { success: true };
 
+  const keysToDelete: string[] = [];
   for (const file of files) {
+    keysToDelete.push(extractObjectKey(file.s3Url));
+    if (file.thumbnailUrl) {
+      keysToDelete.push(extractObjectKey(file.thumbnailUrl));
+    }
+    file.subtitles.forEach((sub) => {
+      keysToDelete.push(extractObjectKey(sub.s3Url));
+    });
+    file.audioTracks.forEach((aud) => {
+      keysToDelete.push(extractObjectKey(aud.s3Url));
+    });
+  }
+
+  for (const key of keysToDelete) {
     try {
-      const objectKey = extractObjectKey(file.s3Url);
-      await deleteObject(objectKey);
+      await deleteObject(key);
     } catch (err) {
-      console.error(`Failed to delete file from S3:`, err);
+      console.error(`Failed to delete S3 asset ${key}:`, err);
     }
   }
 

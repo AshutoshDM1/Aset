@@ -15,6 +15,7 @@ export const deletePermanentlyHandler = async ({
 }) => {
   const file = await ctx.db.file.findFirst({
     where: { id: input.id, ownerId: ctx.auth.userId },
+    include: { subtitles: true, audioTracks: true },
   });
   if (!file) {
     throw new TRPCError({
@@ -23,11 +24,24 @@ export const deletePermanentlyHandler = async ({
     });
   }
 
-  try {
-    const objectKey = extractObjectKey(file.s3Url);
-    await deleteObject(objectKey);
-  } catch (err) {
-    console.error('Failed to delete file from S3:', err);
+  const keysToDelete: string[] = [];
+  keysToDelete.push(extractObjectKey(file.s3Url));
+  if (file.thumbnailUrl) {
+    keysToDelete.push(extractObjectKey(file.thumbnailUrl));
+  }
+  file.subtitles.forEach((sub) => {
+    keysToDelete.push(extractObjectKey(sub.s3Url));
+  });
+  file.audioTracks.forEach((aud) => {
+    keysToDelete.push(extractObjectKey(aud.s3Url));
+  });
+
+  for (const key of keysToDelete) {
+    try {
+      await deleteObject(key);
+    } catch (err) {
+      console.error(`Failed to delete S3 asset ${key}:`, err);
+    }
   }
 
   await ctx.db.$transaction([
