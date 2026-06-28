@@ -241,6 +241,8 @@ export function UnifiedTable({ items, onRefetch }: UnifiedTableProps) {
                           <FileThumbnail
                             name={item.name}
                             thumbnailUrl={item.thumbnailUrl}
+                            view="list"
+                            outerSvg={false}
                             fallbackIcon={
                               isImageFileName(item.name)
                                 ? ImageIcon

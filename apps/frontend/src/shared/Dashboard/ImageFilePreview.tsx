@@ -5,6 +5,12 @@ import { ImagePreviewDialog } from '@/components/Preview/ImagePreview/ImagePrevi
 import FileThumbnail from './FileThumbnail';
 import { cn } from '@/lib/utils';
 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+
 type SiblingImage = {
   id: string;
   name: string;
@@ -94,10 +100,6 @@ const ImageFilePreview = ({
     }
   }, [currentImageIndex, allImages]);
 
-  const dot = name.lastIndexOf('.');
-  const base = dot > 0 ? name.slice(0, dot) : name;
-  const ext = dot > 0 ? name.slice(dot) : '';
-
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
     if (!isOpen) {
@@ -120,47 +122,46 @@ const ImageFilePreview = ({
           sizeMb={sizeMb}
           createdAt={createdAt}
         />
-        <button
-          type="button"
-          onClick={() => {
-            setActiveFile({
-              id: fileId,
-              name,
-              url,
-              starred,
-              trashed,
-              createdAt,
-              sizeMb,
-            });
-            setOpen(true);
-          }}
-          aria-label={`Preview ${name}`}
-          title={name}
-          className="w-full flex flex-col items-center rounded-2xl p-2 transition-transform duration-200 group-hover:-translate-y-1 cursor-pointer relative z-0"
-        >
-          <div
-            className={cn(
-              'flex size-20 items-center justify-center overflow-hidden ',
-              thumbnailUrl
-                ? 'bg-muted/40 ring-1 ring-border/60 rounded-2xl'
-                : '',
-            )}
-          >
-            <FileThumbnail
-              name={name}
-              thumbnailUrl={thumbnailUrl}
-              fallbackIcon={ImageIcon}
-              fallbackColorClass="text-muted-foreground"
-            />
-          </div>
-          <p className="text-sm text-foreground text-center w-20">
-            <span className="truncate inline-block align-bottom max-w-12.5">
-              {base.slice(0, 5)}
-              {base.length > 5 ? '..' : ''}
-            </span>
-            {ext}
-          </p>
-        </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveFile({
+                  id: fileId,
+                  name,
+                  url,
+                  starred,
+                  trashed,
+                  createdAt,
+                  sizeMb,
+                });
+                setOpen(true);
+              }}
+              aria-label={`Preview ${name}`}
+              className="w-full flex flex-col items-center rounded-2xl p-2 transition-transform duration-200 group-hover:-translate-y-1 cursor-pointer relative z-0"
+            >
+              <div
+                className={cn(
+                  'flex size-20 items-center justify-center overflow-hidden bg-muted/40 ring-1 ring-border/60 rounded-2xl',
+                )}
+              >
+                <FileThumbnail
+                  name={name}
+                  thumbnailUrl={thumbnailUrl}
+                  fallbackIcon={ImageIcon}
+                  fallbackColorClass="text-muted-foreground"
+                />
+              </div>
+              <p className="text-xs text-foreground text-center w-20 truncate mt-1.5 px-0.5">
+                {name}
+              </p>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="text-xs max-w-64 break-all">
+            {name}
+          </TooltipContent>
+        </Tooltip>
       </div>
       <ImagePreviewDialog
         open={open}

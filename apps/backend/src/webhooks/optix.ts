@@ -99,7 +99,7 @@ export async function optixRegisterTracksHandler(req: Request, res: Response) {
     return;
   }
 
-  const { fileId, subtitles, audioTracks, status } = req.body;
+  const { fileId, subtitles, audioTracks, status, durationMs } = req.body;
   if (!fileId || !status) {
     res.status(400).json({ error: 'Missing required fields' });
     return;
@@ -120,6 +120,26 @@ export async function optixRegisterTracksHandler(req: Request, res: Response) {
       where: { id: fileId },
       data: {
         processingStatus: status, // 'completed' or 'failed'
+      },
+    });
+
+    // Create the decoding job history record
+    const duration = typeof durationMs === 'number' ? durationMs : 0;
+    const audiosCount = Array.isArray(audioTracks) ? audioTracks.length : 0;
+    const subsCount = Array.isArray(subtitles) ? subtitles.length : 0;
+
+    await db.decodingJob.create({
+      data: {
+        fileId,
+        fileName: file.name,
+        fileSizeMb: file.sizeMb,
+        status,
+        durationMs: duration,
+        audioTracksCount: audiosCount,
+        subtitleTracksCount: subsCount,
+        ownerId: file.ownerId,
+        startedAt: new Date(Date.now() - duration),
+        completedAt: new Date(),
       },
     });
 

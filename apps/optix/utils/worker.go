@@ -46,6 +46,7 @@ type RegisterTracksPayload struct {
 	Status      string          `json:"status"` // "completed" or "failed"
 	Subtitles   []SubtitleTrack `json:"subtitles"`
 	AudioTracks []AudioTrack    `json:"audioTracks"`
+	DurationMs  int64           `json:"durationMs"`
 }
 
 type FFProbeOutput struct {
@@ -208,6 +209,10 @@ func StartWorkerPool(ctx context.Context, redisURL string, concurrency int) {
 
 // findExecutable resolves the command path, prioritizing system commands
 func findExecutable(name string) string {
+	envKey := strings.ToUpper(name) + "_PATH"
+	if val := os.Getenv(envKey); val != "" {
+		return val
+	}
 	if path, err := exec.LookPath(name); err == nil {
 		return path
 	}
@@ -238,9 +243,10 @@ func extractObjectKey(s3URL, publicBase string) string {
 }
 
 func processJob(ctx context.Context, r2 *R2Client, job MediaJob) {
+	startTime := time.Now()
 	if r2 == nil {
 		log.Printf("[MediaWorker] Skipping processing for file %s: R2 client is nil", job.FileID)
-		sendCallback(job.FileID, "failed", nil, nil)
+		sendCallback(job.FileID, "failed", nil, nil, 0)
 		return
 	}
 
@@ -249,7 +255,8 @@ func processJob(ctx context.Context, r2 *R2Client, job MediaJob) {
 	tempDir, err := os.MkdirTemp("", "optix-extractor-")
 	if err != nil {
 		log.Printf("[MediaWorker] Failed to create temp directory: %v", err)
-		sendCallback(job.FileID, "failed", nil, nil)
+		durationMs := time.Since(startTime).Milliseconds()
+		sendCallback(job.FileID, "failed", nil, nil, durationMs)
 		return
 	}
 	defer os.RemoveAll(tempDir)
@@ -260,7 +267,8 @@ func processJob(ctx context.Context, r2 *R2Client, job MediaJob) {
 	err = r2.DownloadFile(ctx, objectKey, localInputPath)
 	if err != nil {
 		log.Printf("[MediaWorker] Failed to download file from R2: %v", err)
-		sendCallback(job.FileID, "failed", nil, nil)
+		durationMs := time.Since(startTime).Milliseconds()
+		sendCallback(job.FileID, "failed", nil, nil, durationMs)
 		return
 	}
 
@@ -284,14 +292,16 @@ func processJob(ctx context.Context, r2 *R2Client, job MediaJob) {
 
 	if err := probeCmd.Run(); err != nil {
 		log.Printf("[MediaWorker] ffprobe failed: %v, stderr: %s", err, stderrBuf.String())
-		sendCallback(job.FileID, "failed", nil, nil)
+		durationMs := time.Since(startTime).Milliseconds()
+		sendCallback(job.FileID, "failed", nil, nil, durationMs)
 		return
 	}
 
 	var probeOut FFProbeOutput
 	if err := json.Unmarshal(stdoutBuf.Bytes(), &probeOut); err != nil {
 		log.Printf("[MediaWorker] Failed to parse ffprobe output: %v", err)
-		sendCallback(job.FileID, "failed", nil, nil)
+		durationMs := time.Since(startTime).Milliseconds()
+		sendCallback(job.FileID, "failed", nil, nil, durationMs)
 		return
 	}
 
@@ -405,10 +415,11 @@ func processJob(ctx context.Context, r2 *R2Client, job MediaJob) {
 
 	// 5. Callback to backend
 	log.Printf("[MediaWorker] Finished extraction for file %s. Registering tracks... (Subs: %d, Audio: %d)", job.FileID, len(subtitleTracks), len(audioTracks))
-	sendCallback(job.FileID, "completed", subtitleTracks, audioTracks)
+	durationMs := time.Since(startTime).Milliseconds()
+	sendCallback(job.FileID, "completed", subtitleTracks, audioTracks, durationMs)
 }
 
-func sendCallback(fileID string, status string, subtitles []SubtitleTrack, audio []AudioTrack) {
+func sendCallback(fileID string, status string, subtitles []SubtitleTrack, audio []AudioTrack, durationMs int64) {
 	backendURL := os.Getenv("BACKEND_URL")
 	if backendURL == "" {
 		backendURL = "http://localhost:5000"
@@ -423,6 +434,7 @@ func sendCallback(fileID string, status string, subtitles []SubtitleTrack, audio
 		Status:      status,
 		Subtitles:   subtitles,
 		AudioTracks: audio,
+		DurationMs:  durationMs,
 	}
 
 	bodyBytes, err := json.Marshal(payload)

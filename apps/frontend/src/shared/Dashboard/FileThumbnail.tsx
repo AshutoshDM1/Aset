@@ -16,6 +16,8 @@ type FileThumbnailProps = {
   fallbackIcon: React.ComponentType<{ className?: string }>;
   fallbackColorClass?: string;
   className?: string;
+  outerSvg?: boolean;
+  view?: 'list' | 'grid';
 };
 
 export default function FileThumbnail({
@@ -24,6 +26,8 @@ export default function FileThumbnail({
   fallbackIcon: FallbackIcon,
   fallbackColorClass = 'text-muted-foreground',
   className,
+  outerSvg = false,
+  view = 'grid',
 }: FileThumbnailProps) {
   const [errored, setErrored] = React.useState(false);
   const dot = name.lastIndexOf('.');
@@ -52,28 +56,77 @@ export default function FileThumbnail({
   }
 
   if (['PDF'].includes(ext)) {
-    return <PdfFileIcon className={className} label={ext} />;
+    return (
+      <PdfFileIcon
+        className={className}
+        label={ext}
+        outerSvg={outerSvg}
+        view={view}
+      />
+    );
   }
 
   if (['MP4', 'MKV', 'MOV', 'WEBM'].includes(ext)) {
-    return <VideoFileIcon className={className} label={ext} />;
+    return (
+      <VideoFileIcon
+        className={className}
+        label={ext}
+        outerSvg={outerSvg}
+        view={view}
+      />
+    );
   }
 
   if (['PNG', 'JPG', 'JPEG', 'WEBP', 'GIF'].includes(ext)) {
-    return <ImageFileIcon className={className} label={ext} />;
+    return (
+      <ImageFileIcon
+        className={className}
+        label={ext}
+        outerSvg={outerSvg}
+        view={view}
+      />
+    );
   }
 
   if (['TXT', 'MD', 'JSON', 'JS', 'TS', 'TSX', 'CSS', 'HTML'].includes(ext)) {
-    return <CodeFileIcon className={className} label={ext} />;
+    return (
+      <CodeFileIcon
+        className={className}
+        label={ext}
+        outerSvg={outerSvg}
+        view={view}
+      />
+    );
   }
 
   if (['ZIP', 'RAR', '7Z', 'TAR', 'GZ'].includes(ext)) {
-    return <ZipFileIcon className={className} label={ext} />;
+    return (
+      <ZipFileIcon
+        className={className}
+        label={ext}
+        outerSvg={outerSvg}
+        view={view}
+      />
+    );
   }
 
   if (['MP3', 'WAV', 'FLAC', 'OGG', 'M4A'].includes(ext)) {
-    return <AudioFileIcon className={className} label={ext} />;
+    return (
+      <AudioFileIcon
+        className={className}
+        label={ext}
+        outerSvg={outerSvg}
+        view={view}
+      />
+    );
   }
 
-  return <DefaultFileIcon className={className} label={ext} />;
+  return (
+    <DefaultFileIcon
+      className={className}
+      label={ext}
+      outerSvg={outerSvg}
+      view={view}
+    />
+  );
 }

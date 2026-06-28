@@ -193,6 +193,8 @@ export function FileTable({ files, onRefetch }: FileTableProps) {
                         <FileThumbnail
                           name={file.name}
                           thumbnailUrl={file.thumbnailUrl}
+                          view="list"
+                          outerSvg={false}
                           fallbackIcon={
                             isImageFileName(file.name)
                               ? ImageIcon

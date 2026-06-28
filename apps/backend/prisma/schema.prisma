@@ -178,4 +178,20 @@ model Coupon {
   createdAt       DateTime @default(now())
 }
 
+model DecodingJob {
+  id                  String   @id @default(uuid())
+  fileId              String
+  fileName            String
+  fileSizeMb          Float
+  status              String   // "completed" or "failed"
+  durationMs          Int      // Active decoding duration in milliseconds
+  audioTracksCount    Int      // Number of extracted audio tracks
+  subtitleTracksCount Int      // Number of extracted subtitle tracks
+  startedAt           DateTime @default(now())
+  completedAt         DateTime @default(now())
+  ownerId             String
+
+  @@index([ownerId])
+}
+
 

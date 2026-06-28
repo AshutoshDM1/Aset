@@ -18,6 +18,7 @@ import PdfFilePreview from '@/shared/Dashboard/PdfFilePreview';
 import VideoFilePreview from '@/shared/Dashboard/VideoFilePreview';
 import TextFilePreview from '@/shared/Dashboard/TextFilePreview';
 import * as React from 'react';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 const COLOR_CYCLE: FolderColor[] = ['cyan', 'yellow', 'pink', 'black'];
 
@@ -125,87 +126,89 @@ export function FolderContents({
   }
 
   return (
-    <ul className="grid grid-cols-3 md:grid-cols-8 xl:grid-cols-10 gap-2 justify-evenly">
-      {sortedFolders.map((item, index) => (
-        <li key={`f-${item.id}`}>
-          <FolderComponent
-            folderId={item.id}
-            folderName={item.name}
-            color={COLOR_CYCLE[index % COLOR_CYCLE.length]}
-            starred={item.starred}
-            trashed={item.trashed}
-            onRefetch={onRefetch}
-          />
-        </li>
-      ))}
-      {imageFiles.map((item) => (
-        <li key={`file-${item.id}`}>
-          <ImageFilePreview
-            fileId={item.id}
-            name={item.name}
-            url={item.url}
-            starred={item.starred}
-            trashed={item.trashed}
-            onRefetch={onRefetch}
-            thumbnailUrl={item.thumbnailUrl}
-            allImages={imageFiles}
-          />
-        </li>
-      ))}
-      {pdfFiles.map((item) => (
-        <li key={`file-${item.id}`}>
-          <PdfFilePreview
-            fileId={item.id}
-            name={item.name}
-            url={item.url}
-            starred={item.starred}
-            trashed={item.trashed}
-            onRefetch={onRefetch}
-            thumbnailUrl={item.thumbnailUrl}
-            allPdfs={pdfFiles}
-          />
-        </li>
-      ))}
-      {videoFiles.map((item) => (
-        <li key={`file-${item.id}`}>
-          <VideoFilePreview
-            fileId={item.id}
-            name={item.name}
-            url={item.url}
-            starred={item.starred}
-            trashed={item.trashed}
-            onRefetch={onRefetch}
-            processingStatus={item.processingStatus}
-            thumbnailUrl={item.thumbnailUrl}
-            allVideos={videoFiles}
-          />
-        </li>
-      ))}
-      {textFiles.map((item) => (
-        <li key={`file-${item.id}`}>
-          <TextFilePreview
-            fileId={item.id}
-            name={item.name}
-            url={item.url}
-            starred={item.starred}
-            trashed={item.trashed}
-            onRefetch={onRefetch}
-          />
-        </li>
-      ))}
-      {otherFiles.map((item) => (
-        <li key={`file-${item.id}`}>
-          <OtherFileTile
-            fileId={item.id}
-            name={item.name}
-            url={item.url}
-            starred={item.starred}
-            trashed={item.trashed}
-            onRefetch={onRefetch}
-            thumbnailUrl={item.thumbnailUrl}
-          />
-        </li>
-      ))}
-    </ul>
+    <TooltipProvider>
+      <ul className="grid grid-cols-3 md:grid-cols-8 xl:grid-cols-10 gap-2 justify-evenly">
+        {sortedFolders.map((item, index) => (
+          <li key={`f-${item.id}`}>
+            <FolderComponent
+              folderId={item.id}
+              folderName={item.name}
+              color={COLOR_CYCLE[index % COLOR_CYCLE.length]}
+              starred={item.starred}
+              trashed={item.trashed}
+              onRefetch={onRefetch}
+            />
+          </li>
+        ))}
+        {imageFiles.map((item) => (
+          <li key={`file-${item.id}`}>
+            <ImageFilePreview
+              fileId={item.id}
+              name={item.name}
+              url={item.url}
+              starred={item.starred}
+              trashed={item.trashed}
+              onRefetch={onRefetch}
+              thumbnailUrl={item.thumbnailUrl}
+              allImages={imageFiles}
+            />
+          </li>
+        ))}
+        {pdfFiles.map((item) => (
+          <li key={`file-${item.id}`}>
+            <PdfFilePreview
+              fileId={item.id}
+              name={item.name}
+              url={item.url}
+              starred={item.starred}
+              trashed={item.trashed}
+              onRefetch={onRefetch}
+              thumbnailUrl={item.thumbnailUrl}
+              allPdfs={pdfFiles}
+            />
+          </li>
+        ))}
+        {videoFiles.map((item) => (
+          <li key={`file-${item.id}`}>
+            <VideoFilePreview
+              fileId={item.id}
+              name={item.name}
+              url={item.url}
+              starred={item.starred}
+              trashed={item.trashed}
+              onRefetch={onRefetch}
+              processingStatus={item.processingStatus}
+              thumbnailUrl={item.thumbnailUrl}
+              allVideos={videoFiles}
+            />
+          </li>
+        ))}
+        {textFiles.map((item) => (
+          <li key={`file-${item.id}`}>
+            <TextFilePreview
+              fileId={item.id}
+              name={item.name}
+              url={item.url}
+              starred={item.starred}
+              trashed={item.trashed}
+              onRefetch={onRefetch}
+            />
+          </li>
+        ))}
+        {otherFiles.map((item) => (
+          <li key={`file-${item.id}`}>
+            <OtherFileTile
+              fileId={item.id}
+              name={item.name}
+              url={item.url}
+              starred={item.starred}
+              trashed={item.trashed}
+              onRefetch={onRefetch}
+              thumbnailUrl={item.thumbnailUrl}
+            />
+          </li>
+        ))}
+      </ul>
+    </TooltipProvider>
   );
 }

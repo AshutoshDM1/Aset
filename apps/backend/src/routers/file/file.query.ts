@@ -6,6 +6,7 @@ import { getStarredHandler } from './query/getStarred';
 import { getTrashHandler } from './query/getTrash';
 import { getMediaTracksHandler } from './query/getMediaTracks';
 import { getProcessingFilesHandler } from './query/getProcessingFiles';
+import { getDecodingHistoryHandler } from './query/getDecodingHistory';
 
 export const fileQueryRouter = router({
   listByFolder: protectedProcedure
@@ -23,4 +24,6 @@ export const fileQueryRouter = router({
     .query(getMediaTracksHandler),
 
   getProcessingFiles: protectedProcedure.query(getProcessingFilesHandler),
+
+  getDecodingHistory: protectedProcedure.query(getDecodingHistoryHandler),
 });

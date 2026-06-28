@@ -13,11 +13,15 @@ import { cn } from '@/lib/utils';
 export type FileIconProps = {
   className?: string;
   label?: string;
+  outerSvg?: boolean;
+  view?: 'list' | 'grid';
 };
 
 type FileDocIconProps = {
   className?: string;
   label: string;
+  outerSvg?: boolean;
+  view?: 'list' | 'grid';
   color:
     | 'red'
     | 'indigo'
@@ -33,6 +37,8 @@ type FileDocIconProps = {
 function FileDocIcon({
   className,
   label,
+  outerSvg = false,
+  view = 'grid',
   color = 'gray',
   children,
 }: FileDocIconProps) {
@@ -97,6 +103,30 @@ function FileDocIcon({
 
   const theme = colorMap[color];
 
+  if (!outerSvg) {
+    return (
+      <div
+        className={cn(
+          'select-none flex items-center justify-center flex-col gap-0',
+          theme.text,
+          className,
+        )}
+      >
+        {children}
+        {/* Badge pill */}
+        <div
+          className={cn(
+            'px-2.5 text-[10px]',
+            view === 'list' ? 'text-[8px]' : 'text-[10px]',
+            theme.badgeBorder,
+          )}
+        >
+          {label}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className={cn(
@@ -145,7 +175,7 @@ function FileDocIcon({
         {/* Badge pill */}
         <div
           className={cn(
-            'px-2.5 py-0.5 rounded-md text-[10px] uppercase text-center min-w-10 select-none leading-none',
+            'px-2.5 py-0.5 rounded-md text-[10px] uppercase text-center min-w-10 select-none leading-none border bg-white shadow-xs',
             theme.badgeBorder,
           )}
         >
@@ -156,58 +186,149 @@ function FileDocIcon({
   );
 }
 
-export function PdfFileIcon({ className, label = 'PDF' }: FileIconProps) {
+export function PdfFileIcon({
+  className,
+  label = 'PDF',
+  outerSvg = true,
+  view = 'grid',
+}: FileIconProps) {
   return (
-    <FileDocIcon color="red" label={label} className={className}>
-      <FileText className="size-8 stroke-1" />
+    <FileDocIcon
+      color="red"
+      label={label}
+      outerSvg={outerSvg}
+      view={view}
+      className={className}
+    >
+      <FileText
+        className={cn('stroke-1', view === 'list' ? 'size-5' : 'size-8')}
+      />
     </FileDocIcon>
   );
 }
 
-export function ImageFileIcon({ className, label = 'PNG' }: FileIconProps) {
+export function ImageFileIcon({
+  className,
+  label = 'PNG',
+  outerSvg = true,
+  view = 'grid',
+}: FileIconProps) {
   return (
-    <FileDocIcon color="sky" label={label} className={className}>
-      <ImageIcon className="size-8 stroke-1" />
+    <FileDocIcon
+      color="sky"
+      label={label}
+      outerSvg={outerSvg}
+      view={view}
+      className={className}
+    >
+      <ImageIcon
+        className={cn('stroke-1', view === 'list' ? 'size-5' : 'size-8')}
+      />
     </FileDocIcon>
   );
 }
 
-export function VideoFileIcon({ className, label = 'MKV' }: FileIconProps) {
+export function VideoFileIcon({
+  className,
+  label = 'MKV',
+  outerSvg = true,
+  view = 'grid',
+}: FileIconProps) {
   return (
-    <FileDocIcon color="indigo" label={label} className={className}>
-      <VideoIcon className="size-8 stroke-1" />
+    <FileDocIcon
+      color="indigo"
+      label={label}
+      outerSvg={outerSvg}
+      view={view}
+      className={className}
+    >
+      <VideoIcon
+        className={cn('stroke-1', view === 'list' ? 'size-5' : 'size-8')}
+      />
     </FileDocIcon>
   );
 }
 
-export function CodeFileIcon({ className, label = 'CODE' }: FileIconProps) {
+export function CodeFileIcon({
+  className,
+  label = 'CODE',
+  outerSvg = true,
+  view = 'grid',
+}: FileIconProps) {
   return (
-    <FileDocIcon color="amber" label={label} className={className}>
-      <FileCode className="size-8 stroke-1" />
+    <FileDocIcon
+      color="amber"
+      label={label}
+      outerSvg={outerSvg}
+      view={view}
+      className={className}
+    >
+      <FileCode
+        className={cn('stroke-1', view === 'list' ? 'size-5' : 'size-8')}
+      />
     </FileDocIcon>
   );
 }
 
-export function ZipFileIcon({ className, label = 'ZIP' }: FileIconProps) {
+export function ZipFileIcon({
+  className,
+  label = 'ZIP',
+  outerSvg = true,
+  view = 'grid',
+}: FileIconProps) {
   return (
-    <FileDocIcon color="blue" label={label} className={className}>
-      <FolderArchive className="size-8 stroke-1" />
+    <FileDocIcon
+      color="blue"
+      label={label}
+      outerSvg={outerSvg}
+      view={view}
+      className={className}
+    >
+      <FolderArchive
+        className={cn('stroke-1', view === 'list' ? 'size-5' : 'size-8')}
+      />
     </FileDocIcon>
   );
 }
 
-export function AudioFileIcon({ className, label = 'MP3' }: FileIconProps) {
+export function AudioFileIcon({
+  className,
+  label = 'MP3',
+  outerSvg = true,
+  view = 'grid',
+}: FileIconProps) {
   return (
-    <FileDocIcon color="emerald" label={label} className={className}>
-      <Music className="size-8 stroke-1" />
+    <FileDocIcon
+      color="emerald"
+      label={label}
+      outerSvg={outerSvg}
+      view={view}
+      className={className}
+    >
+      <Music
+        className={cn('stroke-1', view === 'list' ? 'size-5' : 'size-8')}
+      />
     </FileDocIcon>
   );
 }
 
-export function DefaultFileIcon({ className, label = 'FILE' }: FileIconProps) {
+export function DefaultFileIcon({
+  className,
+  label = 'FILE',
+  outerSvg = true,
+  view = 'grid',
+}: FileIconProps) {
   return (
-    <FileDocIcon color="gray" label={label} className={className}>
-      <FileIcon className="size-8 stroke-1" />
+    <FileDocIcon
+      color="gray"
+      label={label}
+      outerSvg={outerSvg}
+      view={view}
+      className={className}
+    >
+      <FileIcon
+        className={cn('stroke-1', view === 'list' ? 'size-5' : 'size-8')}
+      />
     </FileDocIcon>
   );
 }
