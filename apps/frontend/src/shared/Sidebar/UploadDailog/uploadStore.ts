@@ -5,7 +5,7 @@ export interface UploadFileState {
   name: string;
   size: number;
   progress: number;
-  status: 'idle' | 'uploading' | 'success' | 'error';
+  status: 'idle' | 'uploading' | 'success' | 'error' | 'cancelled';
   errorMsg?: string;
   filepath?: string;
 }
@@ -78,7 +78,22 @@ export const useUploadStore = create<UploadStore>((set) => ({
     }),
 }));
 
-// --- HELPERS ---
+// --- HELPERS & REGISTRY ---
+export const activeUploads = new Map<string, AbortController>();
+
+export function cancelFileUpload(fileId: string) {
+  const controller = activeUploads.get(fileId);
+  if (controller) {
+    controller.abort();
+    activeUploads.delete(fileId);
+  }
+}
+
+export function cancelAllUploads() {
+  activeUploads.forEach((controller) => controller.abort());
+  activeUploads.clear();
+}
+
 export function formatBytes(bytes: number, decimals = 2) {
   if (bytes === 0) return '0 Bytes';
   const k = 1024;
@@ -93,11 +108,25 @@ export function uploadWithProgress(
   file: File,
   contentType: string,
   onProgress: (percent: number) => void,
+  signal?: AbortSignal,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('PUT', url);
     xhr.setRequestHeader('Content-Type', contentType);
+
+    // Hook the AbortSignal — when the controller fires, abort the in-flight XHR.
+    // This is the XHR equivalent of passing signal to fetch().
+    if (signal) {
+      if (signal.aborted) {
+        reject(new DOMException('Upload cancelled', 'AbortError'));
+        return;
+      }
+      signal.addEventListener('abort', () => {
+        xhr.abort();
+        reject(new DOMException('Upload cancelled', 'AbortError'));
+      });
+    }
 
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable) {
@@ -115,6 +144,8 @@ export function uploadWithProgress(
     };
 
     xhr.onerror = () => reject(new Error('Network error during upload'));
+    xhr.onabort = () =>
+      reject(new DOMException('Upload cancelled', 'AbortError'));
     xhr.send(file);
   });
 }

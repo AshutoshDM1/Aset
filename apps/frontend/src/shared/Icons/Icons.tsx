@@ -215,7 +215,7 @@ export function ImageFileIcon({
 }: FileIconProps) {
   return (
     <FileDocIcon
-      color="sky"
+      color="blue"
       label={label}
       outerSvg={outerSvg}
       view={view}

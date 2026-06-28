@@ -65,9 +65,9 @@ export function SettingDialog() {
         {/* Body: stacked on mobile, side-by-side on sm+ */}
         <div className="flex flex-col sm:flex-row flex-1 overflow-hidden min-h-0">
           <SettingSidebar />
-          <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+          <div className="flex-1 min-w-0 min-h-0 overflow-hidden p-4 sm:p-6">
             <RightPanel />
-          </main>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

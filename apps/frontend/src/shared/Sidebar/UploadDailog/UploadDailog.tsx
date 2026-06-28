@@ -4,10 +4,17 @@ import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { queryClient, trpc } from '@/utils/trpc';
-import { useUploadStore, uploadWithProgress } from './uploadStore';
+import { cn } from '@/lib/utils';
+import {
+  useUploadStore,
+  uploadWithProgress,
+  activeUploads,
+  cancelAllUploads,
+} from './uploadStore';
 import type { UploadFileState } from './uploadStore';
 import FolderSelectionStage from './FolderSelectionStage';
 import FileSelectionStage from './FileSelectionStage';
+import FileListPanel from './FileListPanel';
 import UploadProgressStage from './UploadProgressStage';
 import MinimizedPill from './MinimizedPill';
 import { Upload, X, Minus } from 'lucide-react';
@@ -161,6 +168,11 @@ export default function UploadDailog() {
       const fileId = fileState.id;
       const targetFolderId = resolvedFolderIds[index];
 
+      // Create a specific AbortController for this file upload
+      const controller = new AbortController();
+      activeUploads.set(fileId, controller);
+      const { signal } = controller;
+
       try {
         updateFileStatus(fileId, 'uploading');
         const sizeMb = file.size / (1024 * 1024);
@@ -173,6 +185,11 @@ export default function UploadDailog() {
           sizeMb,
         });
 
+        // Check if aborted before triggering XHR
+        if (signal.aborted) {
+          throw new DOMException('Upload cancelled', 'AbortError');
+        }
+
         // 2. Perform upload via XMLHttpRequest with progress tracking
         await uploadWithProgress(
           signed.uploadUrl,
@@ -181,7 +198,13 @@ export default function UploadDailog() {
           (percent) => {
             updateFileProgress(fileId, percent);
           },
+          signal,
         );
+
+        // Check if aborted before DB registration
+        if (signal.aborted) {
+          throw new DOMException('Upload cancelled', 'AbortError');
+        }
 
         // 3. Register file in database using targetFolderId
         await registerFile.mutateAsync({
@@ -194,12 +217,19 @@ export default function UploadDailog() {
 
         updateFileStatus(fileId, 'success');
       } catch (err: any) {
-        console.error('File upload failed:', err);
-        updateFileStatus(
-          fileId,
-          'error',
-          err.message || 'Could not complete upload',
-        );
+        // Distinguish between a user-initiated cancel and a real error
+        if (err?.name === 'AbortError' || signal.aborted) {
+          updateFileStatus(fileId, 'cancelled');
+        } else {
+          console.error('File upload failed:', err);
+          updateFileStatus(
+            fileId,
+            'error',
+            err.message || 'Could not complete upload',
+          );
+        }
+      } finally {
+        activeUploads.delete(fileId);
       }
     });
 
@@ -213,6 +243,18 @@ export default function UploadDailog() {
     );
     void queryClient.invalidateQueries(trpc.user.me.queryFilter());
     toast.success('Finished processing upload queue!');
+  };
+
+  const successCount = files.filter((f) => f.status === 'success').length;
+  const errorCount = files.filter((f) => f.status === 'error').length;
+  const cancelledCount = files.filter((f) => f.status === 'cancelled').length;
+  const isAllDone =
+    files.length > 0 &&
+    successCount + errorCount + cancelledCount === files.length;
+
+  const cancelUploads = () => {
+    cancelAllUploads();
+    toast.info('Cancelling all uploads...');
   };
 
   // Seed localFiles from drag-and-dropped preloaded files when dialog opens
@@ -229,24 +271,26 @@ export default function UploadDailog() {
     }
   }, [isOpen, preloadedFiles, setPreloadedFiles]);
 
-  // Reset internal state on close
+  // Reset internal state and abort ongoing uploads on close/unmount
   useEffect(() => {
     if (!isOpen) {
+      cancelAllUploads();
       setLocalFiles([]);
       setDecodeVideos(true);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    return () => {
+      cancelAllUploads();
+    };
+  }, []);
 
   if (!isOpen) return null;
 
   if (isMinimized) {
     return <MinimizedPill />;
   }
-
-  const successCount = files.filter((f) => f.status === 'success').length;
-  const errorCount = files.filter((f) => f.status === 'error').length;
-  const isAllDone =
-    files.length > 0 && successCount + errorCount === files.length;
 
   return (
     <TooltipProvider delayDuration={400}>
@@ -263,7 +307,7 @@ export default function UploadDailog() {
         }}
       >
         <DialogContent
-          className="sm:max-w-md p-0 overflow-hidden flex flex-col max-h-[82vh] gap-0"
+          className="sm:max-w-4xl p-0 overflow-hidden flex flex-col max-h-[52vh] gap-0"
           showCloseButton={false}
         >
           {/* Compact header */}
@@ -310,22 +354,44 @@ export default function UploadDailog() {
             </div>
           </header>
 
-          {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar px-4 py-4 space-y-4">
+          {/* Two-panel content area */}
+          <div className="flex-1 flex min-h-0 overflow-hidden">
             {!isUploading ? (
-              <div className="space-y-4">
-                <FolderSelectionStage />
-                {folderId !== null && folderId !== undefined && (
-                  <FileSelectionStage
-                    localFiles={localFiles}
-                    setLocalFiles={setLocalFiles}
-                    decodeVideos={decodeVideos}
-                    setDecodeVideos={setDecodeVideos}
-                  />
+              <>
+                {/* Left panel — folder picker + drop zone */}
+                <div
+                  className={cn(
+                    'flex flex-col gap-4 overflow-y-auto custom-scrollbar px-4 py-4 transition-all duration-300',
+                    localFiles.length > 0
+                      ? 'w-[50%] border-r border-border/60'
+                      : 'w-full',
+                  )}
+                >
+                  <FolderSelectionStage />
+                  {folderId !== null && folderId !== undefined && (
+                    <FileSelectionStage
+                      localFiles={localFiles}
+                      setLocalFiles={setLocalFiles}
+                    />
+                  )}
+                </div>
+
+                {/* Right panel — file list (slides in when files are selected) */}
+                {localFiles.length > 0 && (
+                  <div className="w-[50%] flex flex-col px-4 py-4 overflow-hidden animate-in slide-in-from-right-4 duration-300">
+                    <FileListPanel
+                      localFiles={localFiles}
+                      setLocalFiles={setLocalFiles}
+                      decodeVideos={decodeVideos}
+                      setDecodeVideos={setDecodeVideos}
+                    />
+                  </div>
                 )}
-              </div>
+              </>
             ) : (
-              <UploadProgressStage />
+              <div className="flex-1 overflow-y-auto custom-scrollbar px-4 py-4">
+                <UploadProgressStage />
+              </div>
             )}
           </div>
 
@@ -356,15 +422,24 @@ export default function UploadDailog() {
             ) : (
               <>
                 {!isAllDone && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-xs h-8"
-                    onClick={minimizeDialog}
-                  >
-                    <Minus className="size-3.5 mr-1" />
-                    Background
-                  </Button>
+                  <>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="text-xs h-8"
+                      onClick={cancelUploads}
+                    >
+                      Cancel Upload
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs h-8"
+                      onClick={minimizeDialog}
+                    >
+                      Background
+                    </Button>
+                  </>
                 )}
                 <Button
                   size="sm"
