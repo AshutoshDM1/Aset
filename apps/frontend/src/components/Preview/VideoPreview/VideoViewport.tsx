@@ -1,7 +1,9 @@
-import { Play, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useRef, useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { PlayIcon } from '@/shared/PlayIcon/PlayIcon';
+import { cn } from '@/lib/utils';
 
 interface VideoViewportProps {
   videoRef: React.RefObject<HTMLVideoElement | null>;
@@ -358,34 +360,46 @@ export function VideoViewport({
           )}
         </AnimatePresence>
 
-        {/* Big Play Pause Central Animation Indicator or buffering spinner */}
-        <AnimatePresence mode="wait">
-          {isBuffering ? (
+        {/* Buffering Spinner */}
+        <AnimatePresence>
+          {isBuffering && (
             <motion.div
               key="buffering"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
-              className="absolute flex items-center justify-center size-16 rounded-full bg-black/40 border border-white/10 backdrop-blur-md text-white shadow-2xl pointer-events-none z-10"
+              className="absolute flex items-center justify-center size-16 rounded-full bg-black/40 border border-white/10 backdrop-blur-md text-white shadow-2xl pointer-events-none z-15"
             >
               <div className="size-7 rounded-full border-3 border-white/20 border-t-primary animate-spin" />
             </motion.div>
-          ) : (
-            !isPlaying &&
-            !isLocked && (
-              <motion.div
-                key="play"
-                whileTap={{ scale: 0.9 }}
-                whileHover={{ scale: 1.1 }}
-                transition={{ ease: 'linear', duration: 0.2 }}
-                onClick={togglePlay}
-                className="absolute size-16 rounded-full bg-white/10 border border-white/20 backdrop-blur-md flex items-center justify-center text-white/90 hover:text-white hover:scale-105 active:scale-95 transition-all shadow-2xl cursor-pointer z-10"
-              >
-                <Play className="size-8 fill-current translate-x-0.5" />
-              </motion.div>
-            )
           )}
         </AnimatePresence>
+
+        {/* Big Play Pause Central Animation Indicator */}
+        {!isLocked && (
+          <motion.div
+            animate={{
+              opacity: isPlaying ? 0 : 1,
+              scale: isPlaying ? 1 : 1,
+              pointerEvents: isPlaying ? 'none' : 'auto',
+            }}
+            transition={{
+              opacity: { duration: 0.35, ease: 'easeInOut' },
+              scale: { duration: 0.35, ease: 'easeOut' },
+            }}
+            onClick={togglePlay}
+            className="absolute size-16 rounded-full bg-white/10 border border-white/20 backdrop-blur-md flex items-center justify-center text-white/90 hover:text-white hover:scale-105 active:scale-95 transition-all shadow-2xl cursor-pointer z-10"
+          >
+            <PlayIcon
+              isPlaying={isPlaying}
+              size={32}
+              className={cn(
+                'fill-current transition-all',
+                !isPlaying && 'translate-x-0.5',
+              )}
+            />
+          </motion.div>
+        )}
       </div>
 
       {/* Synchronized secondary audio track player */}

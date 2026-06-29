@@ -11,6 +11,7 @@ interface UseVideoPlayerProps {
     language: string;
     url: string;
   }>;
+  fileId?: string;
 }
 
 export function useVideoPlayer({
@@ -19,6 +20,7 @@ export function useVideoPlayer({
   videoRef,
   containerRef,
   subtitles = [],
+  fileId,
 }: UseVideoPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -38,12 +40,174 @@ export function useVideoPlayer({
 
   // Ref for external synchronized audio element
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const lastSaveTimestampRef = useRef<number>(Date.now());
+  const restoredFileIdRef = useRef<string | null>(null);
+  const lastKnownTimeRef = useRef<number>(0);
+  const activeFileIdRef = useRef<string | null>(null);
+
+  // Synchronous flush of previous file progress during render phase before DOM resets currentTime
+  if (fileId && activeFileIdRef.current !== fileId) {
+    if (
+      activeFileIdRef.current &&
+      lastKnownTimeRef.current > 0 &&
+      restoredFileIdRef.current === activeFileIdRef.current
+    ) {
+      const data = {
+        time: lastKnownTimeRef.current,
+        updatedAt: Date.now(),
+      };
+      localStorage.setItem(
+        `aset-video-time-${activeFileIdRef.current}`,
+        JSON.stringify(data),
+      );
+    }
+    activeFileIdRef.current = fileId;
+    lastKnownTimeRef.current = 0;
+    restoredFileIdRef.current = null; // Instantly invalidate restoration for the new file during render
+  }
 
   // Subtitle and Audio tracks selection states
   const [selectedTextTrackId, setSelectedTextTrackId] =
     useState<string>('none');
   const [selectedAudioTrackId, setSelectedAudioTrackId] =
     useState<string>('native');
+
+  const saveCurrentTime = () => {
+    if (fileId && videoRef.current && restoredFileIdRef.current === fileId) {
+      const data = {
+        time: videoRef.current.currentTime,
+        updatedAt: Date.now(),
+      };
+      localStorage.setItem(`aset-video-time-${fileId}`, JSON.stringify(data));
+      lastKnownTimeRef.current = videoRef.current.currentTime;
+    }
+  };
+
+  // Save on unmount or fileId change
+  useEffect(() => {
+    return () => {
+      saveCurrentTime();
+    };
+  }, [fileId, open]);
+
+  // Reset player states, initialize timestamp, and clean up history when opened/closed
+  useEffect(() => {
+    if (open) {
+      lastSaveTimestampRef.current = Date.now();
+
+      // Automatic cleanup: remove video progress records older than 15 days
+      try {
+        const keysToRemove: string[] = [];
+        const fifteenDaysAgo = Date.now() - 15 * 24 * 60 * 60 * 1000;
+
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('aset-video-time-')) {
+            const val = localStorage.getItem(key);
+            if (val) {
+              try {
+                const data = JSON.parse(val);
+                if (data && typeof data === 'object' && data.updatedAt) {
+                  if (data.updatedAt < fifteenDaysAgo) {
+                    keysToRemove.push(key);
+                  }
+                }
+              } catch {}
+            }
+          }
+        }
+
+        keysToRemove.forEach((key) => {
+          localStorage.removeItem(key);
+        });
+      } catch (e) {
+        console.error('Failed to cleanup video history:', e);
+      }
+    } else {
+      saveCurrentTime();
+      setIsPlaying(false);
+      setCurrentTime(0);
+      setDuration(0);
+      setBufferedTime(0);
+      setIsBuffering(false);
+      setIsLocked(false);
+      setIsRotated(false);
+    }
+  }, [open]);
+
+  // Reset progress restoration state when fileId changes (e.g. next/prev navigation)
+  useEffect(() => {
+    setCurrentTime(0);
+    setDuration(0);
+    setBufferedTime(0);
+  }, [fileId]);
+
+  useEffect(() => {
+    if (!open || !fileId || !videoRef.current) {
+      if (!open) {
+        restoredFileIdRef.current = null;
+      }
+      return;
+    }
+
+    const video = videoRef.current;
+
+    const restoreTime = () => {
+      if (restoredFileIdRef.current === fileId) return;
+      const savedTimeStr = localStorage.getItem(`aset-video-time-${fileId}`);
+      if (savedTimeStr) {
+        let savedTime = 0;
+        try {
+          const data = JSON.parse(savedTimeStr);
+          if (
+            data &&
+            typeof data === 'object' &&
+            typeof data.time === 'number'
+          ) {
+            savedTime = data.time;
+          } else {
+            savedTime = parseFloat(savedTimeStr);
+          }
+        } catch {
+          savedTime = parseFloat(savedTimeStr);
+        }
+
+        if (savedTime > 0) {
+          video.currentTime = savedTime;
+          setCurrentTime(savedTime);
+          restoredFileIdRef.current = fileId;
+        }
+      } else {
+        restoredFileIdRef.current = fileId;
+      }
+    };
+
+    const handleReady = () => {
+      if (video.duration) {
+        restoreTime();
+      }
+    };
+
+    const handleLoadStart = () => {
+      restoredFileIdRef.current = null;
+    };
+
+    video.addEventListener('loadedmetadata', handleReady);
+    video.addEventListener('loadeddata', handleReady);
+    video.addEventListener('canplay', handleReady);
+    video.addEventListener('loadstart', handleLoadStart);
+
+    if (video.readyState >= 1 && video.duration) {
+      restoreTime();
+    }
+
+    return () => {
+      video.removeEventListener('loadedmetadata', handleReady);
+      video.removeEventListener('loadeddata', handleReady);
+      video.removeEventListener('canplay', handleReady);
+      video.removeEventListener('loadstart', handleLoadStart);
+    };
+  }, [open, fileId, subtitles, videoRef]);
 
   const selectTextTrack = (trackId: string) => {
     setSelectedTextTrackId(trackId);
@@ -242,6 +406,7 @@ export function useVideoPlayer({
 
     if (isPlaying) {
       video.pause();
+      saveCurrentTime();
       if (audio && selectedAudioTrackId !== 'native') {
         audio.pause();
       }
@@ -310,6 +475,26 @@ export function useVideoPlayer({
     const current = videoRef.current.currentTime;
     setCurrentTime(current);
     updateBufferedProgress(current);
+
+    // Store the last known time in a ref for synchronous saving on fileId change
+    if (fileId && restoredFileIdRef.current === fileId && current > 0) {
+      lastKnownTimeRef.current = current;
+    }
+
+    // Throttled save: once every 1.5 seconds during playback, only after restoring progress
+    const now = Date.now();
+    if (
+      fileId &&
+      restoredFileIdRef.current === fileId &&
+      now - lastSaveTimestampRef.current > 1500
+    ) {
+      const data = {
+        time: current,
+        updatedAt: now,
+      };
+      localStorage.setItem(`aset-video-time-${fileId}`, JSON.stringify(data));
+      lastSaveTimestampRef.current = now;
+    }
   };
 
   const handleProgress = () => {
@@ -352,6 +537,9 @@ export function useVideoPlayer({
     if (!videoRef.current) return;
     videoRef.current.currentTime = val;
     setCurrentTime(val);
+    if (fileId && restoredFileIdRef.current === fileId) {
+      lastKnownTimeRef.current = val;
+    }
     resetControlsTimer();
   };
 
@@ -487,5 +675,6 @@ export function useVideoPlayer({
     selectAudioTrack,
     selectedTextTrackId,
     selectTextTrack,
+    hasRestored: restoredFileIdRef.current === fileId,
   };
 }

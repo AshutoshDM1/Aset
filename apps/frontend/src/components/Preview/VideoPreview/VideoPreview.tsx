@@ -44,6 +44,17 @@ export function VideoPreview({
   const subtitles = mediaTracks?.subtitles || [];
   const audioTracks = mediaTracks?.audioTracks || [];
 
+  const handleClose = () => {
+    if (fileId && videoRef.current && hasRestored) {
+      const data = {
+        time: videoRef.current.currentTime,
+        updatedAt: Date.now(),
+      };
+      localStorage.setItem(`aset-video-time-${fileId}`, JSON.stringify(data));
+    }
+    onClose();
+  };
+
   const {
     isPlaying,
     setIsPlaying,
@@ -84,7 +95,15 @@ export function VideoPreview({
     selectAudioTrack,
     selectedTextTrackId,
     selectTextTrack,
-  } = useVideoPlayer({ open, onClose, videoRef, containerRef, subtitles });
+    hasRestored,
+  } = useVideoPlayer({
+    open,
+    onClose: handleClose,
+    videoRef,
+    containerRef,
+    subtitles,
+    fileId,
+  });
 
   const handleDownload = () => {
     if (fileId) {
@@ -107,7 +126,7 @@ export function VideoPreview({
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose();
+        handleClose();
       } else if (e.key === 'ArrowLeft' && onPrev) {
         onPrev();
       } else if (e.key === 'ArrowRight' && onNext) {
@@ -117,7 +136,7 @@ export function VideoPreview({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [open, isLocked, onPrev, onNext, onClose]);
+  }, [open, isLocked, onPrev, onNext, handleClose]);
 
   if (!open) return null;
 
@@ -140,7 +159,7 @@ export function VideoPreview({
               isDownloading={isDownloading}
               showControls={showControls}
               handleDownload={handleDownload}
-              onClose={onClose}
+              onClose={handleClose}
             />
           )}
         </AnimatePresence>

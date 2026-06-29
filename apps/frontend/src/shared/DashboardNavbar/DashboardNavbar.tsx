@@ -161,7 +161,7 @@ function DashboardNavbar({ className }: { className?: string }) {
           <div className="flex items-center justify-end gap-4">
             <DashboardNavbarSearch className="flex-1" />
             <Button
-              className="px-5 rounded-xl py-5 cursor-pointer"
+              className="hidden md:flex px-5 rounded-xl py-5 cursor-pointer"
               size="lg"
               onClick={() => useUploadStore.getState().openDialog()}
             >

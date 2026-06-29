@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import {
-  Play,
-  Pause,
   RotateCcw,
   RotateCw,
   Settings,
@@ -16,6 +14,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { PlayIcon } from '@/shared/PlayIcon/PlayIcon';
 
 interface VideoControlsProps {
   showControls: boolean;
@@ -171,11 +170,11 @@ export function VideoControls({
             className="size-10 md:size-11 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-white flex items-center justify-center cursor-pointer shadow-lg transition-colors shrink-0"
             title={isPlaying ? 'Pause' : 'Play'}
           >
-            {isPlaying ? (
-              <Pause className="size-5 fill-current" />
-            ) : (
-              <Play className="size-5 fill-current " />
-            )}
+            <PlayIcon
+              isPlaying={isPlaying}
+              size={20}
+              className="fill-current"
+            />
           </motion.button>
 
           <motion.button
