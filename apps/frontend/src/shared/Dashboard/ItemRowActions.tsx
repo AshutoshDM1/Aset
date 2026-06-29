@@ -35,6 +35,7 @@ interface ItemRowActionsProps {
   starred?: boolean;
   trashed?: boolean;
   url?: string;
+  thumbnailUrl?: string | null;
   onRefetch?: () => void;
   isOwner?: boolean;
   sizeMb?: number;
@@ -49,6 +50,7 @@ export function ItemRowActions({
   starred,
   trashed,
   url,
+  thumbnailUrl,
   onRefetch,
   isOwner = true,
   sizeMb,
@@ -444,6 +446,7 @@ export function ItemRowActions({
         starred={starred}
         trashed={trashed}
         url={url}
+        thumbnailUrl={thumbnailUrl}
         onRefetch={onRefetch}
         processingStatus={processingStatus}
       />

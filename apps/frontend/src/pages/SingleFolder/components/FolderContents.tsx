@@ -192,6 +192,7 @@ export function FolderContents({
               starred={item.starred}
               trashed={item.trashed}
               onRefetch={onRefetch}
+              thumbnailUrl={item.thumbnailUrl}
             />
           </li>
         ))}

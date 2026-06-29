@@ -12,7 +12,7 @@ import {
   HardDrive,
   Star,
   Trash2,
-  FileIcon,
+  FileIcon as LucideFileIcon,
   FolderIcon,
   ExternalLink,
   Copy,
@@ -20,6 +20,7 @@ import {
   Tag,
   Eye,
   Loader2,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { trpc } from '@/utils/trpc';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
+import FileThumbnail from './FileThumbnail';
 
 interface DetailsDialogProps {
   open: boolean;
@@ -39,6 +41,7 @@ interface DetailsDialogProps {
   starred?: boolean;
   trashed?: boolean;
   url?: string;
+  thumbnailUrl?: string | null;
   onRefetch?: () => void;
   processingStatus?: string | null;
 }
@@ -54,12 +57,14 @@ export function DetailsDialog({
   starred = false,
   trashed = false,
   url,
+  thumbnailUrl,
   onRefetch,
   processingStatus,
 }: DetailsDialogProps) {
   const queryClient = useQueryClient();
   const [copiedId, setCopiedId] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
+  const [copiedThumbnail, setCopiedThumbnail] = useState(false);
 
   const folderStarMutation = useMutation({
     ...trpc.folder.toggleStar.mutationOptions(),
@@ -104,18 +109,26 @@ export function DetailsDialog({
       ? name.substring(name.lastIndexOf('.') + 1).toUpperCase()
       : 'FOLDER';
 
-  const copyToClipboard = async (text: string, isUrl: boolean) => {
+  const copyToClipboard = async (
+    text: string,
+    fieldType: 'id' | 'url' | 'thumbnail',
+  ) => {
     try {
       await navigator.clipboard.writeText(text);
-      if (isUrl) {
+      if (fieldType === 'url') {
         setCopiedUrl(true);
         setTimeout(() => setCopiedUrl(false), 2000);
+      } else if (fieldType === 'thumbnail') {
+        setCopiedThumbnail(true);
+        setTimeout(() => setCopiedThumbnail(false), 2000);
       } else {
         setCopiedId(true);
         setTimeout(() => setCopiedId(false), 2000);
       }
       toast.success(
-        isUrl ? 'URL copied to clipboard' : 'ID copied to clipboard',
+        fieldType === 'id'
+          ? 'ID copied to clipboard'
+          : 'URL copied to clipboard',
       );
     } catch {
       toast.error('Failed to copy to clipboard');
@@ -130,7 +143,7 @@ export function DetailsDialog({
             {type === 'folder' ? (
               <FolderIcon className="size-5 text-amber-500 fill-current shrink-0" />
             ) : (
-              <FileIcon className="size-5 text-primary shrink-0" />
+              <LucideFileIcon className="size-5 text-primary shrink-0" />
             )}
             <span className="truncate">{name}</span>
           </DialogTitle>
@@ -142,11 +155,25 @@ export function DetailsDialog({
         <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-1">
           {/* Main Visual Header inside content */}
           <div className="p-4 rounded-2xl bg-muted/30 border border-border/40 flex flex-col items-center justify-center text-center space-y-2">
-            <div className="size-16 flex items-center justify-center text-xl font-bold tracking-wider text-muted-foreground select-none">
-              {fileExtension}
+            <div className="size-20 flex items-center justify-center overflow-hidden rounded-xl bg-muted/40 text-muted-foreground ring-1 ring-border/60 shadow-2xs select-none pointer-events-none">
+              {type === 'folder' ? (
+                <FolderIcon className="size-10 text-amber-500 fill-current" />
+              ) : (
+                <FileThumbnail
+                  name={name}
+                  thumbnailUrl={thumbnailUrl}
+                  view="grid"
+                  outerSvg={true}
+                  fallbackIcon={LucideFileIcon}
+                  fallbackColorClass="text-muted-foreground"
+                />
+              )}
             </div>
             <div className="space-y-0.5">
-              <p className="text-sm font-medium text-foreground truncate max-w-60">
+              <p
+                className="text-sm font-medium text-foreground truncate max-w-60"
+                title={name}
+              >
                 {name}
               </p>
               <p className="text-xs text-muted-foreground font-medium">
@@ -155,88 +182,97 @@ export function DetailsDialog({
             </div>
           </div>
 
-          {/* Metadata Rows */}
-          <div className="divide-y divide-border/60 border-y border-border/60">
-            {/* Size Row */}
-            <div className="py-2.5 flex items-center justify-between text-sm">
-              <span className="flex items-center gap-2 text-muted-foreground font-medium">
-                <HardDrive className="size-4 shrink-0" />
+          {/* Metadata Grid (Size to In Trash) */}
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4 py-4 border-y border-border/60">
+            {/* Size Card */}
+            <div className="flex flex-col gap-1">
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+                <HardDrive className="size-3.5 shrink-0" />
                 Size
               </span>
-              <span className="font-semibold text-foreground">
+              <span className="text-sm font-semibold text-foreground truncate">
                 {formattedSize}
               </span>
             </div>
 
-            {/* Created At Row */}
-            <div className="py-2.5 flex items-center justify-between text-sm">
-              <span className="flex items-center gap-2 text-muted-foreground font-medium">
-                <Calendar className="size-4 shrink-0" />
+            {/* Created At Card */}
+            <div className="flex flex-col gap-1">
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+                <Calendar className="size-3.5 shrink-0" />
                 Created
               </span>
-              <span className="font-medium text-foreground text-right">
+              <span
+                className="text-sm font-semibold text-foreground truncate"
+                title={formattedDate}
+              >
                 {formattedDate}
               </span>
             </div>
 
-            {/* Starred Status Row */}
-            <div className="py-2.5 flex items-center justify-between text-sm">
-              <span className="flex items-center gap-2 text-muted-foreground font-medium">
-                <Star className="size-4 shrink-0" />
+            {/* Starred Status Card */}
+            <div className="flex flex-col gap-1">
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+                <Star className="size-3.5 shrink-0" />
                 Starred
               </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                disabled={isStarPending}
-                onClick={handleStarToggle}
-                className={cn(
-                  'h-7 px-2.5 rounded-full text-xs font-semibold select-none transition-all flex items-center gap-1.5 border',
-                  starred
-                    ? 'bg-yellow-500/15 text-yellow-600 dark:text-yellow-400 border-yellow-500/25 hover:bg-yellow-500/25'
-                    : 'bg-muted/50 text-muted-foreground border-transparent hover:bg-muted',
-                )}
-              >
-                {isStarPending ? (
-                  <Loader2 className="size-3 animate-spin text-primary" />
-                ) : (
-                  <Star
-                    className={cn(
-                      'size-3 shrink-0',
-                      starred &&
-                        'fill-current text-yellow-500 dark:text-yellow-400',
-                    )}
-                  />
-                )}
-                {starred ? 'Yes' : 'No'}
-              </Button>
+              <div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled={isStarPending}
+                  onClick={handleStarToggle}
+                  className={cn(
+                    'h-7 px-2.5 rounded-full text-xs font-semibold select-none transition-all flex items-center gap-1.5 border cursor-pointer',
+                    starred
+                      ? 'bg-yellow-500/15 text-yellow-600 dark:text-yellow-400 border-yellow-500/25 hover:bg-yellow-500/25'
+                      : 'bg-muted/50 text-muted-foreground border-transparent hover:bg-muted',
+                  )}
+                >
+                  {isStarPending ? (
+                    <Loader2 className="size-3 animate-spin text-primary" />
+                  ) : (
+                    <Star
+                      className={cn(
+                        'size-3 shrink-0',
+                        starred &&
+                          'fill-current text-yellow-500 dark:text-yellow-400',
+                      )}
+                    />
+                  )}
+                  {starred ? 'Yes' : 'No'}
+                </Button>
+              </div>
             </div>
 
-            {/* Trashed Status Row */}
-            <div className="py-2.5 flex items-center justify-between text-sm">
-              <span className="flex items-center gap-2 text-muted-foreground font-medium">
-                <Trash2 className="size-4 shrink-0" />
+            {/* Trashed Status Card */}
+            <div className="flex flex-col gap-1">
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+                <Trash2 className="size-3.5 shrink-0" />
                 In Trash
               </span>
-              <span
-                className={cn(
-                  'px-2 py-0.5 rounded-full text-xs font-semibold',
-                  trashed
-                    ? 'bg-destructive/15 text-destructive border border-destructive/25'
-                    : 'bg-muted text-muted-foreground border border-transparent',
-                )}
-              >
-                {trashed ? 'Yes' : 'No'}
-              </span>
+              <div>
+                <span
+                  className={cn(
+                    'inline-block px-2 py-0.5 rounded-full text-xs font-semibold border leading-none',
+                    trashed
+                      ? 'bg-destructive/15 text-destructive border-destructive/25'
+                      : 'bg-muted text-muted-foreground border-transparent',
+                  )}
+                >
+                  {trashed ? 'Yes' : 'No'}
+                </span>
+              </div>
             </div>
+          </div>
 
+          <div className="space-y-4">
             {/* Processing Status Row (for videos only) */}
             {type === 'file' &&
               (name.toLowerCase().endsWith('.mp4') ||
                 name.toLowerCase().endsWith('.mkv') ||
                 name.toLowerCase().endsWith('.mov') ||
                 name.toLowerCase().endsWith('.webm')) && (
-                <div className="py-2.5 flex items-center justify-between text-sm">
+                <div className="py-1 flex items-center justify-between text-sm">
                   <span className="flex items-center gap-2 text-muted-foreground font-medium">
                     <Loader2
                       className={cn(
@@ -268,52 +304,94 @@ export function DetailsDialog({
                 </div>
               )}
 
-            {/* ID Row */}
-            <div className="py-2.5 flex flex-col gap-1.5 text-sm">
-              <span className="flex items-center gap-2 text-muted-foreground font-medium">
-                <Tag className="size-4 shrink-0" />
-                Unique ID
-              </span>
-              <div className="flex items-center gap-2 pl-6">
-                <code className="text-xs bg-muted/60 border border-border/40 px-2 py-1 rounded flex-1 truncate font-mono text-muted-foreground">
-                  {id}
-                </code>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="size-7 shrink-0"
-                  onClick={() => copyToClipboard(id, false)}
-                  title="Copy ID"
-                >
-                  {copiedId ? (
-                    <Check className="size-3 text-green-500" />
-                  ) : (
-                    <Copy className="size-3" />
-                  )}
-                </Button>
-              </div>
-            </div>
-
-            {/* S3/Download URL Row (if applicable) */}
-            {type === 'file' && url && (
-              <div className="py-2.5 flex flex-col gap-1.5 text-sm border-b border-border/60">
+            <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+              {/* ID Row */}
+              <div className="flex flex-col gap-1.5 text-sm">
                 <span className="flex items-center gap-2 text-muted-foreground font-medium">
-                  <ExternalLink className="size-4 shrink-0" />
-                  Access Link
+                  <Tag className="size-4 shrink-0" />
+                  Unique ID
+                </span>
+                <div className="flex items-center gap-2">
+                  <code className="text-xs bg-muted/60 border border-border/40 px-2 py-1 rounded flex-1 truncate font-mono text-muted-foreground">
+                    {id}
+                  </code>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="size-7 shrink-0 cursor-pointer"
+                    onClick={() => copyToClipboard(id, 'id')}
+                    title="Copy ID"
+                  >
+                    {copiedId ? (
+                      <Check className="size-3 text-green-500" />
+                    ) : (
+                      <Copy className="size-3" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              {/* S3/Download URL Row (if applicable) */}
+              {type === 'file' && url && (
+                <div className="flex flex-col gap-1.5 text-sm">
+                  <span className="flex items-center gap-2 text-muted-foreground font-medium">
+                    <ExternalLink className="size-4 shrink-0" />
+                    Access Link
+                  </span>
+                  <div className="flex items-center gap-2 ">
+                    <code className="text-xs bg-muted/60 border border-border/40 px-2 py-1 rounded flex-1 truncate font-mono text-muted-foreground">
+                      {url}
+                    </code>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="size-7 cursor-pointer"
+                        onClick={() => copyToClipboard(url, 'url')}
+                        title="Copy URL"
+                      >
+                        {copiedUrl ? (
+                          <Check className="size-3 text-green-500" />
+                        ) : (
+                          <Copy className="size-3" />
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="size-7 cursor-pointer"
+                        asChild
+                        title="Open in new tab"
+                      >
+                        <a href={url} target="_blank" rel="noopener noreferrer">
+                          <Eye className="size-3" />
+                        </a>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            {/* Thumbnail URL Row (if applicable) */}
+            {type === 'file' && thumbnailUrl && (
+              <div className="flex flex-col gap-1.5 text-sm pt-1">
+                <span className="flex items-center gap-2 text-muted-foreground font-medium">
+                  <ImageIcon className="size-4 shrink-0" />
+                  Thumbnail Link
                 </span>
                 <div className="flex items-center gap-2 pl-6">
                   <code className="text-xs bg-muted/60 border border-border/40 px-2 py-1 rounded flex-1 truncate font-mono text-muted-foreground">
-                    {url}
+                    {thumbnailUrl}
                   </code>
                   <div className="flex items-center gap-1 shrink-0">
                     <Button
                       variant="outline"
                       size="icon"
-                      className="size-7"
-                      onClick={() => copyToClipboard(url, true)}
-                      title="Copy URL"
+                      className="size-7 cursor-pointer"
+                      onClick={() => copyToClipboard(thumbnailUrl, 'thumbnail')}
+                      title="Copy Thumbnail URL"
                     >
-                      {copiedUrl ? (
+                      {copiedThumbnail ? (
                         <Check className="size-3 text-green-500" />
                       ) : (
                         <Copy className="size-3" />
@@ -322,11 +400,15 @@ export function DetailsDialog({
                     <Button
                       variant="outline"
                       size="icon"
-                      className="size-7"
+                      className="size-7 cursor-pointer"
                       asChild
-                      title="Open in new tab"
+                      title="Open thumbnail in new tab"
                     >
-                      <a href={url} target="_blank" rel="noopener noreferrer">
+                      <a
+                        href={thumbnailUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         <Eye className="size-3" />
                       </a>
                     </Button>
@@ -337,10 +419,10 @@ export function DetailsDialog({
           </div>
         </div>
 
-        <div className="shrink-0 flex justify-end">
+        <div className="shrink-0 flex justify-end pt-2">
           <Button
             variant="outline"
-            className="w-full sm:w-auto rounded-xl"
+            className="w-full sm:w-auto rounded-xl cursor-pointer"
             onClick={() => onOpenChange(false)}
           >
             Close

@@ -168,7 +168,7 @@ export default function FolderSelectionStage() {
           onValueChange={(val) => setFolderId(val)}
           disabled={createFolderMutation.isPending}
         >
-          <SelectTrigger className="flex-1 h-9 w-full rounded-lg border-input bg-background text-sm text-foreground font-medium select-none">
+          <SelectTrigger className="flex-1 h-9 w-full rounded-lg border-input  text-sm text-foreground font-medium select-none">
             <SelectValue placeholder="Select a folder…" />
           </SelectTrigger>
           <SelectContent

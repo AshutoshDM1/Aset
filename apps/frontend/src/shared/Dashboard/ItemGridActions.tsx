@@ -38,6 +38,7 @@ interface ItemGridActionsProps {
   starred?: boolean;
   trashed?: boolean;
   url?: string;
+  thumbnailUrl?: string | null;
   onRefetch?: () => void;
   isOwner?: boolean;
   sizeMb?: number;
@@ -52,6 +53,7 @@ export function ItemGridActions({
   starred,
   trashed,
   url,
+  thumbnailUrl,
   onRefetch,
   isOwner = true,
   sizeMb,
@@ -407,6 +409,7 @@ export function ItemGridActions({
         starred={starred}
         trashed={trashed}
         url={url}
+        thumbnailUrl={thumbnailUrl}
         onRefetch={onRefetch}
         processingStatus={processingStatus}
       />

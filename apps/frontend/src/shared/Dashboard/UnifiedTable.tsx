@@ -287,6 +287,7 @@ export function UnifiedTable({ items, onRefetch }: UnifiedTableProps) {
                       starred={item.starred}
                       trashed={item.trashed}
                       url={item.url}
+                      thumbnailUrl={item.thumbnailUrl}
                       onRefetch={onRefetch}
                       sizeMb={item.sizeMb}
                       createdAt={item.createdAt}

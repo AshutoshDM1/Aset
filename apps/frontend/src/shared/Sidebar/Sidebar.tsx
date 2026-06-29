@@ -16,14 +16,12 @@ import {
   Clock3,
   Folder,
   Home,
-  Plus,
   Star,
   Trash2,
   Users,
 } from 'lucide-react';
 import * as React from 'react';
 import { Link, NavLink, useLocation } from 'react-router';
-import { useUploadStore } from '@/shared/Sidebar/UploadDailog/uploadStore';
 
 type SidebarItem = {
   label: string;
@@ -46,7 +44,10 @@ function SidebarNavItem({ item }: { item: SidebarItem }) {
     item.href === '/dashboard'
       ? location.pathname === '/dashboard' ||
         location.pathname === '/dashboard/'
-      : location.pathname.startsWith(item.href);
+      : item.href === '/dashboard/my-files'
+        ? location.pathname.startsWith('/dashboard/my-files') ||
+          location.pathname.startsWith('/dashboard/folder')
+        : location.pathname.startsWith(item.href);
   return (
     <NavLink to={item.href}>
       <Button
@@ -54,8 +55,8 @@ function SidebarNavItem({ item }: { item: SidebarItem }) {
         className={cn(
           'w-full transition-all duration-300',
           isActive
-            ? 'bg-muted hover:bg-muted/60 text-foreground '
-            : 'bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted/60 ',
+            ? 'bg-primary hover:bg-primary/80 text-white '
+            : 'bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted ',
         )}
       >
         <div className="flex items-center justify-start gap-2">
@@ -195,15 +196,7 @@ export default function Sidebar({ className }: { className?: string }) {
             <span className="text-2xl font-bold">Aset</span>
           </div>
         </Link>
-        <div className="p-4">
-          <Button
-            className="w-full py-5 cursor-pointer"
-            size="lg"
-            onClick={() => useUploadStore.getState().openDialog()}
-          >
-            <Plus aria-hidden data-icon="inline-start" />
-            Upload New
-          </Button>
+        <div className="p-4 pr-8">
           <nav className="space-y-1 mt-2">
             {SIDEBAR_ITEMS.map((item) => (
               <SidebarNavItem key={item.href} item={item} />

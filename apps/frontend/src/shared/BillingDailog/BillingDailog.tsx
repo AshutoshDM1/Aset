@@ -622,7 +622,7 @@ export const BillingDailog: React.FC = () => {
                   className={`w-full text-xs font-normal rounded-xl py-5 transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer ${
                     totalPrice > 0
                       ? 'bg-muted hover:bg-muted text-muted-foreground cursor-not-allowed border border-border'
-                      : 'bg-black hover:bg-black hover:opacity-80 text-white'
+                      : 'bg-foreground hover:bg-foreground hover:opacity-80 text-background'
                   }`}
                 >
                   {isCheckoutLoading ? (

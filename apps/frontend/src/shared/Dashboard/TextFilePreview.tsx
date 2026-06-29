@@ -21,6 +21,7 @@ type TextFilePreviewProps = {
   onRefetch?: () => void;
   createdAt?: Date | string;
   sizeMb?: number;
+  thumbnailUrl?: string | null;
 };
 
 const TextFilePreview = ({
@@ -32,6 +33,7 @@ const TextFilePreview = ({
   onRefetch,
   createdAt,
   sizeMb,
+  thumbnailUrl,
 }: TextFilePreviewProps) => {
   const [open, setOpen] = useState(false);
 
@@ -45,6 +47,7 @@ const TextFilePreview = ({
           starred={starred}
           trashed={trashed}
           url={url}
+          thumbnailUrl={thumbnailUrl}
           onRefetch={onRefetch}
           sizeMb={sizeMb}
           createdAt={createdAt}

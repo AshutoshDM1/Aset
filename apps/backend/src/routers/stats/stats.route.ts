@@ -395,6 +395,42 @@ export const statsRouter = router({
           };
         });
 
+      // 6. Top Files based on download count
+      const topFilesDb = await ctx.db.file.findMany({
+        where: {
+          ownerId: ctx.auth.userId,
+          trashed: false,
+        },
+        select: {
+          id: true,
+          name: true,
+          sizeMb: true,
+          thumbnailUrl: true,
+          _count: {
+            select: { downloads: true },
+          },
+        },
+        orderBy: [
+          {
+            downloads: {
+              _count: 'desc',
+            },
+          },
+          {
+            createdAt: 'desc',
+          },
+        ],
+        take: 4,
+      });
+
+      const topFiles = topFilesDb.map((file) => ({
+        id: file.id,
+        name: file.name,
+        sizeMb: file.sizeMb,
+        thumbnailUrl: file.thumbnailUrl,
+        downloadCount: file._count.downloads,
+      }));
+
       return {
         overview: [
           {
@@ -438,6 +474,7 @@ export const statsRouter = router({
         fileTypes,
         uploadsChart,
         activities,
+        topFiles,
       };
     }),
 });

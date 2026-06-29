@@ -1,9 +1,4 @@
-import { HugeiconsIcon } from '@hugeicons/react';
-import {
-  ArrowUp01Icon,
-  ArrowDown01Icon,
-  MinusSignIcon,
-} from '@hugeicons/core-free-icons';
+import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { StatTrend } from './mockData';
 
@@ -22,10 +17,10 @@ const trendStyles: Record<StatTrend, string> = {
   flat: 'text-emerald-600 bg-emerald-500/10',
 };
 
-const trendIcons: Record<StatTrend, typeof ArrowUp01Icon> = {
-  up: ArrowUp01Icon,
-  down: ArrowDown01Icon,
-  flat: MinusSignIcon,
+const trendIcons = {
+  up: ArrowUp,
+  down: ArrowDown,
+  flat: Minus,
 };
 
 export function StatCard({
@@ -39,25 +34,29 @@ export function StatCard({
   const TrendIcon = trendIcons[trend];
 
   return (
-    <div className="">
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-sm text-muted-foreground">{label}</p>
-        {icon ? <span className="text-muted-foreground">{icon}</span> : null}
-      </div>
-      <p className="mt-2 text-2xl font-semibold tracking-tight">{value}</p>
-      <div className="mt-2 flex items-center gap-2 text-xs">
-        <span
-          className={cn(
-            'inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 font-medium',
-            trendStyles[trend],
-          )}
-        >
-          <HugeiconsIcon icon={TrendIcon} size={12} strokeWidth={2} />
-          {change}
-        </span>
-        {hint ? (
-          <span className="text-muted-foreground text-[10px]">{hint}</span>
-        ) : null}
+    <div className="rounded-xl bg-background p-5 shadow-sm ring-1 ring-border/60 flex items-start gap-4">
+      {icon}
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-medium text-muted-foreground">{label}</p>
+        <p className="mt-1 text-2xl font-bold tracking-tight text-foreground">
+          {value}
+        </p>
+        <div className="mt-2 flex items-center gap-1.5 text-[11px]">
+          <span
+            className={cn(
+              'inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 font-semibold leading-none',
+              trendStyles[trend],
+            )}
+          >
+            <TrendIcon className="size-3" strokeWidth={2.5} />
+            {change.replace(/[+-]/g, '')}
+          </span>
+          {hint ? (
+            <span className="text-muted-foreground text-[10px] truncate">
+              {hint}
+            </span>
+          ) : null}
+        </div>
       </div>
     </div>
   );

@@ -7,10 +7,11 @@ import { StorageUsage } from './components/StorageUsage';
 import { UploadsChart } from './components/UploadsChart';
 import { FileTypeBreakdown } from './components/FileTypeBreakdown';
 import { RecentActivity } from './components/RecentActivity';
+import { TopFiles } from './components/TopFiles';
 import GetStarted from './components/GetStarted';
 
 export default function DashboardStats() {
-  const [rangeDays, setRangeDays] = useState(7);
+  const [rangeDays, setRangeDays] = useState(30);
   const { data, isLoading } = useQuery(
     trpc.stats.getDashboardStats.queryOptions({ rangeDays }),
   );
@@ -50,12 +51,15 @@ export default function DashboardStats() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-5 items-stretch">
-        <div className="lg:col-span-2 flex flex-col h-full">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 items-stretch">
+        <div className="flex flex-col h-full">
           <StorageUsage storage={data.storage} />
         </div>
-        <div className="lg:col-span-3 flex flex-col h-full">
+        <div className="flex flex-col h-full">
           <RecentActivity activities={data.activities} />
+        </div>
+        <div className="flex flex-col h-full">
+          <TopFiles files={data.topFiles} />
         </div>
       </div>
     </div>

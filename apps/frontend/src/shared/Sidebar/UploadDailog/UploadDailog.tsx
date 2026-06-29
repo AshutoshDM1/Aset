@@ -309,7 +309,10 @@ export default function UploadDailog() {
         }}
       >
         <DialogContent
-          className="sm:max-w-4xl p-0 overflow-hidden flex flex-col max-h-[52vh] gap-0"
+          className={cn(
+            'p-0 overflow-hidden flex flex-col max-h-[52vh] gap-0',
+            localFiles.length ? 'sm:max-w-3xl' : 'sm:max-w-lg',
+          )}
           showCloseButton={false}
         >
           {/* Compact header */}

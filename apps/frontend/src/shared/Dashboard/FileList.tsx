@@ -159,6 +159,7 @@ export function FileList({ mode = 'recent' }: FileListProps) {
               onRefetch={refetch}
               createdAt={file.createdAt}
               sizeMb={file.sizeMb}
+              thumbnailUrl={file.thumbnailUrl}
             />
           ) : (
             <OtherFileTile

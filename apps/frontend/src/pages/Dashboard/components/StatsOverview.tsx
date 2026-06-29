@@ -1,18 +1,28 @@
-import { HugeiconsIcon } from '@hugeicons/react';
-import {
-  File01Icon,
-  Folder01Icon,
-  UserGroupIcon,
-  StarIcon,
-} from '@hugeicons/core-free-icons';
+import { FileText, Folder, Users, Star } from 'lucide-react';
 import { StatCard } from './StatCard';
 import type { StatItem } from './mockData';
 
-const iconById: Record<string, typeof File01Icon> = {
-  files: File01Icon,
-  folders: Folder01Icon,
-  shared: UserGroupIcon,
-  starred: StarIcon,
+const statConfig = {
+  files: {
+    icon: FileText,
+    iconClass: 'text-indigo-600 dark:text-indigo-400',
+    bgClass: 'bg-indigo-50 dark:bg-indigo-950/40',
+  },
+  folders: {
+    icon: Folder,
+    iconClass: 'text-blue-600 dark:text-blue-400',
+    bgClass: 'bg-blue-50 dark:bg-blue-950/40',
+  },
+  shared: {
+    icon: Users,
+    iconClass: 'text-emerald-600 dark:text-emerald-400',
+    bgClass: 'bg-emerald-50 dark:bg-emerald-950/40',
+  },
+  starred: {
+    icon: Star,
+    iconClass: 'text-amber-500 dark:text-amber-400',
+    bgClass: 'bg-amber-50 dark:bg-amber-950/40',
+  },
 };
 
 type StatsOverviewProps = {
@@ -26,7 +36,8 @@ export function StatsOverview({ overview }: StatsOverviewProps) {
       className="grid gap-4 grid-cols-2 xl:grid-cols-4"
     >
       {overview.map((stat) => {
-        const Icon = iconById[stat.id];
+        const config = statConfig[stat.id as keyof typeof statConfig];
+        const IconComponent = config?.icon;
         return (
           <StatCard
             key={stat.id}
@@ -36,8 +47,12 @@ export function StatsOverview({ overview }: StatsOverviewProps) {
             trend={stat.trend}
             hint={stat.hint}
             icon={
-              Icon ? (
-                <HugeiconsIcon icon={Icon} size={18} strokeWidth={1.5} />
+              IconComponent ? (
+                <div
+                  className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${config.bgClass}`}
+                >
+                  <IconComponent className={`size-5 ${config.iconClass}`} />
+                </div>
               ) : null
             }
           />

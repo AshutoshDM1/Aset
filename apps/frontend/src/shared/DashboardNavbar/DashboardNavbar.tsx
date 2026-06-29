@@ -10,7 +10,8 @@ import Logo from '../Navbar/Logo';
 import { SearchDialog } from '@/shared/Search/SearchDialog';
 import { useSelectionStore } from '@/store/selectionStore';
 import { Button } from '@/components/ui/button';
-import { ArrowBigLeftDash } from 'lucide-react';
+import { ArrowBigLeftDash, Upload } from 'lucide-react';
+import { useUploadStore } from '../Sidebar/UploadDailog/uploadStore';
 
 function DashboardNavbar({ className }: { className?: string }) {
   const location = useLocation();
@@ -159,6 +160,14 @@ function DashboardNavbar({ className }: { className?: string }) {
           />
           <div className="flex items-center justify-end gap-4">
             <DashboardNavbarSearch className="flex-1" />
+            <Button
+              className="px-5 rounded-xl py-5 cursor-pointer"
+              size="lg"
+              onClick={() => useUploadStore.getState().openDialog()}
+            >
+              <Upload aria-hidden data-icon="inline-start" />
+              Upload Files
+            </Button>
             <DashboardNavbarActions />
           </div>
         </div>

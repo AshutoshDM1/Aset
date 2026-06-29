@@ -111,6 +111,7 @@ const VideoFilePreview = ({
           starred={starred}
           trashed={trashed}
           url={url}
+          thumbnailUrl={thumbnailUrl}
           onRefetch={onRefetch}
           sizeMb={sizeMb}
           createdAt={createdAt}
